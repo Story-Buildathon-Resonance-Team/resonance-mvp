@@ -20,3 +20,10 @@
    Or, if using Yarn:
 
    yarn install
+
+3. Add variables to .env
+
+NEXT_PUBLIC_RPC_PROVIDER_URL
+NEXT_PUBLIC_TOMO_CLIENT_ID
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID
+PINATA_JWT
