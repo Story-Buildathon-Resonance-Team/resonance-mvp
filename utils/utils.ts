@@ -49,7 +49,7 @@ export const RoyaltyPolicyLAP: Address =
 export const RoyaltyPolicyLRP: Address =
   "0x9156e603C949481883B1d3355c6f1132D191fC41";
 
-// Pre-configured PIL Flavor for "support this story and earn money together"
+// Pre-configured PIL Flavor for "support this story, extend its universe, and earn money together"
 // https://docs.story.foundation/concepts/programmable-ip-license/pil-flavors#commercial-remix
 
 export function createCommercialRemixTerms(terms: {
