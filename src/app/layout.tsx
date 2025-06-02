@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { PropsWithChildren } from "react";
@@ -7,17 +8,15 @@ import { useConnectModal } from "@tomo-inc/tomo-evm-kit";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Example",
-  description: "This is an Example DApp",
-};
-
 export default function RootLayout({ children }: PropsWithChildren) {
   const { openConnectModal } = useConnectModal();
 
   return (
     <html lang='en'>
-      <body>
+      <head>
+        <title>Resonance MVP</title>
+      </head>
+      <body className={`${inter} antialiased`}>
         <Web3Providers>
           <button onClick={openConnectModal}>Connect Wallet</button>
           {children}
