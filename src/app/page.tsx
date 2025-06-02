@@ -31,8 +31,8 @@ export default function LoginTest() {
             <p className='text-sm text-gray-500'>No wallet connected yet</p>
           )}
 
-          <Button variant='outline' onClick={() => openConnectModal()}>
-            {isConnected ? "Reconnect / Switch" : "Login with Tomo"}
+          <Button variant='default' onClick={() => openConnectModal?.()}>
+            {isConnected ? "Connected" : "Login with Tomo"}
           </Button>
         </div>
       </CardContent>

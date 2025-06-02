@@ -49,7 +49,7 @@ export const users: UserEntry[] = [
   },
   {
     userName: "Nat",
-    walletAddress: "",
+    walletAddress: "0x1BB1EB6b6676A6b0850547a70019112c41495BA2",
     stories: [
       {
         ipId: "",
