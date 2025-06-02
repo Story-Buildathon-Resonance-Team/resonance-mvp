@@ -18,7 +18,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       </head>
       <body className={`${inter} antialiased`}>
         <Web3Providers>
-          <button onClick={openConnectModal}>Connect Wallet</button>
+          <button onClick={openConnectModal}>Login</button>
           {children}
         </Web3Providers>
       </body>
