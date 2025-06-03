@@ -1,7 +1,7 @@
 import { client } from "@/utils/config";
 import {
   createCommercialRemixTerms,
-  NonCommercialSocialRemixingTermsId,
+  NonCommercialSocialRemixingTerms,
   SPGNFTContractAddress,
 } from "@/utils/utils";
 import { uploadJSONToIPFS } from "../utils/pinata";
@@ -24,7 +24,7 @@ interface StoryRegistrationData {
 export interface StoryRegistrationResult {
   ipId: string;
   txHash: string;
-  licenseTermsIds: readonly string[];
+  licenseTermsIds: readonly bigint[];
   storyData: {
     id: string;
     title: string;
@@ -34,7 +34,7 @@ export interface StoryRegistrationResult {
     imageCID: string;
     ipId: string;
     txHash: string;
-    licenseTermsIds: readonly string[];
+    licenseTermsIds: readonly bigint[];
     licenseType: string;
     createdAt: string;
     ipMetadataURI: string;
@@ -143,7 +143,7 @@ export async function registerStoryAsIP(
     // 5. Determine license terms
     const licenseTermsData =
       data.licenseType === "non-commercial"
-        ? [{ terms: NonCommercialSocialRemixingTermsId }]
+        ? [{ terms: NonCommercialSocialRemixingTerms }]
         : [
             {
               terms: createCommercialRemixTerms({

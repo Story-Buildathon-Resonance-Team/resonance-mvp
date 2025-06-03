@@ -23,7 +23,7 @@ export const SPGNFTContractAddress: Address =
 // https://docs.story.foundation/concepts/programmable-ip-license/pil-flavors#flavor-%231%3A-non-commercial-social-remixing
 
 export const NonCommercialSocialRemixingTermsId = "1";
-const nonCommercialSocialRemix: LicenseTerms = {
+export const NonCommercialSocialRemixingTerms: LicenseTerms = {
   transferable: true,
   royaltyPolicy: zeroAddress,
   defaultMintingFee: 0n,
@@ -75,4 +75,20 @@ export function createCommercialRemixTerms(terms: {
     currency: WIP_TOKEN_ADDRESS,
     uri: "https://github.com/piplabs/pil-document/blob/ad67bb632a310d2557f8abcccd428e4c9c798db1/off-chain-terms/CommercialRemix.json",
   };
+}
+
+export const defaultLicensingConfig: LicensingConfig = {
+  mintingFee: 0n,
+  isSet: false,
+  disabled: false,
+  commercialRevShare: 0,
+  expectGroupRewardPool: zeroAddress,
+  expectMinimumGroupRewardShare: 0,
+  licensingHook: zeroAddress,
+  hookData: "0x",
+};
+
+export function convertRoyaltyPercentToTokens(royaltyPercent: number): number {
+  // there are 100,000,000 tokens total (100, but 6 decimals)
+  return royaltyPercent * 1_000_000;
 }
