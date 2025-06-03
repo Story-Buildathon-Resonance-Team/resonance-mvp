@@ -42,7 +42,7 @@ import {
   Info,
 } from "lucide-react";
 import { registerStoryAsIP } from "../services/storyService";
-import { uploadStoryToPinata } from "@/utils/pinata";
+import { uploadStoryToPinata } from "../utils/pinata";
 
 // Step-specific validation schemas
 const storyContentSchema = z.object({

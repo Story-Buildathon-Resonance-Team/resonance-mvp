@@ -4,7 +4,7 @@ import {
   NonCommercialSocialRemixingTermsId,
   SPGNFTContractAddress,
 } from "@/utils/utils";
-import { uploadJSONToIPFS } from "@/utils/pinata";
+import { uploadJSONToIPFS } from "../utils/pinata";
 import { createHash } from "crypto";
 import { IpMetadata } from "@story-protocol/core-sdk";
 import { Address, Hash } from "viem";
