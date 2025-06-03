@@ -106,7 +106,9 @@ const steps: Step[] = [
   },
 ];
 
-export function PaginatedStoryForm({ onSuccess }: PaginatedStoryFormProps) {
+export default function PaginatedStoryForm({
+  onSuccess,
+}: PaginatedStoryFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
