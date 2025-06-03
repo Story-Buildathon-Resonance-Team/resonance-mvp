@@ -33,7 +33,10 @@ export default function RootLayout({ children }: PropsWithChildren) {
               <Button
                 variant='default'
                 className='my-1 cursor-pointer'
-                onClick={() => openConnectModal?.()}
+                onClick={() => {
+                  console.log("openConnectModal:", openConnectModal);
+                  openConnectModal?.();
+                }}
               >
                 {isConnected ? `${userName}` : "Login"}
               </Button>
