@@ -8,7 +8,8 @@
 
 export interface StoryEntry {
   ipId: string;
-  metadataCID: string;
+  ipMetadataCID: string;
+  nftMetadataCID: string;
   textCID: string;
   imageCID: string;
   title?: string;
@@ -30,7 +31,8 @@ export const users: UserEntry[] = [
     stories: [
       {
         ipId: "", // The IP ID returned by Story Protocol
-        metadataCID: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
         textCID: "",
         imageCID: "",
         title: "",
@@ -38,7 +40,8 @@ export const users: UserEntry[] = [
       },
       {
         ipId: "",
-        metadataCID: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
         textCID: "",
         imageCID: "",
         title: "",
@@ -53,7 +56,8 @@ export const users: UserEntry[] = [
     stories: [
       {
         ipId: "",
-        metadataCID: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
         textCID: "",
         imageCID: "",
         title: "",
@@ -68,7 +72,8 @@ export const users: UserEntry[] = [
     stories: [
       {
         ipId: "", // The IP ID returned by Story Protocol
-        metadataCID: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
         textCID: "",
         imageCID: "",
         title: "",
@@ -76,7 +81,8 @@ export const users: UserEntry[] = [
       },
       {
         ipId: "",
-        metadataCID: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
         textCID: "",
         imageCID: "",
         title: "",
@@ -91,7 +97,8 @@ export const users: UserEntry[] = [
     stories: [
       {
         ipId: "", // The IP ID returned by Story Protocol
-        metadataCID: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
         textCID: "",
         imageCID: "",
         title: "",
@@ -99,7 +106,8 @@ export const users: UserEntry[] = [
       },
       {
         ipId: "",
-        metadataCID: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
         textCID: "",
         imageCID: "",
         title: "",
@@ -114,7 +122,8 @@ export const users: UserEntry[] = [
     stories: [
       {
         ipId: "", // The IP ID returned by Story Protocol
-        metadataCID: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
         textCID: "",
         imageCID: "",
         title: "",
@@ -122,7 +131,8 @@ export const users: UserEntry[] = [
       },
       {
         ipId: "",
-        metadataCID: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
         textCID: "",
         imageCID: "",
         title: "",

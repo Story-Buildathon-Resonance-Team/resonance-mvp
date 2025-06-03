@@ -2,19 +2,16 @@
 
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { PropsWithChildren } from "react";
-import Web3Providers from "./Web3Providers";
-import { useEffect } from "react";
+import { PropsWithChildren, useEffect } from "react";
+import Web3Providers, { useUser } from "./Web3Providers";
 import { Button } from "../components/ui/button";
 import { useConnectModal } from "@tomo-inc/tomo-evm-kit";
-import { useAccount } from "wagmi";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({ children }: PropsWithChildren) {
   const { openConnectModal } = useConnectModal();
-
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, userName } = useUser();
 
   useEffect(() => {
     if (isConnected && address) {
@@ -23,12 +20,13 @@ export default function RootLayout({ children }: PropsWithChildren) {
       console.log("Not connected");
     }
   }, [isConnected, address]);
+
   return (
     <html lang='en'>
       <head>
         <title>Resonance MVP</title>
       </head>
-      <body className={`${inter} antialiased`}>
+      <body className={`${inter.className} antialiased`}>
         <Web3Providers>
           <main className='flex min-h-screen flex-col items-center justify-between p-4'>
             <nav className='w-full max-w-4xl mb-8 flex justify-end'>
@@ -37,7 +35,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                 className='my-1 cursor-pointer'
                 onClick={() => openConnectModal?.()}
               >
-                {isConnected ? "Connected" : "Login with Tomo"}
+                {isConnected ? `${userName}` : "Login"}
               </Button>
             </nav>
             {children}
