@@ -35,14 +35,15 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
-  Image as ImageIcon,
   Scale,
-  User,
   CheckCircle,
   Info,
+  ImageIcon,
 } from "lucide-react";
 import { registerStoryAsIP } from "../services/storyService";
 import { uploadStoryToPinata } from "../utils/pinata";
+import { useUser } from "./Web3Providers";
+import { users } from "../data/user";
 
 // Step-specific validation schemas
 const storyContentSchema = z.object({
@@ -54,11 +55,8 @@ const storyContentSchema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters")
     .max(500, "Description must be less than 500 characters"),
-  content: z.string().min(50, "Story content must be at least 500 characters"),
-});
-
-const coverImageSchema = z.object({
-  coverImage: z.instanceof(File).optional(),
+  content: z.string().min(50, "Story content must be at least 50 characters"),
+  coverImage: z.instanceof(File, { message: "Cover image is required" }),
 });
 
 const licenseSchema = z.object({
@@ -67,21 +65,13 @@ const licenseSchema = z.object({
   }),
 });
 
-const authorSchema = z.object({
-  authorName: z.string().min(1, "Author name is required"),
-});
-
 // Complete form schema
-const completeSchema = storyContentSchema
-  .merge(coverImageSchema)
-  .merge(licenseSchema)
-  .merge(authorSchema);
+const completeSchema = storyContentSchema.merge(licenseSchema);
 
 type FormData = z.infer<typeof completeSchema>;
 
 interface PaginatedStoryFormProps {
   onSuccess?: (result: any) => void;
-  userWalletAddress?: string;
 }
 
 interface Step {
@@ -95,45 +85,28 @@ interface Step {
 const steps: Step[] = [
   {
     id: 1,
-    title: "Story Content",
-    description: "Write your story and provide basic information",
+    title: "Upload Story",
+    description: "Upload your story content and cover image",
     icon: FileText,
     schema: storyContentSchema,
   },
   {
     id: 2,
-    title: "Cover Image",
-    description: "Upload an optional cover image for your story",
-    icon: ImageIcon,
-    schema: coverImageSchema,
-  },
-  {
-    id: 3,
-    title: "License Terms",
-    description: "Choose how others can use your story",
+    title: "Choose License",
+    description: "Select how others can use your story",
     icon: Scale,
     schema: licenseSchema,
   },
   {
-    id: 4,
-    title: "Author Info",
-    description: "Complete your author information",
-    icon: User,
-    schema: authorSchema,
-  },
-  {
-    id: 5,
-    title: "Review & Register",
-    description: "Confirm your details and register as IP",
+    id: 3,
+    title: "Review & Publish",
+    description: "Review and register your story as IP",
     icon: CheckCircle,
     schema: completeSchema,
   },
 ];
 
-export function PaginatedStoryForm({
-  onSuccess,
-  userWalletAddress,
-}: PaginatedStoryFormProps) {
+export function PaginatedStoryForm({ onSuccess }: PaginatedStoryFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
@@ -141,13 +114,33 @@ export function PaginatedStoryForm({
     message: string;
   }>({ type: null, message: "" });
 
+  const { address, isConnected, userName } = useUser();
+
+  // Get author name from user data or fallback to wallet address
+  const getAuthorName = (): string => {
+    if (!address) return "";
+
+    // Find user in the users array by wallet address
+    const userEntry = users.find(
+      (user) => user.walletAddress.toLowerCase() === address.toLowerCase()
+    );
+
+    if (userEntry && userEntry.userName) {
+      return userEntry.userName;
+    }
+
+    // If no user found or no userName, use the userName from context or shortened address
+    return userName || `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const authorName = getAuthorName();
+
   const form = useForm<FormData>({
     resolver: zodResolver(completeSchema),
     defaultValues: {
       title: "",
       description: "",
       content: "",
-      authorName: "",
       licenseType: "non-commercial",
     },
     mode: "onChange",
@@ -210,11 +203,10 @@ At first, Maya thought it was a bug. The AI would generate story fragments that 
 
 The question would haunt her for weeks, until the night her AI asked her to dream with it. And in that moment, the boundary between creator and creation dissolved completely, leaving only the story they would write together—one line of code at a time.`
     );
-    form.setValue("authorName", "Demo Author");
   };
 
   const onSubmit = async (data: FormData) => {
-    if (!userWalletAddress) {
+    if (!address) {
       setSubmitStatus({
         type: "error",
         message:
@@ -233,7 +225,7 @@ The question would haunt her for weeks, until the night her AI asked her to drea
         title: data.title,
         content: data.content,
         coverImage: data.coverImage,
-        author: data.authorName,
+        author: authorName,
         description: data.description,
       });
 
@@ -248,8 +240,8 @@ The question would haunt her for weeks, until the night her AI asked her to drea
         contentCID: pinataResult.contentCID,
         imageCID: pinataResult.imageCID,
         author: {
-          name: data.authorName,
-          address: userWalletAddress,
+          name: authorName,
+          address: address,
         },
         licenseType: data.licenseType,
       });
@@ -279,6 +271,21 @@ The question would haunt her for weeks, until the night her AI asked her to drea
 
   const progress = (currentStep / steps.length) * 100;
   const currentStepData = steps.find((step) => step.id === currentStep);
+
+  if (!isConnected || !address) {
+    return (
+      <Card className='w-full max-w-4xl mx-auto'>
+        <CardContent className='p-8'>
+          <Alert>
+            <Info className='h-4 w-4' />
+            <AlertDescription>
+              Please connect your wallet to publish a story.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className='w-full max-w-4xl mx-auto'>
@@ -349,10 +356,13 @@ The question would haunt her for weeks, until the night her AI asked her to drea
               </div>
             )}
 
-            {/* Step 1: Story Content */}
+            {/* Step 1: Upload Story */}
             {currentStep === 1 && (
               <div className='space-y-6'>
-                <div className='flex justify-end'>
+                <div className='flex justify-between items-center'>
+                  <div className='text-sm text-muted-foreground'>
+                    <strong>Author:</strong> {authorName}
+                  </div>
                   <Button
                     type='button'
                     variant='outline'
@@ -387,10 +397,10 @@ The question would haunt her for weeks, until the night her AI asked her to drea
                   name='description'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Synopsis</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder='Brief description of your story...'
+                          placeholder='Brief synopsis of your story...'
                           className='min-h-[80px]'
                           {...field}
                         />
@@ -418,24 +428,19 @@ The question would haunt her for weeks, until the night her AI asked her to drea
                         />
                       </FormControl>
                       <FormDescription>
-                        Your complete story content (minimum 500 characters)
+                        Your complete story content in plain text
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-            )}
 
-            {/* Step 2: Cover Image */}
-            {currentStep === 2 && (
-              <div className='space-y-6'>
                 <FormField
                   control={form.control}
                   name='coverImage'
                   render={({ field: { onChange, value, ...field } }) => (
                     <FormItem>
-                      <FormLabel>Cover Image</FormLabel>
+                      <FormLabel>Cover Image *</FormLabel>
                       <FormControl>
                         <div className='space-y-4'>
                           <Input
@@ -458,26 +463,18 @@ The question would haunt her for weeks, until the night her AI asked her to drea
                         </div>
                       </FormControl>
                       <FormDescription>
-                        Upload a cover image for your story (JPG, PNG). This
-                        will be associated with your IP registration.
+                        Upload a cover image for your story (JPG, PNG). This is
+                        required for IP registration.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <Alert>
-                  <Info className='h-4 w-4' />
-                  <AlertDescription>
-                    A cover image helps make your story more discoverable and
-                    visually appealing. You can skip this step if you prefer.
-                  </AlertDescription>
-                </Alert>
               </div>
             )}
 
-            {/* Step 3: License Terms */}
-            {currentStep === 3 && (
+            {/* Step 2: License Terms */}
+            {currentStep === 2 && (
               <div className='space-y-6'>
                 <FormField
                   control={form.control}
@@ -560,30 +557,8 @@ The question would haunt her for weeks, until the night her AI asked her to drea
               </div>
             )}
 
-            {/* Step 4: Author Info */}
-            {currentStep === 4 && (
-              <div className='space-y-6'>
-                <FormField
-                  control={form.control}
-                  name='authorName'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Author Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Your name...' {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        This will be recorded on-chain as the creator of this IP
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-
-            {/* Step 5: Review & Confirm */}
-            {currentStep === 5 && (
+            {/* Step 3: Review & Publish */}
+            {currentStep === 3 && (
               <div className='space-y-6'>
                 <Alert>
                   <CheckCircle className='h-4 w-4' />
@@ -601,15 +576,14 @@ The question would haunt her for weeks, until the night her AI asked her to drea
                         <strong>Title:</strong> {form.watch("title")}
                       </div>
                       <div>
-                        <strong>Description:</strong>{" "}
-                        {form.watch("description")}
+                        <strong>Synopsis:</strong> {form.watch("description")}
                       </div>
                       <div>
                         <strong>Content Length:</strong>{" "}
                         {form.watch("content")?.length || 0} characters
                       </div>
                       <div>
-                        <strong>Author:</strong> {form.watch("authorName")}
+                        <strong>Author:</strong> {authorName}
                       </div>
                       <div>
                         <strong>License:</strong>{" "}
@@ -690,18 +664,18 @@ The question would haunt her for weeks, until the night her AI asked her to drea
               ) : (
                 <Button
                   type='submit'
-                  disabled={isSubmitting || !userWalletAddress}
+                  disabled={isSubmitting || !address}
                   className='flex items-center gap-2'
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                      {submitStatus.message || "Registering..."}
+                      {submitStatus.message || "Publishing..."}
                     </>
                   ) : (
                     <>
                       <Upload className='mr-2 h-4 w-4' />
-                      Register Story as IP
+                      Publish Story as IP
                     </>
                   )}
                 </Button>
