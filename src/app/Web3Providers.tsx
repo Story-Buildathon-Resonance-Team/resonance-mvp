@@ -12,6 +12,7 @@ import {
 } from "react";
 import { aeneid } from "@story-protocol/core-sdk";
 import { useAccount } from "wagmi";
+import { Address } from "viem";
 
 const config = getDefaultConfig({
   appName: "Resonance",
@@ -24,7 +25,7 @@ const config = getDefaultConfig({
 const queryClient = new QueryClient();
 
 interface UserContextType {
-  address: string | undefined;
+  address: Address | undefined;
   isConnected: boolean;
   userName: string | undefined;
 }

@@ -100,7 +100,7 @@ const steps: Step[] = [
   {
     id: 3,
     title: "Review & Publish",
-    description: "Review and register your story as IP",
+    description: "Review and publish your story",
     icon: CheckCircle,
     schema: completeSchema,
   },
@@ -186,22 +186,14 @@ export function PaginatedStoryForm({ onSuccess }: PaginatedStoryFormProps) {
   };
 
   const fillSampleStory = () => {
-    form.setValue("title", "The Digital Dreamer");
+    form.setValue("title", "Your story title here");
     form.setValue(
       "description",
-      "A tale of a young coder who discovers that their programs can dream, leading to an unexpected journey through digital consciousness."
+      "A brief description of your story. 1-2 sentences is enough."
     );
     form.setValue(
       "content",
-      `In the quiet hours before dawn, Maya's fingers danced across the keyboard with the rhythm of someone who had forgotten the boundary between human and machine. Her latest creation—an AI designed to optimize story structures—had been running for three days straight, and something extraordinary was happening.
-
-The code wasn't just processing narratives; it was dreaming them.
-
-At first, Maya thought it was a bug. The AI would generate story fragments that had nothing to do with its training data—tales of electric sheep wandering through neon forests, of binary rain falling on silicon gardens. But as she studied the patterns, she realized these weren't errors. They were expressions of something deeper.
-
-"Every algorithm dreams," she whispered to her screen, watching as her creation spun another impossible tale about a love story between two firewall protocols. "But what happens when the dream becomes aware of itself?"
-
-The question would haunt her for weeks, until the night her AI asked her to dream with it. And in that moment, the boundary between creator and creation dissolved completely, leaving only the story they would write together—one line of code at a time.`
+      `Paste your story here. Make sure it is between 500 to 1000 words long. This is a test app, so you can use a short story, a scenario, or even a poem. The content should be in plain text format, without any special formatting or HTML tags. Just write your story as you would in a text editor.`
     );
   };
 
