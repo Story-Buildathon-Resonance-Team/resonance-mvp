@@ -38,21 +38,20 @@ yarn install
 Create a `.env.local` file in the root directory and add the following environment variables:
 
 ```env
-# Story Protocol Configuration
+# Server-side only
+WALLET_PRIVATE_KEY=your_private_key_here
+PINATA_JWT=your_pinata_jwt_here
+
+# Client-side accessible
+NEXT_PUBLIC_PINATA_JWT=your_pinata_jwt_here
+NEXT_PUBLIC_TOMO_CLIENT_ID=your_tomo_client_id
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id
 NEXT_PUBLIC_RPC_PROVIDER_URL=https://aeneid.storyrpc.io
+NEXT_PUBLIC_PROTOCOL_EXPLORER=https://aeneid.explorer.story.foundation
+
+# Optional
 STORY_NETWORK=aeneid
-
-# Wallet Configuration
-WALLET_PRIVATE_KEY=your_wallet_private_key_here
-
-# Tomo Wallet Integration
-NEXT_PUBLIC_TOMO_CLIENT_ID=your_tomo_client_id_here
-NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id_here
-
-# IPFS Storage (Pinata)
-PINATA_JWT=your_pinata_jwt_token_here
-
-# Smart Contract Addresses (Optional - will use defaults if not provided)
+NFT_CONTRACT_ADDRESS=your_nft_contract_address_here
 SPG_NFT_CONTRACT_ADDRESS=your_spg_nft_contract_address_here
 ```
 
