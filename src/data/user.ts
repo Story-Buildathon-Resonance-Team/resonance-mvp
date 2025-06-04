@@ -26,7 +26,7 @@ export interface UserEntry {
 
 export const users: UserEntry[] = [
   {
-    userName: "Craig",
+    userName: "",
     walletAddress: "",
     stories: [
       {
@@ -92,7 +92,7 @@ export const users: UserEntry[] = [
     ],
   },
   {
-    userName: "Simon",
+    userName: "",
     walletAddress: "",
     stories: [
       {
@@ -117,7 +117,7 @@ export const users: UserEntry[] = [
     ],
   },
   {
-    userName: "Xavier",
+    userName: "",
     walletAddress: "",
     stories: [
       {

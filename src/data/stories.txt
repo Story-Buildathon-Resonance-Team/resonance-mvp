@@ -1,5 +1,0 @@
-// List of orignal stories and remixes you could use to test registration flow. If you use a story, delete it from here.
-
-Story: 
-
-Title: 
