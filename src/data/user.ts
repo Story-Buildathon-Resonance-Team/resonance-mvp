@@ -10,7 +10,7 @@ export interface StoryEntry {
   ipId: string;
   ipMetadataCID: string;
   nftMetadataCID: string;
-  textCID: string;
+  contentCID: string;
   imageCID: string;
   title?: string;
   synopsis?: string;
@@ -33,7 +33,7 @@ export const users: UserEntry[] = [
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",
-        textCID: "",
+        contentCID: "",
         imageCID: "",
         title: "",
         synopsis: "",
@@ -42,7 +42,7 @@ export const users: UserEntry[] = [
         ipId: "",
         ipMetadataCID: "",
         nftMetadataCID: "",
-        textCID: "",
+        contentCID: "",
         imageCID: "",
         title: "",
         synopsis: "",
@@ -60,13 +60,35 @@ export const users: UserEntry[] = [
           "bafkreihxoorp34rjyk3c654ephbjwmgbt3dxaetyoazqzdbu4mmyltigzq",
         nftMetadataCID:
           "bafkreiafjforjo4cy4ye4tgl7xyjlhfaxz5ntp4n3qgcdid573vfwtl5ku",
-        textCID: "bafkreiaond2f2xj5bhtgjptgnphwn45wqizbhy5ju7z4px7ncfhugp4shu",
+        contentCID:
+          "bafkreiaond2f2xj5bhtgjptgnphwn45wqizbhy5ju7z4px7ncfhugp4shu",
         imageCID: "bafybeiammagvjzcc7qln4ni6bjryrxtea5voz326vufkgfspcremp2avbm",
         title: "The Missing Piece",
         synopsis:
           "On the run from her sister’s ruthless regime, Tamara discovers a bloody message in a remote cabin that hints at a deeper truth behind her bloodline and a soul-binding treaty.",
       },
-      // …more
+      {
+        ipId: "0xf85014aa8ECa28A5c8ceEfcC5dCeFB4416F51f08",
+        ipMetadataCID:
+          "bafkreihfngnzxlhvzjnp7qyqjvefjxmypg3ke5p4o4lrptlvzqq2rjcdzq",
+        nftMetadataCID:
+          "bafkreic46pmhqoni66axnbmb4ogkx46kfz6us6xfmohdjj5w53penj7aiq",
+        contentCID:
+          "bafkreid34mk4ojned6wlylkcvploxqxfcrolmc6dago4zg3gzpaafxzelq",
+        imageCID: "bafybeigmqq35e2wly6qy6enenumudd5bbp67h3koascgyuagixrxq5njly",
+        title: "The Weight of Truth",
+        synopsis:
+          "In a crumbling, post-apocalyptic city hunted by Purifier machines, Daniel searches for a genetic heir who can activate a long-lost device to restore humanity",
+      },
+      {
+        ipId: "", // The IP ID returned by Story Protocol
+        ipMetadataCID: "",
+        nftMetadataCID: "",
+        contentCID: "",
+        imageCID: "",
+        title: "",
+        synopsis: "",
+      },
     ],
   },
   {
@@ -77,7 +99,7 @@ export const users: UserEntry[] = [
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",
-        textCID: "",
+        contentCID: "",
         imageCID: "",
         title: "",
         synopsis: "",
@@ -86,7 +108,7 @@ export const users: UserEntry[] = [
         ipId: "",
         ipMetadataCID: "",
         nftMetadataCID: "",
-        textCID: "",
+        contentCID: "",
         imageCID: "",
         title: "",
         synopsis: "",
@@ -102,7 +124,7 @@ export const users: UserEntry[] = [
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",
-        textCID: "",
+        contentCID: "",
         imageCID: "",
         title: "",
         synopsis: "",
@@ -111,7 +133,7 @@ export const users: UserEntry[] = [
         ipId: "",
         ipMetadataCID: "",
         nftMetadataCID: "",
-        textCID: "",
+        contentCID: "",
         imageCID: "",
         title: "",
         synopsis: "",
@@ -127,7 +149,7 @@ export const users: UserEntry[] = [
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",
-        textCID: "",
+        contentCID: "",
         imageCID: "",
         title: "",
         synopsis: "",
@@ -136,7 +158,7 @@ export const users: UserEntry[] = [
         ipId: "",
         ipMetadataCID: "",
         nftMetadataCID: "",
-        textCID: "",
+        contentCID: "",
         imageCID: "",
         title: "",
         synopsis: "",
