@@ -24,14 +24,14 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="text-center space-y-4 max-w-2xl">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <BookOpen className="h-8 w-8 text-primary" />
-          <h1 className="text-4xl font-bold">Resonance</h1>
+          <h1 className="text-5xl font-bold">Stories That
+          Spark Stories</h1>
         </div>
         <p className="text-xl text-muted-foreground">
-          Decentralized storytelling platform powered by Story Protocol, Pinata, and Tomo
+          Enter a vibrant world where creativity flows freely. Protect your original works, collaborate with fellow writers, and watch as your stories inspire endless new possibilities.
         </p>
         <p className="text-gray-600">
-          Create, register, and manage your intellectual property for fiction stories on the blockchain.
+        Decentralized storytelling platform powered by Story Protocol, Pinata, and Tomo
         </p>
       </div>
 
@@ -40,11 +40,11 @@ export default function HomePage() {
         <Card className="text-center">
           <CardHeader>
             <Shield className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-            <CardTitle className="text-lg">Story Protocol</CardTitle>
+            <CardTitle className="text-lg">Secure & Share</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Register your stories as IP assets with programmable licensing terms
+            Blockchain-powered protection through Story Protocol ensures your creative work is safe while encouraging collaborative remixing and building on your ideas.
             </p>
           </CardContent>
         </Card>
@@ -52,11 +52,11 @@ export default function HomePage() {
         <Card className="text-center">
           <CardHeader>
             <Globe className="h-8 w-8 text-green-500 mx-auto mb-2" />
-            <CardTitle className="text-lg">IPFS Storage</CardTitle>
+            <CardTitle className="text-lg">Creative Playground</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Decentralized storage via Pinata ensures your content is always accessible
+              Transform existing narratives, spawn new characters, or create entirely fresh worlds. Every story becomes a launching pad for imagination.
             </p>
           </CardContent>
         </Card>
@@ -64,11 +64,11 @@ export default function HomePage() {
         <Card className="text-center">
           <CardHeader>
             <Users className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-            <CardTitle className="text-lg">Tomo Auth</CardTitle>
+            <CardTitle className="text-lg">Community Impact</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Seamless Web3 authentication with social login capabilities
+              Stories rise in popularity based on their collaborative power. The more remixes and derivative works, the greater the resonance.
             </p>
           </CardContent>
         </Card>
