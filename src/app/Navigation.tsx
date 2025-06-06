@@ -22,7 +22,7 @@ export default function Navigation() {
   return (
     <nav className='w-full max-w-4xl mb-8 flex justify-between items-center'>
       {/* Logo/Home Link */}
-      <Link href="/" className="flex items-center gap-2 text-lg font-semibold hover:text-primary transition-colors">
+      <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
         <BookOpen className="h-6 w-6" />
         <span>Resonance</span>
       </Link>
