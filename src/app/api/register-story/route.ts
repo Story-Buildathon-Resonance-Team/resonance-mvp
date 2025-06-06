@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { initializeServerConfig } from "@/utils/serverConfig";
 import {
   NonCommercialSocialRemixingTerms,
+  CommercialUseOnlyTerms,
   CommercialRemixTerms,
   SPGNFTContractAddress,
+  PILTemplateAddress,
 } from "@/utils/utils";
 import { uploadJSONToIPFS } from "@/utils/pinata";
 import { createHash } from "crypto";
@@ -19,7 +21,7 @@ interface StoryRegistrationRequest {
     name: string;
     address: Address;
   };
-  licenseType: "non-commercial" | "commercial-remix";
+  licenseType: "non-commercial" | "commercial-use" | "commercial-remix";
 }
 
 export async function GET() {
@@ -101,6 +103,8 @@ export async function POST(request: NextRequest) {
           value:
             data.licenseType === "non-commercial"
               ? "Non-Commercial Social Remixing"
+              : data.licenseType === "commercial-use"
+              ? "Commercial Use Only"
               : "Commercial Remix",
         },
         {
@@ -131,12 +135,23 @@ export async function POST(request: NextRequest) {
     });
 
     // 5. Determine license terms
-    const licenseTermsData =
-      data.licenseType === "non-commercial"
-        ? [{ terms: NonCommercialSocialRemixingTerms }]
-        : [{ terms: CommercialRemixTerms }];
+    let licenseTermsData;
+    if (data.licenseType === "non-commercial") {
+      licenseTermsData = [{ 
+        terms: NonCommercialSocialRemixingTerms
+      }];
+    } else if (data.licenseType === "commercial-use") {
+      licenseTermsData = [{ 
+        terms: CommercialUseOnlyTerms
+      }];
+    } else {
+      licenseTermsData = [{ 
+        terms: CommercialRemixTerms
+      }];
+    }
 
     console.log("License terms:", licenseTermsData);
+    console.log("PIL Template Address:", PILTemplateAddress);
 
     // 6. Register with Story Protocol
     console.log("Registering with Story Protocol...");

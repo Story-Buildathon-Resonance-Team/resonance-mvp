@@ -6,7 +6,9 @@ import { uploadFileToIPFS, uploadJSONToIPFS } from "./functions/uploadIPFS";
 
 export interface StoryUploadData {
   title: string;
-  content: string;
+  content?: string;
+  storyFile?: File;
+  contentType: "text" | "pdf";
   coverImage: File;
   author: string;
   description: string;
@@ -34,21 +36,32 @@ export async function uploadStoryToPinata(
     const imageCID = await uploadFileToIPFS(data.coverImage, apiKey);
     const imageUrl = `https://gateway.pinata.cloud/ipfs/${imageCID}`;
 
-    // Create story content object
-    const storyContent = {
-      title: data.title,
-      description: data.description,
-      content: data.content,
-      author: data.author,
-      createdAt: new Date().toISOString(),
-      type: "fiction-story",
-      version: "1.0",
-    };
+    let contentCID: string;
+    let contentUrl: string;
 
-    // Upload story content as JSON
-    console.log("Uploading story content...");
-    const contentCID = await uploadJSONToIPFS(storyContent, apiKey);
-    const contentUrl = `https://gateway.pinata.cloud/ipfs/${contentCID}`;
+    if (data.contentType === "pdf" && data.storyFile) {
+      // Upload PDF file directly
+      console.log("Uploading PDF file...");
+      contentCID = await uploadFileToIPFS(data.storyFile, apiKey);
+      contentUrl = `https://gateway.pinata.cloud/ipfs/${contentCID}`;
+    } else {
+      // Create story content object for text content
+      const storyContent = {
+        title: data.title,
+        description: data.description,
+        content: data.content || "",
+        author: data.author,
+        createdAt: new Date().toISOString(),
+        type: "fiction-story",
+        contentType: data.contentType,
+        version: "1.0",
+      };
+
+      // Upload story content as JSON
+      console.log("Uploading story content...");
+      contentCID = await uploadJSONToIPFS(storyContent, apiKey);
+      contentUrl = `https://gateway.pinata.cloud/ipfs/${contentCID}`;
+    }
 
     console.log("Story uploaded successfully:", {
       contentCID,

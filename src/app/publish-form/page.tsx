@@ -46,8 +46,8 @@ import { useUser } from "../Web3Providers";
 import { users } from "../../data/user";
 import SuccessModal from "../../components/SuccessModal";
 
-// Step-specific validation schemas
-const storyContentSchema = z.object({
+// Base schema without refinement
+const baseSchema = z.object({
   title: z
     .string()
     .min(1, "Title is required")
@@ -56,18 +56,43 @@ const storyContentSchema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters")
     .max(500, "Description must be less than 500 characters"),
-  content: z.string().min(50, "Story content must be at least 50 characters"),
+  contentType: z.enum(["text", "pdf"], {
+    required_error: "Please select content type",
+  }),
+  content: z.string().optional(),
+  storyFile: z.instanceof(File).optional(),
   coverImage: z.instanceof(File, { message: "Cover image is required" }),
-});
-
-const licenseSchema = z.object({
-  licenseType: z.enum(["non-commercial", "commercial-remix"], {
+  licenseType: z.enum(["non-commercial", "commercial-use", "commercial-remix"], {
     required_error: "Please select a license type",
   }),
 });
 
-// Complete form schema
-const completeSchema = storyContentSchema.merge(licenseSchema);
+// Complete form schema with refinement
+const completeSchema = baseSchema.refine((data) => {
+  if (data.contentType === "text") {
+    return data.content && data.content.length >= 50;
+  } else if (data.contentType === "pdf") {
+    return data.storyFile && data.storyFile.type === "application/pdf";
+  }
+  return false;
+}, {
+  message: "Please provide either text content (min 50 characters) or upload a PDF file",
+  path: ["content"],
+});
+
+// Step-specific schemas for validation
+const storyContentSchema = baseSchema.pick({
+  title: true,
+  description: true,
+  contentType: true,
+  content: true,
+  storyFile: true,
+  coverImage: true,
+});
+
+const licenseSchema = baseSchema.pick({
+  licenseType: true,
+});
 
 type FormData = z.infer<typeof completeSchema>;
 
@@ -144,6 +169,7 @@ export default function PaginatedStoryForm({
     defaultValues: {
       title: "",
       description: "",
+      contentType: "text",
       content: "",
       licenseType: "non-commercial",
     },
@@ -195,6 +221,7 @@ export default function PaginatedStoryForm({
       "description",
       "A brief description of your story. 1-2 sentences is enough."
     );
+    form.setValue("contentType", "text");
     form.setValue(
       "content",
       `Paste your story here. Make sure it is between 500 to 1000 words long. This is a test app, so you can use a short story, a scenario, or even a poem. The content should be in plain text format, without any special formatting or HTML tags. Just write your story as you would in a text editor.`
@@ -220,6 +247,8 @@ export default function PaginatedStoryForm({
       const pinataResult = await uploadStoryToPinata({
         title: data.title,
         content: data.content,
+        storyFile: data.storyFile,
+        contentType: data.contentType,
         coverImage: data.coverImage,
         author: authorName,
         description: data.description,
@@ -429,26 +458,104 @@ export default function PaginatedStoryForm({
                   )}
                 />
 
+                {/* Content Type Selection */}
                 <FormField
                   control={form.control}
-                  name="content"
+                  name="contentType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Story Content</FormLabel>
+                      <FormLabel>Content Type</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder="Write your story here..."
-                          className="min-h-[300px]"
-                          {...field}
-                        />
+                        <div className="flex gap-4">
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              value="text"
+                              checked={field.value === "text"}
+                              onChange={field.onChange}
+                            />
+                            <span>Text Content</span>
+                          </label>
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              value="pdf"
+                              checked={field.value === "pdf"}
+                              onChange={field.onChange}
+                            />
+                            <span>PDF Upload</span>
+                          </label>
+                        </div>
                       </FormControl>
                       <FormDescription>
-                        Your complete story content in plain text
+                        Choose how you want to provide your story content
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                {/* Text Content */}
+                {form.watch("contentType") === "text" && (
+                  <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Story Content</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Write your story here..."
+                            className="min-h-[300px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Your complete story content in plain text
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {/* PDF Upload */}
+                {form.watch("contentType") === "pdf" && (
+                  <FormField
+                    control={form.control}
+                    name="storyFile"
+                    render={({ field: { onChange, value, ...field } }) => (
+                      <FormItem>
+                        <FormLabel>Story PDF File</FormLabel>
+                        <FormControl>
+                          <div className="space-y-4">
+                            <Input
+                              type="file"
+                              accept=".pdf"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                onChange(file);
+                              }}
+                              {...field}
+                            />
+                            {value && (
+                              <div className="p-4 border border-dashed rounded-lg">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <FileText className="h-4 w-4" />
+                                  Selected: {value.name} ({(value.size / 1024 / 1024).toFixed(2)} MB)
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Upload your story as a PDF file (max 10MB recommended)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <FormField
                   control={form.control}
@@ -532,6 +639,34 @@ export default function PaginatedStoryForm({
 
                             <label
                               className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${
+                                field.value === "commercial-use"
+                                  ? "border-primary bg-primary/5"
+                                  : ""
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                value="commercial-use"
+                                checked={field.value === "commercial-use"}
+                                onChange={field.onChange}
+                                className="mt-1"
+                              />
+                              <div className="space-y-1">
+                                <div className="font-medium">
+                                  Commercial Use Only
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  Others can use your story commercially with 10% revenue share.
+                                  No derivatives allowed - protects your original work.
+                                </div>
+                                <Badge variant="secondary" className="text-xs">
+                                  Commercial + Protected
+                                </Badge>
+                              </div>
+                            </label>
+
+                            <label
+                              className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${
                                 field.value === "commercial-remix"
                                   ? "border-primary bg-primary/5"
                                   : ""
@@ -549,12 +684,11 @@ export default function PaginatedStoryForm({
                                   Commercial Remix
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  Others can use your story commercially and you
-                                  earn 5% revenue share from derivatives. Includes
-                                  small minting fees.
+                                  Others can use your story commercially and create derivatives.
+                                  You earn 25% revenue share from all uses.
                                 </div>
                                 <Badge variant="secondary" className="text-xs">
-                                  Monetization enabled
+                                  Maximum Monetization
                                 </Badge>
                               </div>
                             </label>
@@ -594,18 +728,32 @@ export default function PaginatedStoryForm({
                         <strong>Synopsis:</strong> {form.watch("description")}
                       </div>
                       <div>
-                        <strong>Content Length:</strong>{" "}
-                        {form.watch("content")?.length || 0} characters
-                      </div>
-                      <div>
                         <strong>Author:</strong> {authorName}
                       </div>
                       <div>
                         <strong>License:</strong>{" "}
                         {form.watch("licenseType") === "non-commercial"
                           ? "Non-Commercial Social Remixing"
-                          : "Commercial Remix (5% revenue share)"}
+                          : form.watch("licenseType") === "commercial-use"
+                          ? "Commercial Use Only (10% revenue share)"
+                          : "Commercial Remix (25% revenue share)"}
                       </div>
+                      <div>
+                        <strong>Content Type:</strong>{" "}
+                        {form.watch("contentType") === "text" ? "Text Content" : "PDF File"}
+                      </div>
+                      {form.watch("contentType") === "text" && (
+                        <div>
+                          <strong>Content Length:</strong>{" "}
+                          {form.watch("content")?.length || 0} characters
+                        </div>
+                      )}
+                      {form.watch("contentType") === "pdf" && form.watch("storyFile") && (
+                        <div>
+                          <strong>PDF File:</strong>{" "}
+                          {form.watch("storyFile")?.name} ({(form.watch("storyFile")?.size / 1024 / 1024).toFixed(2)} MB)
+                        </div>
+                      )}
                       <div>
                         <strong>Cover Image:</strong>{" "}
                         {form.watch("coverImage")
