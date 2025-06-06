@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { initializeServerConfig } from "@/utils/config";
+import { initializeServerConfig } from "@/utils/serverConfig";
 import {
   createCommercialRemixTerms,
   NonCommercialSocialRemixingTerms,
@@ -125,13 +125,13 @@ export async function POST(request: NextRequest) {
       data.licenseType === "non-commercial"
         ? [{ terms: NonCommercialSocialRemixingTerms }]
         : [
-            {
-              terms: createCommercialRemixTerms({
-                defaultMintingFee: 1,
-                commercialRevShare: 5,
-              }),
-            },
-          ];
+          {
+            terms: createCommercialRemixTerms({
+              defaultMintingFee: 1,
+              commercialRevShare: 5,
+            }),
+          },
+        ];
 
     console.log("License terms:", licenseTermsData);
 
@@ -195,9 +195,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: `Failed to register story: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        error: `Failed to register story: ${error instanceof Error ? error.message : "Unknown error"
+          }`,
       },
       { status: 500 }
     );

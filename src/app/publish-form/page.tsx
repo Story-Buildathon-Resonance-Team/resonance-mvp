@@ -268,10 +268,10 @@ export default function PaginatedStoryForm({
 
   if (!isConnected || !address) {
     return (
-      <Card className='w-full max-w-4xl mx-auto'>
-        <CardContent className='p-8'>
+      <Card className="w-full max-w-4xl mx-auto">
+        <CardContent className="p-8">
           <Alert>
-            <Info className='h-4 w-4' />
+            <Info className="h-4 w-4" />
             <AlertDescription>
               Please connect your wallet to publish a story.
             </AlertDescription>
@@ -282,12 +282,12 @@ export default function PaginatedStoryForm({
   }
 
   return (
-    <Card className='w-full max-w-4xl mx-auto'>
+    <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <div className='flex items-center justify-between'>
+        <div className="flex items-center justify-between">
           <div>
-            <CardTitle className='flex items-center gap-2'>
-              <BookOpen className='h-5 w-5' />
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
               Publish Your Story
             </CardTitle>
             <CardDescription>
@@ -295,17 +295,17 @@ export default function PaginatedStoryForm({
               registered.
             </CardDescription>
           </div>
-          <Badge variant='outline'>
+          <Badge variant="outline">
             Step {currentStep} of {steps.length}
           </Badge>
         </div>
 
         {/* Progress Bar */}
-        <div className='space-y-2'>
-          <Progress value={progress} className='h-2' />
-          <div className='flex justify-between text-sm text-muted-foreground'>
+        <div className="space-y-2">
+          <Progress value={progress} className="h-2" />
+          <div className="flex justify-between text-sm text-muted-foreground">
             {steps.map((step) => (
-              <div key={step.id} className='flex flex-col items-center gap-1'>
+              <div key={step.id} className="flex flex-col items-center gap-1">
                 <div
                   className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
                     step.id === currentStep
@@ -316,9 +316,9 @@ export default function PaginatedStoryForm({
                   }`}
                 >
                   {step.id < currentStep ? (
-                    <CheckCircle className='h-4 w-4' />
+                    <CheckCircle className="h-4 w-4" />
                   ) : (
-                    <step.icon className='h-4 w-4' />
+                    <step.icon className="h-4 w-4" />
                   )}
                 </div>
                 <span
@@ -336,14 +336,14 @@ export default function PaginatedStoryForm({
 
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Current Step Header */}
             {currentStepData && (
-              <div className='flex items-center gap-3 p-4 bg-muted/50 rounded-lg'>
-                <currentStepData.icon className='h-6 w-6 text-primary' />
+              <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+                <currentStepData.icon className="h-6 w-6 text-primary" />
                 <div>
-                  <h3 className='font-semibold'>{currentStepData.title}</h3>
-                  <p className='text-sm text-muted-foreground'>
+                  <h3 className="font-semibold">{currentStepData.title}</h3>
+                  <p className="text-sm text-muted-foreground">
                     {currentStepData.description}
                   </p>
                 </div>
@@ -352,32 +352,32 @@ export default function PaginatedStoryForm({
 
             {/* Step 1: Upload Story */}
             {currentStep === 1 && (
-              <div className='space-y-6'>
-                <div className='flex justify-between items-center'>
-                  <div className='text-sm text-muted-foreground'>
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">
                     <strong>Author:</strong> {authorName}
                   </div>
                   <Button
-                    type='button'
-                    variant='outline'
-                    size='sm'
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={fillSampleStory}
-                    className='flex items-center gap-2'
+                    className="flex items-center gap-2"
                   >
-                    <Sparkles className='h-4 w-4' />
+                    <Sparkles className="h-4 w-4" />
                     Fill Sample Story
                   </Button>
                 </div>
 
                 <FormField
                   control={form.control}
-                  name='title'
+                  name="title"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Story Title</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder='Enter your story title...'
+                          placeholder="Enter your story title..."
                           {...field}
                         />
                       </FormControl>
@@ -388,14 +388,14 @@ export default function PaginatedStoryForm({
 
                 <FormField
                   control={form.control}
-                  name='description'
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Synopsis</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder='Brief synopsis of your story...'
-                          className='min-h-[80px]'
+                          placeholder="Brief synopsis of your story..."
+                          className="min-h-[80px]"
                           {...field}
                         />
                       </FormControl>
@@ -410,14 +410,14 @@ export default function PaginatedStoryForm({
 
                 <FormField
                   control={form.control}
-                  name='content'
+                  name="content"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Story Content</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder='Write your story here...'
-                          className='min-h-[300px]'
+                          placeholder="Write your story here..."
+                          className="min-h-[300px]"
                           {...field}
                         />
                       </FormControl>
@@ -431,15 +431,15 @@ export default function PaginatedStoryForm({
 
                 <FormField
                   control={form.control}
-                  name='coverImage'
+                  name="coverImage"
                   render={({ field: { onChange, value, ...field } }) => (
                     <FormItem>
                       <FormLabel>Cover Image *</FormLabel>
                       <FormControl>
-                        <div className='space-y-4'>
+                        <div className="space-y-4">
                           <Input
-                            type='file'
-                            accept='image/*'
+                            type="file"
+                            accept="image/*"
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               onChange(file);
@@ -447,9 +447,9 @@ export default function PaginatedStoryForm({
                             {...field}
                           />
                           {value && (
-                            <div className='p-4 border border-dashed rounded-lg'>
-                              <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                                <ImageIcon className='h-4 w-4' />
+                            <div className="p-4 border border-dashed rounded-lg">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <ImageIcon className="h-4 w-4" />
                                 Selected: {value.name}
                               </div>
                             </div>
@@ -469,16 +469,16 @@ export default function PaginatedStoryForm({
 
             {/* Step 2: License Terms */}
             {currentStep === 2 && (
-              <div className='space-y-6'>
+              <div className="space-y-6">
                 <FormField
                   control={form.control}
-                  name='licenseType'
+                  name="licenseType"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>License Type</FormLabel>
                       <FormControl>
-                        <div className='space-y-4'>
-                          <div className='grid gap-4'>
+                        <div className="space-y-4">
+                          <div className="grid gap-4">
                             <label
                               className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${
                                 field.value === "non-commercial"
@@ -487,23 +487,23 @@ export default function PaginatedStoryForm({
                               }`}
                             >
                               <input
-                                type='radio'
-                                value='non-commercial'
+                                type="radio"
+                                value="non-commercial"
                                 checked={field.value === "non-commercial"}
                                 onChange={field.onChange}
-                                className='mt-1'
+                                className="mt-1"
                               />
-                              <div className='space-y-1'>
-                                <div className='font-medium'>
+                              <div className="space-y-1">
+                                <div className="font-medium">
                                   Non-Commercial Social Remixing
                                 </div>
-                                <div className='text-sm text-muted-foreground'>
+                                <div className="text-sm text-muted-foreground">
                                   Others can remix and build upon your story for
                                   non-commercial purposes. Perfect for
                                   encouraging creative collaboration and viral
                                   storytelling.
                                 </div>
-                                <Badge variant='secondary' className='text-xs'>
+                                <Badge variant="secondary" className="text-xs">
                                   Recommended for community building
                                 </Badge>
                               </div>
@@ -517,22 +517,22 @@ export default function PaginatedStoryForm({
                               }`}
                             >
                               <input
-                                type='radio'
-                                value='commercial-remix'
+                                type="radio"
+                                value="commercial-remix"
                                 checked={field.value === "commercial-remix"}
                                 onChange={field.onChange}
-                                className='mt-1'
+                                className="mt-1"
                               />
-                              <div className='space-y-1'>
-                                <div className='font-medium'>
+                              <div className="space-y-1">
+                                <div className="font-medium">
                                   Commercial Remix
                                 </div>
-                                <div className='text-sm text-muted-foreground'>
+                                <div className="text-sm text-muted-foreground">
                                   Others can use your story commercially and you
                                   earn revenue share from derivatives. Includes
                                   minting fees and 5% revenue sharing.
                                 </div>
-                                <Badge variant='secondary' className='text-xs'>
+                                <Badge variant="secondary" className="text-xs">
                                   Monetization enabled
                                 </Badge>
                               </div>
@@ -553,19 +553,19 @@ export default function PaginatedStoryForm({
 
             {/* Step 3: Review & Publish */}
             {currentStep === 3 && (
-              <div className='space-y-6'>
+              <div className="space-y-6">
                 <Alert>
-                  <CheckCircle className='h-4 w-4' />
+                  <CheckCircle className="h-4 w-4" />
                   <AlertDescription>
                     Please review your story details before registering as
                     intellectual property.
                   </AlertDescription>
                 </Alert>
 
-                <div className='space-y-4'>
-                  <div className='grid gap-4 p-4 border rounded-lg'>
-                    <h3 className='font-semibold'>Story Details</h3>
-                    <div className='grid gap-2 text-sm'>
+                <div className="space-y-4">
+                  <div className="grid gap-4 p-4 border rounded-lg">
+                    <h3 className="font-semibold">Story Details</h3>
+                    <div className="grid gap-2 text-sm">
                       <div>
                         <strong>Title:</strong> {form.watch("title")}
                       </div>
@@ -594,9 +594,9 @@ export default function PaginatedStoryForm({
                     </div>
                   </div>
 
-                  <div className='p-4 bg-muted/50 rounded-lg'>
-                    <h4 className='font-medium mb-2'>What happens next?</h4>
-                    <ol className='text-sm space-y-1 list-decimal list-inside text-muted-foreground'>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <h4 className="font-medium mb-2">What happens next?</h4>
+                    <ol className="text-sm space-y-1 list-decimal list-inside text-muted-foreground">
                       <li>Your story and images will be uploaded to IPFS</li>
                       <li>
                         Metadata will be generated following IP Asset standards
@@ -633,42 +633,42 @@ export default function PaginatedStoryForm({
             <Separator />
 
             {/* Navigation Buttons */}
-            <div className='flex justify-between'>
+            <div className="flex justify-between">
               <Button
-                type='button'
-                variant='outline'
+                type="button"
+                variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 1 || isSubmitting}
-                className='flex items-center gap-2'
+                className="flex items-center gap-2"
               >
-                <ChevronLeft className='h-4 w-4' />
+                <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
 
               {currentStep < steps.length ? (
                 <Button
-                  type='button'
+                  type="button"
                   onClick={handleNext}
                   disabled={isSubmitting}
-                  className='flex items-center gap-2'
+                  className="flex items-center gap-2"
                 >
                   Next
-                  <ChevronRight className='h-4 w-4' />
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               ) : (
                 <Button
-                  type='submit'
+                  type="submit"
                   disabled={isSubmitting || !address}
-                  className='flex items-center gap-2'
+                  className="flex items-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       {submitStatus.message || "Publishing..."}
                     </>
                   ) : (
                     <>
-                      <Upload className='mr-2 h-4 w-4' />
+                      <Upload className="mr-2 h-4 w-4" />
                       Publish Story as IP
                     </>
                   )}
