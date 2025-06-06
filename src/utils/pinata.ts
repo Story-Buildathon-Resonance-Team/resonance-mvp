@@ -1,80 +1,111 @@
-import { PinataSDK } from "pinata-web3";
+/**
+ * Pinata Utilities - Handles IPFS uploads for story content and metadata
+ */
 
-const pinata = new PinataSDK({
-  pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT,
-});
+import { uploadFileToIPFS, uploadJSONToIPFS } from "./functions/uploadIPFS";
 
 export interface StoryUploadData {
   title: string;
-  content: string;
-  coverImage?: File;
+  content?: string;
+  storyFile?: File;
+  contentType: "text" | "pdf";
+  coverImage: File;
   author: string;
   description: string;
 }
 
-export interface PinataUploadResult {
+export interface StoryUploadResult {
   contentCID: string;
   imageCID: string;
+  contentUrl: string;
+  imageUrl: string;
 }
 
+/**
+ * Upload story content and cover image to IPFS via Pinata
+ */
 export async function uploadStoryToPinata(
-  data: StoryUploadData
-): Promise<PinataUploadResult> {
+  data: StoryUploadData,
+  apiKey?: string
+): Promise<StoryUploadResult> {
   try {
-    console.log("Starting Pinata upload process...");
+    console.log("Uploading story to Pinata:", data.title);
 
-    // 1. Upload story content as plain text
-    console.log("Uploading story content to IPFS...");
-    const contentBlob = new Blob([data.content], { type: "text/plain" });
-    const contentFile = new File(
-      [contentBlob],
-      `${data.title.replace(/\s+/g, "_")}_content.txt`,
-      {
-        type: "text/plain",
-      }
-    );
+    // Upload cover image first
+    console.log("Uploading cover image...");
+    const imageCID = await uploadFileToIPFS(data.coverImage, apiKey);
+    const imageUrl = `https://gateway.pinata.cloud/ipfs/${imageCID}`;
 
-    const contentUpload = await pinata.upload.file(contentFile);
-    console.log("Content uploaded to IPFS:", contentUpload.IpfsHash);
+    let contentCID: string;
+    let contentUrl: string;
 
-    // 2. Upload cover image (required)
-    if (!data.coverImage) {
-      throw new Error("Cover image is required");
+    if (data.contentType === "pdf" && data.storyFile) {
+      // Upload PDF file directly
+      console.log("Uploading PDF file...");
+      contentCID = await uploadFileToIPFS(data.storyFile, apiKey);
+      contentUrl = `https://gateway.pinata.cloud/ipfs/${contentCID}`;
+    } else {
+      // Create story content object for text content
+      const storyContent = {
+        title: data.title,
+        description: data.description,
+        content: data.content || "",
+        author: data.author,
+        createdAt: new Date().toISOString(),
+        type: "fiction-story",
+        contentType: data.contentType,
+        version: "1.0",
+      };
+
+      // Upload story content as JSON
+      console.log("Uploading story content...");
+      contentCID = await uploadJSONToIPFS(storyContent, apiKey);
+      contentUrl = `https://gateway.pinata.cloud/ipfs/${contentCID}`;
     }
 
-    console.log("Uploading cover image to IPFS...");
-    const imageUpload = await pinata.upload.file(data.coverImage);
-    console.log("Image uploaded to IPFS:", imageUpload.IpfsHash);
+    console.log("Story uploaded successfully:", {
+      contentCID,
+      imageCID,
+    });
 
-    const result = {
-      contentCID: contentUpload.IpfsHash,
-      imageCID: imageUpload.IpfsHash,
+    return {
+      contentCID,
+      imageCID,
+      contentUrl,
+      imageUrl,
     };
-
-    console.log("Pinata upload completed:", result);
-    return result;
   } catch (error) {
-    console.error("Pinata upload failed:", error);
+    console.error("Error uploading story to Pinata:", error);
     throw new Error(
-      `Failed to upload to IPFS: ${
+      `Failed to upload story to IPFS: ${
         error instanceof Error ? error.message : "Unknown error"
       }`
     );
   }
 }
 
-export async function uploadJSONToIPFS(jsonMetadata: any): Promise<string> {
-  try {
-    console.log("Uploading JSON metadata to IPFS...");
-    const { IpfsHash } = await pinata.upload.json(jsonMetadata);
-    console.log("JSON metadata uploaded:", IpfsHash);
-    return IpfsHash;
-  } catch (error) {
-    console.error("JSON upload failed:", error);
-    throw new Error(
-      `Failed to upload JSON to IPFS: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`
-    );
-  }
+/**
+ * Upload JSON metadata to IPFS (re-export for convenience)
+ */
+export { uploadJSONToIPFS } from "./functions/uploadIPFS";
+
+/**
+ * Upload file to IPFS (re-export for convenience)
+ */
+export { uploadFileToIPFS } from "./functions/uploadIPFS";
+
+/**
+ * Generate IPFS gateway URL
+ */
+export function getIPFSUrl(cid: string, gateway = "https://gateway.pinata.cloud/ipfs"): string {
+  return `${gateway}/${cid}`;
+}
+
+/**
+ * Validate IPFS CID format
+ */
+export function isValidCID(cid: string): boolean {
+  // Basic CID validation - checks for common CID patterns
+  const cidRegex = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[A-Za-z2-7]{58}|z[1-9A-HJ-NP-Za-km-z]{48})$/;
+  return cidRegex.test(cid);
 }

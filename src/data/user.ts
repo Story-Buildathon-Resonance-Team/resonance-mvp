@@ -81,13 +81,17 @@ export const users: UserEntry[] = [
           "In a crumbling, post-apocalyptic city hunted by Purifier machines, Daniel searches for a genetic heir who can activate a long-lost device to restore humanity",
       },
       {
-        ipId: "", // The IP ID returned by Story Protocol
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
+        ipId: "0x2eAad0B97A190E46F53116f142eD690C8322832A",
+        ipMetadataCID:
+          "bafkreiaix2m76edrrgzsirl4mjulyv5lyvkt3dfmufz3qz5rd43iej6m24",
+        nftMetadataCID:
+          "bafkreiae3hof4xymt2v5ezx4c3dukyl43pa5snviv7buba2dcb5ibgsjny",
+        contentCID:
+          "bafkreia4dsvq4f4uwlcyoaoijqr4yzu4q2ejxkf4vlesdicjzeq4rmcr7m",
+        imageCID: "bafybeigmph3prqd4njxbbjetxinp7fyeupdch3d7pq6i3q3jy3b2nrubnq",
+        title: "Whispers",
+        synopsis:
+          "Amid the flickering hope of distant stars and the golden glow of rebellion, a weary captain and a gifted child uncover a cosmic secret that could ignite a new future for humanity.",
       },
     ],
   },

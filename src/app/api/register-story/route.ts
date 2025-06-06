@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { initializeServerConfig } from "@/utils/config";
+import { initializeServerConfig } from "@/utils/serverConfig";
 import {
-  createCommercialRemixTerms,
   NonCommercialSocialRemixingTerms,
+  CommercialUseOnlyTerms,
+  CommercialRemixTerms,
   SPGNFTContractAddress,
+  PILTemplateAddress,
 } from "@/utils/utils";
 import { uploadJSONToIPFS } from "@/utils/pinata";
 import { createHash } from "crypto";
@@ -19,18 +21,28 @@ interface StoryRegistrationRequest {
     name: string;
     address: Address;
   };
-  licenseType: "non-commercial" | "commercial-remix";
+  licenseType: "non-commercial" | "commercial-use" | "commercial-remix";
+}
+
+export async function GET() {
+  return NextResponse.json({
+    message: "Story registration API is running",
+    timestamp: new Date().toISOString()
+  });
 }
 
 export async function POST(request: NextRequest) {
   try {
     console.log("=== Starting Story IP Registration API ===");
 
-    // Initialize server-side config
-    const { client } = initializeServerConfig();
-
-    // Parse request body
+    // Parse request body first
     const data: StoryRegistrationRequest = await request.json();
+    console.log("Request data parsed successfully");
+
+    // Initialize server-side config
+    console.log("Initializing server config...");
+    const { client } = initializeServerConfig();
+    console.log("Server config initialized successfully");
 
     console.log("Registration data:", {
       title: data.title,
@@ -91,6 +103,8 @@ export async function POST(request: NextRequest) {
           value:
             data.licenseType === "non-commercial"
               ? "Non-Commercial Social Remixing"
+              : data.licenseType === "commercial-use"
+              ? "Commercial Use Only"
               : "Commercial Remix",
         },
         {
@@ -121,19 +135,23 @@ export async function POST(request: NextRequest) {
     });
 
     // 5. Determine license terms
-    const licenseTermsData =
-      data.licenseType === "non-commercial"
-        ? [{ terms: NonCommercialSocialRemixingTerms }]
-        : [
-            {
-              terms: createCommercialRemixTerms({
-                defaultMintingFee: 1,
-                commercialRevShare: 5,
-              }),
-            },
-          ];
+    let licenseTermsData;
+    if (data.licenseType === "non-commercial") {
+      licenseTermsData = [{ 
+        terms: NonCommercialSocialRemixingTerms
+      }];
+    } else if (data.licenseType === "commercial-use") {
+      licenseTermsData = [{ 
+        terms: CommercialUseOnlyTerms
+      }];
+    } else {
+      licenseTermsData = [{ 
+        terms: CommercialRemixTerms
+      }];
+    }
 
     console.log("License terms:", licenseTermsData);
+    console.log("PIL Template Address:", PILTemplateAddress);
 
     // 6. Register with Story Protocol
     console.log("Registering with Story Protocol...");
@@ -151,7 +169,7 @@ export async function POST(request: NextRequest) {
 
     console.log("Story Protocol registration response:", response);
 
-    // 7. Prepare response data
+    // 7. Prepare response data (convert BigInt values to strings for JSON serialization)
     const storyData = {
       id: response.ipId!,
       title: data.title,
@@ -161,7 +179,8 @@ export async function POST(request: NextRequest) {
       imageCID: data.imageCID,
       ipId: response.ipId!,
       txHash: response.txHash!,
-      licenseTermsIds: response.licenseTermsIds!,
+      licenseTermsIds: response.licenseTermsIds!.map(id => id.toString()),
+      tokenId: response.tokenId?.toString(),
       licenseType: data.licenseType,
       createdAt: new Date().toISOString(),
       ipMetadataURI: `https://ipfs.io/ipfs/${ipIpfsHash}`,
@@ -178,28 +197,36 @@ export async function POST(request: NextRequest) {
     console.log("Transaction Hash:", response.txHash);
     console.log("IPA ID:", response.ipId);
     console.log("License Terms IDs:", response.licenseTermsIds);
+    console.log("Token ID:", response.tokenId);
     console.log("Explorer URL:", explorerUrl);
 
     return NextResponse.json({
       success: true,
       ipId: response.ipId!,
       txHash: response.txHash!,
-      licenseTermsIds: response.licenseTermsIds!,
+      licenseTermsIds: response.licenseTermsIds!.map(id => id.toString()),
+      tokenId: response.tokenId?.toString(),
       storyData,
       explorerUrl,
     });
   } catch (error) {
     console.error("=== STORY REGISTRATION FAILED ===");
     console.error("Error details:", error);
+    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
 
+    // Return a proper JSON error response
     return NextResponse.json(
       {
         success: false,
-        error: `Failed to register story: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        error: `Failed to register story: ${error instanceof Error ? error.message : "Unknown error"}`,
+        details: error instanceof Error ? error.stack : String(error)
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
     );
   }
 }
