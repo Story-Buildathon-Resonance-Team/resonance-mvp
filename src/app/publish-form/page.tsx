@@ -44,6 +44,7 @@ import { registerStoryAsIP } from "../../services/storyService";
 import { uploadStoryToPinata } from "../../utils/pinata";
 import { useUser } from "../Web3Providers";
 import { users } from "../../data/user";
+import SuccessModal from "../../components/SuccessModal";
 
 // Step-specific validation schemas
 const storyContentSchema = z.object({
@@ -115,6 +116,7 @@ export default function PaginatedStoryForm({
     type: "success" | "error" | null;
     message: string;
   }>({ type: null, message: "" });
+  const [successResult, setSuccessResult] = useState<any>(null);
 
   const { address, isConnected, userName } = useUser();
 
@@ -240,15 +242,27 @@ export default function PaginatedStoryForm({
         licenseType: data.licenseType,
       });
 
-      setSubmitStatus({
-        type: "success",
-        message: `Story successfully registered! IP ID: ${registrationResult.ipId}`,
-      });
+      if (registrationResult.success && registrationResult.ipId) {
+        setSubmitStatus({
+          type: "success",
+          message: `Story successfully registered! IP ID: ${registrationResult.ipId}`,
+        });
 
-      console.log("Story registered successfully:", registrationResult.ipId);
+        console.log("Story registered successfully:", {
+          ipId: registrationResult.ipId,
+          txHash: registrationResult.txHash,
+          tokenId: registrationResult.tokenId,
+          explorerUrl: registrationResult.explorerUrl,
+        });
 
-      form.reset();
-      onSuccess?.(registrationResult);
+        // Show success modal
+        setSuccessResult(registrationResult);
+        
+        form.reset();
+        onSuccess?.(registrationResult);
+      } else {
+        throw new Error(registrationResult.error || "Registration failed - no IP ID returned");
+      }
     } catch (error) {
       console.error("Story submission error:", error);
       setSubmitStatus({
@@ -282,7 +296,14 @@ export default function PaginatedStoryForm({
   }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <>
+      {successResult && (
+        <SuccessModal
+          result={successResult}
+          onClose={() => setSuccessResult(null)}
+        />
+      )}
+      <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -529,8 +550,8 @@ export default function PaginatedStoryForm({
                                 </div>
                                 <div className="text-sm text-muted-foreground">
                                   Others can use your story commercially and you
-                                  earn revenue share from derivatives. Includes
-                                  minting fees and 5% revenue sharing.
+                                  earn 5% revenue share from derivatives. Includes
+                                  small minting fees.
                                 </div>
                                 <Badge variant="secondary" className="text-xs">
                                   Monetization enabled
@@ -583,7 +604,7 @@ export default function PaginatedStoryForm({
                         <strong>License:</strong>{" "}
                         {form.watch("licenseType") === "non-commercial"
                           ? "Non-Commercial Social Remixing"
-                          : "Commercial Remix"}
+                          : "Commercial Remix (5% revenue share)"}
                       </div>
                       <div>
                         <strong>Cover Image:</strong>{" "}
@@ -620,11 +641,25 @@ export default function PaginatedStoryForm({
                   <Alert
                     className={
                       submitStatus.type === "error"
-                        ? "border-destructive"
-                        : "border-green-500"
+                        ? "border-destructive bg-destructive/10"
+                        : "border-green-500 bg-green-50"
                     }
                   >
-                    <AlertDescription>{submitStatus.message}</AlertDescription>
+                    {submitStatus.type === "error" ? (
+                      <div className="space-y-2">
+                        <div className="font-medium text-destructive">Registration Failed</div>
+                        <AlertDescription className="text-sm">
+                          {submitStatus.message}
+                        </AlertDescription>
+                        <div className="text-xs text-muted-foreground">
+                          This is usually due to license configuration issues. Please try again or contact support if the problem persists.
+                        </div>
+                      </div>
+                    ) : (
+                      <AlertDescription className="text-green-700">
+                        {submitStatus.message}
+                      </AlertDescription>
+                    )}
                   </Alert>
                 )}
               </div>
@@ -679,5 +714,6 @@ export default function PaginatedStoryForm({
         </Form>
       </CardContent>
     </Card>
+    </>
   );
 }

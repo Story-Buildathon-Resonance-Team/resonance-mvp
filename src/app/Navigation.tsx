@@ -37,6 +37,12 @@ export default function Navigation() {
                 Home
               </Button>
             </Link>
+            <Link href="/stories">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Stories
+              </Button>
+            </Link>
             <Link href="/publish-form">
               <Button variant="outline" size="sm">
                 Publish Story

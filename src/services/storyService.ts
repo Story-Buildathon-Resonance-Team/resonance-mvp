@@ -22,6 +22,7 @@ export interface StoryRegistrationResult {
   ipId?: string;
   txHash?: string;
   licenseTermsIds?: string[];
+  tokenId?: string;
   storyData?: any;
   explorerUrl?: string;
   error?: string;
@@ -62,6 +63,7 @@ export async function registerStoryAsIP(
       ipId: result.ipId,
       txHash: result.txHash,
       licenseTermsIds: result.licenseTermsIds,
+      tokenId: result.tokenId,
       storyData: result.storyData,
       explorerUrl: result.explorerUrl,
     };

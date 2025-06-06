@@ -101,10 +101,12 @@ export default function HomePage() {
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  View Stories
-                </Button>
+                <Link href="/stories">
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    View Stories
+                  </Button>
+                </Link>
               </div>
             </div>
           ) : (
