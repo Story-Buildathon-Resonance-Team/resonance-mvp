@@ -24,7 +24,7 @@ export default function HomePage() {
   return (
     <div className='flex flex-col items-center justify-center min-h-screen space-y-8'>
       {/* Hero Section */}
-      <div className="text-center space-y-4 max-w-2xl">
+      <div className="text-center space-y-4 max-w-2xl mt-20 mb-20">
         <div className="flex items-center justify-center gap-2 mb-4">
           <h1 className="text-5xl font-bold">Stories That
           Spark Stories</h1>
@@ -38,7 +38,7 @@ export default function HomePage() {
       </div>
 
       {/* Feature Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full mt-12 mb-16">
         <Card className="text-center">
           <CardHeader>
             <Shield className="h-8 w-8 text-blue-500 mx-auto mb-2" />
@@ -77,7 +77,7 @@ export default function HomePage() {
       </div>
 
       {/* Stories in Motion Section */}
-      <div className="w-full max-w-6xl space-y-6">
+      <div className="w-full max-w-6xl space-y-6 mt-20 mb-20">
         <div className="text-center space-y-2">
           <h2 className="text-3xl font-bold">Stories in Motion</h2>
           <p className="text-lg text-muted-foreground">
@@ -166,72 +166,38 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Main Action Card */}
-      <Card className='max-w-2xl w-full'>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
-            Get Started
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* Footer Call-to-Action Section */}
+      <div className="w-full max-w-4xl text-center space-y-6 mt-20 mb-16">
+        <div className="space-y-4">
+          <h2 className="text-4xl font-bold">Ready to Begin Your Story?</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Join a community where creativity multiplies and every story has the potential to become a universe.
+          </p>
+        </div>
+        
+        <div className="pt-4">
           {isConnected ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-green-600 border-green-600">
-                  Connected as {userName}
-                </Badge>
-              </div>
-              <p className='text-gray-700'>
-                You're connected and ready to publish your stories as intellectual property assets!
-              </p>
-              <div className="flex gap-3">
-                <Link href="/publish-form">
-                  <Button className="flex items-center gap-2">
-                    <Upload className="h-4 w-4" />
-                    Publish Story
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/stories">
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    View Stories
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            <Link href="/publish-form">
+              <Button className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white px-8 py-3 text-lg font-medium">
+                Start Creating
+              </Button>
+            </Link>
           ) : (
-            <div className="space-y-4">
-              <p className='text-gray-700'>
-                Connect your wallet to start publishing stories and registering them as IP assets on the blockchain.
-              </p>
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-medium mb-2">What you can do:</h4>
-                <ul className="text-sm space-y-1 text-muted-foreground">
-                  <li>• Publish fiction stories with cover images</li>
-                  <li>• Register stories as IP assets on Story Protocol</li>
-                  <li>• Choose licensing terms (non-commercial or commercial)</li>
-                  <li>• Store content permanently on IPFS</li>
-                  <li>• Enable others to create derivatives of your work</li>
-                </ul>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Click the "Login" button in the top right to connect your wallet and get started.
-              </p>
-            </div>
+            <Button className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white px-8 py-3 text-lg font-medium">
+              Start Creating
+            </Button>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Technology Stack */}
-      <div className="text-center space-y-2 max-w-2xl">
-        <p className="text-sm text-muted-foreground">Powered by</p>
-        <div className="flex items-center justify-center gap-4 text-sm">
-          <Badge variant="secondary">Story Protocol</Badge>
-          <Badge variant="secondary">Pinata IPFS</Badge>
-          <Badge variant="secondary">Tomo EVM Kit</Badge>
-          <Badge variant="secondary">Next.js</Badge>
+        {/* Technology Stack */}
+        <div className="pt-12 space-y-2">
+          <p className="text-sm text-muted-foreground">Powered by</p>
+          <div className="flex items-center justify-center gap-4 text-sm">
+            <Badge variant="secondary">Story Protocol</Badge>
+            <Badge variant="secondary">Pinata IPFS</Badge>
+            <Badge variant="secondary">Tomo EVM Kit</Badge>
+            <Badge variant="secondary">Next.js</Badge>
+          </div>
         </div>
       </div>
     </div>
