@@ -438,16 +438,22 @@ export default function PaginatedStoryForm({
                               />
                               <div className="space-y-1">
                                 <div className="font-medium">
-                                  Non-Commercial Social Remixing
+                                  Non-Commercial Remix License
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  Others can remix and build upon your story for
-                                  non-commercial purposes. Perfect for
-                                  encouraging creative collaboration and viral
-                                  storytelling.
+                                  Perfect for building your creative community:
+                                  <br /><br />
+                                  &nbsp; • Writers and fans can remix your stories for free.
+                                  <br />
+                                  &nbsp; • You receive full attribution for every derivative work.
+                                  <br />
+                                  &nbsp; • Build passionate communities around your universe.
+                                  <br />
+                                  &nbsp; • See which characters/plots resonate most with audiences.
                                 </div>
+                                <br />
                                 <Badge variant="secondary" className="text-xs">
-                                  Recommended for community building
+                                  Ideal for: Community building and creative experimentation.
                                 </Badge>
                               </div>
                             </label>
@@ -468,14 +474,20 @@ export default function PaginatedStoryForm({
                               />
                               <div className="space-y-1">
                                 <div className="font-medium">
-                                  Commercial Use Only
+                                  Commercial Remix License
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  Others can use your story commercially with 10% revenue share.
-                                  No derivatives allowed - protects your original work.
+                                  Turn your stories into revenue-generating universes:
+                                  <br /><br />
+                                    • Creators pay you a 25% revenue share from commercial remixes.
+                                  <br />
+                                    • You receive full attribution for every derivative work.
+                                  <br />
+                                    • Your original work becomes more valuable with each adaptation.
                                 </div>
+                                <br />
                                 <Badge variant="secondary" className="text-xs">
-                                  Commercial + Protected
+                                  Ideal for: Proven story universes and scalable income.
                                 </Badge>
                               </div>
                             </label>
@@ -496,14 +508,20 @@ export default function PaginatedStoryForm({
                               />
                               <div className="space-y-1">
                                 <div className="font-medium">
-                                  Commercial Remix
+                                  Commercial Use License
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  Others can use your story commercially and create derivatives.
-                                  You earn 25% revenue share from all uses.
+                                  Turn your story universe into a thriving creative economy:
+                                  <br /><br />
+                                    • Other creators pay you a 10% revenue share when they commercially use your
+                                    characters, settings, or storylines.
+                                  <br />
+                                    • Perfect for businesses that want to use your story in marketing, products, or services
+                                    without creating remixes.
                                 </div>
+                                <br />
                                 <Badge variant="secondary" className="text-xs">
-                                  Maximum Monetization
+                                  Ideal for: Writers ready to build sustainable income from their fictional universes.
                                 </Badge>
                               </div>
                             </label>
@@ -548,9 +566,9 @@ export default function PaginatedStoryForm({
                       <div>
                         <strong>License:</strong>{" "}
                         {form.watch("licenseType") === "non-commercial"
-                          ? "Non-Commercial Social Remixing"
+                          ? "Non-Commercial Remix License"
                           : form.watch("licenseType") === "commercial-use"
-                          ? "Commercial Use Only (10% revenue share)"
+                          ? "Commercial Remix License (10% revenue share)"
                           : "Commercial Remix (25% revenue share)"}
                       </div>
                       <div>
