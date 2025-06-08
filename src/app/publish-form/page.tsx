@@ -423,7 +423,7 @@ export default function PaginatedStoryForm({
                         <div className="space-y-4">
                           <div className="grid gap-4">
                             <label
-                              className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${
+                              className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
                                 field.value === "non-commercial"
                                   ? "border-primary bg-primary/5"
                                   : ""
@@ -434,32 +434,29 @@ export default function PaginatedStoryForm({
                                 value="non-commercial"
                                 checked={field.value === "non-commercial"}
                                 onChange={field.onChange}
-                                className="mt-1"
+                                className="mt-1 flex-shrink-0"
                               />
-                              <div className="space-y-1">
+                              <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
                                 <div className="font-medium">
                                   Non-Commercial Remix License
                                 </div>
                                 <div className="text-sm text-muted-foreground">
                                   Perfect for building your creative community:
-                                  <br /><br />
-                                  &nbsp; • Writers and fans can remix your stories for free.
-                                  <br />
-                                  &nbsp; • You receive full attribution for every derivative work.
-                                  <br />
-                                  &nbsp; • Build passionate communities around your universe.
-                                  <br />
-                                  &nbsp; • See which characters/plots resonate most with audiences.
                                 </div>
-                                <br />
+                                <ul className="text-sm text-muted-foreground space-y-1 ml-2">
+                                  <li className="break-words">• Writers and fans can remix your stories for free</li>
+                                  <li className="break-words">• You receive full attribution for every derivative work</li>
+                                  <li className="break-words">• Build passionate communities around your universe</li>
+                                  <li className="break-words">• See which characters/plots resonate most with audiences</li>
+                                </ul>
                                 <Badge variant="secondary" className="text-xs">
-                                  Ideal for: Community building and creative experimentation.
+                                  Ideal for: Community building and creative experimentation
                                 </Badge>
                               </div>
                             </label>
 
                             <label
-                              className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${
+                              className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
                                 field.value === "commercial-use"
                                   ? "border-primary bg-primary/5"
                                   : ""
@@ -470,30 +467,27 @@ export default function PaginatedStoryForm({
                                 value="commercial-use"
                                 checked={field.value === "commercial-use"}
                                 onChange={field.onChange}
-                                className="mt-1"
+                                className="mt-1 flex-shrink-0"
                               />
-                              <div className="space-y-1">
+                              <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
                                 <div className="font-medium">
-                                  Commercial Remix License
+                                  Commercial Use License
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  Turn your stories into revenue-generating universes:
-                                  <br /><br />
-                                    • Creators pay you a 25% revenue share from commercial remixes.
-                                  <br />
-                                    • You receive full attribution for every derivative work.
-                                  <br />
-                                    • Your original work becomes more valuable with each adaptation.
+                                  Turn your story universe into a thriving creative economy:
                                 </div>
-                                <br />
+                                <ul className="text-sm text-muted-foreground space-y-1 ml-2">
+                                  <li className="break-words">• Other creators pay you a 10% revenue share when they commercially use your characters, settings, or storylines</li>
+                                  <li className="break-words">• Perfect for businesses that want to use your story in marketing, products, or services without creating remixes</li>
+                                </ul>
                                 <Badge variant="secondary" className="text-xs">
-                                  Ideal for: Proven story universes and scalable income.
+                                  Ideal for: Writers ready to build sustainable income from their fictional universes
                                 </Badge>
                               </div>
                             </label>
 
                             <label
-                              className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${
+                              className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
                                 field.value === "commercial-remix"
                                   ? "border-primary bg-primary/5"
                                   : ""
@@ -504,24 +498,22 @@ export default function PaginatedStoryForm({
                                 value="commercial-remix"
                                 checked={field.value === "commercial-remix"}
                                 onChange={field.onChange}
-                                className="mt-1"
+                                className="mt-1 flex-shrink-0"
                               />
-                              <div className="space-y-1">
+                              <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
                                 <div className="font-medium">
-                                  Commercial Use License
+                                  Commercial Remix License
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  Turn your story universe into a thriving creative economy:
-                                  <br /><br />
-                                    • Other creators pay you a 10% revenue share when they commercially use your
-                                    characters, settings, or storylines.
-                                  <br />
-                                    • Perfect for businesses that want to use your story in marketing, products, or services
-                                    without creating remixes.
+                                  Turn your stories into revenue-generating universes:
                                 </div>
-                                <br />
+                                <ul className="text-sm text-muted-foreground space-y-1 ml-2">
+                                  <li className="break-words">• Creators pay you a 25% revenue share from commercial remixes</li>
+                                  <li className="break-words">• You receive full attribution for every derivative work</li>
+                                  <li className="break-words">• Your original work becomes more valuable with each adaptation</li>
+                                </ul>
                                 <Badge variant="secondary" className="text-xs">
-                                  Ideal for: Writers ready to build sustainable income from their fictional universes.
+                                  Ideal for: Proven story universes and scalable income
                                 </Badge>
                               </div>
                             </label>
@@ -568,8 +560,8 @@ export default function PaginatedStoryForm({
                         {form.watch("licenseType") === "non-commercial"
                           ? "Non-Commercial Remix License"
                           : form.watch("licenseType") === "commercial-use"
-                          ? "Commercial Remix License (10% revenue share)"
-                          : "Commercial Remix (25% revenue share)"}
+                          ? "Commercial Use License (10% revenue share)"
+                          : "Commercial Remix License (25% revenue share)"}
                       </div>
                       <div>
                         <strong>Content Type:</strong>{" "}
