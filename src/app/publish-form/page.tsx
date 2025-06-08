@@ -45,6 +45,7 @@ import { uploadStoryToPinata } from "../../utils/pinata";
 import { useUser } from "../Web3Providers";
 import { users } from "../../data/user";
 import SuccessModal from "../../components/SuccessModal";
+import StoryUploadFormStep1 from "../../components/StoryUploadFormStep1";
 
 // Base schema without refinement
 const baseSchema = z.object({
@@ -169,9 +170,9 @@ export default function PaginatedStoryForm({
     defaultValues: {
       title: "",
       description: "",
-      contentType: "text",
+      contentType: "text" as const,
       content: "",
-      licenseType: "non-commercial",
+      licenseType: "non-commercial" as const,
     },
     mode: "onChange",
   });
@@ -402,197 +403,11 @@ export default function PaginatedStoryForm({
 
             {/* Step 1: Upload Story */}
             {currentStep === 1 && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-muted-foreground">
-                    <strong>Author:</strong> {authorName}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={fillSampleStory}
-                    className="flex items-center gap-2"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Fill Sample Story
-                  </Button>
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Story Title</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter your story title..."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Synopsis</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Brief synopsis of your story..."
-                          className="min-h-[80px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        A short summary that will help others discover your
-                        story
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Content Type Selection */}
-                <FormField
-                  control={form.control}
-                  name="contentType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Content Type</FormLabel>
-                      <FormControl>
-                        <div className="flex gap-4">
-                          <label className="flex items-center space-x-2 cursor-pointer">
-                            <input
-                              type="radio"
-                              value="text"
-                              checked={field.value === "text"}
-                              onChange={field.onChange}
-                            />
-                            <span>Text Content</span>
-                          </label>
-                          <label className="flex items-center space-x-2 cursor-pointer">
-                            <input
-                              type="radio"
-                              value="pdf"
-                              checked={field.value === "pdf"}
-                              onChange={field.onChange}
-                            />
-                            <span>PDF Upload</span>
-                          </label>
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Choose how you want to provide your story content
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Text Content */}
-                {form.watch("contentType") === "text" && (
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Story Content</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Write your story here..."
-                            className="min-h-[300px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Your complete story content in plain text
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                {/* PDF Upload */}
-                {form.watch("contentType") === "pdf" && (
-                  <FormField
-                    control={form.control}
-                    name="storyFile"
-                    render={({ field: { onChange, value, ...field } }) => (
-                      <FormItem>
-                        <FormLabel>Story PDF File</FormLabel>
-                        <FormControl>
-                          <div className="space-y-4">
-                            <Input
-                              type="file"
-                              accept=".pdf"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                onChange(file);
-                              }}
-                              {...field}
-                            />
-                            {value && (
-                              <div className="p-4 border border-dashed rounded-lg">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <FileText className="h-4 w-4" />
-                                  Selected: {value.name} ({(value.size / 1024 / 1024).toFixed(2)} MB)
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          Upload your story as a PDF file (max 10MB recommended)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                <FormField
-                  control={form.control}
-                  name="coverImage"
-                  render={({ field: { onChange, value, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>Cover Image *</FormLabel>
-                      <FormControl>
-                        <div className="space-y-4">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              onChange(file);
-                            }}
-                            {...field}
-                          />
-                          {value && (
-                            <div className="p-4 border border-dashed rounded-lg">
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <ImageIcon className="h-4 w-4" />
-                                Selected: {value.name}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Upload a cover image for your story (JPG, PNG). This is
-                        required for IP registration.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <StoryUploadFormStep1 
+                form={form}
+                authorName={authorName}
+                fillSampleStory={fillSampleStory}
+              />
             )}
 
             {/* Step 2: License Terms */}
@@ -751,7 +566,7 @@ export default function PaginatedStoryForm({
                       {form.watch("contentType") === "pdf" && form.watch("storyFile") && (
                         <div>
                           <strong>PDF File:</strong>{" "}
-                          {form.watch("storyFile")?.name} ({(form.watch("storyFile")?.size / 1024 / 1024).toFixed(2)} MB)
+                          {form.watch("storyFile")?.name} ({((form.watch("storyFile")?.size || 0) / 1024 / 1024).toFixed(2)} MB)
                         </div>
                       )}
                       <div>
