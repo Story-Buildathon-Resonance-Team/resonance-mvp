@@ -29,7 +29,7 @@ export default function Navigation() {
   };
 
   return (
-    <nav className='w-full max-w-4xl mb-8'>
+    <nav className='w-full max-w-4xl'>
       {/* Desktop Navigation */}
       <div className="flex justify-between items-center">
         {/* Logo/Home Link */}

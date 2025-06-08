@@ -31,10 +31,10 @@ export default function StoriesPage() {
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-8">
+      <br /><br />
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <BookOpen className="h-8 w-8 text-primary" />
           <h1 className="text-4xl font-bold">Published Stories</h1>
         </div>
         <p className="text-xl text-muted-foreground">
