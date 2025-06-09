@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
-import type { StoryStore, StoryDraft, ReadingProgress, PublishedStory } from './types'
+import type { StoryStore, StoryDraft, ReadingProgress, PublishedStory, RemixedStory } from './types'
 
 export const useStoryStore = create<StoryStore>()(
   devtools(
@@ -13,6 +13,7 @@ export const useStoryStore = create<StoryStore>()(
         readingProgress: [],
         bookmarkedStories: [],
         publishedStories: [],
+        remixedStories: [],
         
         // Actions - Drafts
         createDraft: () => {
@@ -109,6 +110,21 @@ export const useStoryStore = create<StoryStore>()(
           publishedStories: [story, ...state.publishedStories]
         })),
         
+        // Actions - Remixed Stories
+        addRemixedStory: (story) => set((state) => ({
+          remixedStories: [story, ...state.remixedStories]
+        })),
+        
+        updateRemixedStory: (id, updates) => set((state) => ({
+          remixedStories: state.remixedStories.map(story =>
+            story.id === id ? { ...story, ...updates } : story
+          )
+        })),
+        
+        deleteRemixedStory: (id) => set((state) => ({
+          remixedStories: state.remixedStories.filter(story => story.id !== id)
+        })),
+        
         // Persistence
         loadFromStorage: () => {
           // Handled by persist middleware
@@ -129,6 +145,7 @@ export const useStoryStore = create<StoryStore>()(
           readingProgress: state.readingProgress,
           bookmarkedStories: state.bookmarkedStories,
           publishedStories: state.publishedStories,
+          remixedStories: state.remixedStories,
         }),
       }
     ),

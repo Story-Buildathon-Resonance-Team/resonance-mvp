@@ -47,6 +47,23 @@ export interface UserPreferences {
   }
 }
 
+export interface RemixedStory {
+  id: string
+  originalStoryId: string
+  originalTitle: string
+  originalAuthor: {
+    name: string
+    address: string
+  }
+  remixTitle: string
+  remixDescription: string
+  remixedAt: number
+  ipId?: string // If the remix has been published
+  status: 'draft' | 'published'
+  contentCID?: string
+  imageCID?: string
+}
+
 // Store interfaces
 export interface AppStore {
   // UI State
@@ -116,6 +133,9 @@ export interface StoryStore {
   // Published Stories (cached)
   publishedStories: PublishedStory[]
   
+  // Remixed Stories
+  remixedStories: RemixedStory[]
+  
   // Actions - Drafts
   createDraft: () => string
   saveDraft: (id: string, data: Partial<StoryDraft>) => void
@@ -129,6 +149,11 @@ export interface StoryStore {
   
   // Actions - Published Stories
   addPublishedStory: (story: PublishedStory) => void
+  
+  // Actions - Remixed Stories
+  addRemixedStory: (story: RemixedStory) => void
+  updateRemixedStory: (id: string, updates: Partial<RemixedStory>) => void
+  deleteRemixedStory: (id: string) => void
   
   // Persistence
   loadFromStorage: () => void
