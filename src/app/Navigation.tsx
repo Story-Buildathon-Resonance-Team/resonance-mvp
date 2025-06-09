@@ -65,6 +65,23 @@ export default function Navigation() {
     navigate('/preferences');
   };
 
+  const handleLogin = () => {
+    console.log("Login button clicked!");
+    console.log("openConnectModal:", openConnectModal);
+    console.log("typeof openConnectModal:", typeof openConnectModal);
+    
+    if (openConnectModal) {
+      try {
+        openConnectModal();
+        console.log("openConnectModal called successfully");
+      } catch (error) {
+        console.error("Error calling openConnectModal:", error);
+      }
+    } else {
+      console.error("openConnectModal is not available");
+    }
+  };
+
   // User dropdown component
   const UserDropdown = ({ size = "default" }: { size?: "default" | "sm" }) => {
     if (!isConnected) {
@@ -73,10 +90,7 @@ export default function Navigation() {
           variant='default'
           size={size}
           className='cursor-pointer'
-          onClick={() => {
-            console.log("openConnectModal:", openConnectModal);
-            openConnectModal?.();
-          }}
+          onClick={handleLogin}
         >
           Login
         </Button>
@@ -87,7 +101,7 @@ export default function Navigation() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant='default'
+            variant='outline'
             size={size}
             className='cursor-pointer flex items-center gap-2'
           >
@@ -138,14 +152,9 @@ export default function Navigation() {
         <div className='hidden md:flex items-center gap-4'>
           {isConnected && (
             <div className='flex items-center gap-3'>
-              <Link href='/dashboard' onClick={() => navigate('/dashboard')}>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='flex items-center gap-2'
-                >
-                  <LayoutDashboard className='h-4 w-4' />
-                  Dashboard
+              <Link href='/publish-form' onClick={() => navigate('/publish-form')}>
+                <Button variant='default' size='sm'>
+                  Publish a Story
                 </Button>
               </Link>
               <Link href='/library' onClick={() => navigate('/library')}>
@@ -158,22 +167,33 @@ export default function Navigation() {
                   Library
                 </Button>
               </Link>
-              <Link href='/publish-form' onClick={() => navigate('/publish-form')}>
-                <Button variant='outline' size='sm'>
-                  Publish Story
+              <Link href='/dashboard' onClick={() => navigate('/dashboard')}>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='flex items-center gap-2'
+                >
+                  <LayoutDashboard className='h-4 w-4' />
+                  Dashboard
                 </Button>
               </Link>
             </div>
           )}
 
-          {/* User Dropdown */}
-          <UserDropdown />
+          {/* Action Buttons */}
+          <div className='flex items-center gap-2'>
+            {/* Login/User Dropdown */}
+            <UserDropdown />
+          </div>
         </div>
 
-        {/* Mobile Menu Button and User Button */}
+        {/* Mobile Menu Button and Action Buttons */}
         <div className='md:hidden flex items-center gap-2'>
-          {/* User Dropdown - Always visible */}
-          <UserDropdown size="sm" />
+          {/* Mobile Action Buttons */}
+          <div className='flex items-center gap-2'>
+            {/* Login/User Dropdown */}
+            <UserDropdown size="sm" />
+          </div>
 
           {/* Hamburger Menu Button - Only show when connected */}
           {isConnected && (
@@ -197,35 +217,31 @@ export default function Navigation() {
       {isConnected && mobileMenuOpen && (
         <div className='md:hidden mt-4 bg-card border border-border rounded-lg shadow-lg'>
           <div className='flex flex-col p-2'>
-            <Link href='/dashboard' onClick={() => handleNavigation('/dashboard')}>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='w-full justify-start gap-2'
-              >
-                <LayoutDashboard className='h-4 w-4' />
-                Dashboard
-              </Button>
-            </Link>
-            <Link href='/library' onClick={() => handleNavigation('/library')}>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='w-full justify-start gap-2'
-              >
-                <BookOpen className='h-4 w-4' />
-                Library
-              </Button>
-            </Link>
-            <Link href='/publish-form' onClick={() => handleNavigation('/publish-form')}>
-              <Button
-                variant='outline'
-                size='sm'
-                className='w-full justify-start'
-              >
-                Publish Story
-              </Button>
-            </Link>
+          <Link href='/publish-form' onClick={() => navigate('/publish-form')}>
+                <Button variant='ghost' size='sm'>
+                  Publish a Story
+                </Button>
+              </Link>
+              <Link href='/library' onClick={() => navigate('/library')}>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='flex items-center gap-2'
+                >
+                  <BookOpen className='h-4 w-4' />
+                  Library
+                </Button>
+              </Link>
+              <Link href='/dashboard' onClick={() => navigate('/dashboard')}>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='flex items-center gap-2'
+                >
+                  <LayoutDashboard className='h-4 w-4' />
+                  Dashboard
+                </Button>
+              </Link>
           </div>
         </div>
       )}

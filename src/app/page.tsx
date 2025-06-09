@@ -39,7 +39,8 @@ export default function HomePage() {
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full mt-12 mb-16'>
         <Card className='text-center'>
           <CardHeader>
-            <Shield className='h-8 w-8 text-primary mx-auto mb-2' />
+              🔐
+              <br />
             <CardTitle className='text-lg'>Secure & Share</CardTitle>
           </CardHeader>
           <CardContent>
@@ -53,7 +54,8 @@ export default function HomePage() {
 
         <Card className='text-center'>
           <CardHeader>
-            <Globe className='h-8 w-8 text-primary mx-auto mb-2' />
+            🎨
+            <br />
             <CardTitle className='text-lg'>Creative Playground</CardTitle>
           </CardHeader>
           <CardContent>
@@ -67,7 +69,8 @@ export default function HomePage() {
 
         <Card className='text-center'>
           <CardHeader>
-            <Users className='h-8 w-8 text-primary mx-auto mb-2' />
+            🌟
+            <br />
             <CardTitle className='text-lg'>Community Impact</CardTitle>
           </CardHeader>
           <CardContent>
