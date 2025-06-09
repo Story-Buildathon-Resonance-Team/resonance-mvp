@@ -215,10 +215,10 @@ export default function DashboardPage() {
           <h3 className="text-lg font-semibold">Explore</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button variant="outline" asChild className="h-auto p-4 justify-start">
-              <Link href="/library" className="flex items-center gap-3">
+              <Link href="/stories" className="flex items-center gap-3">
                 <BookOpenIcon className="h-5 w-5" />
                 <div className="text-left">
-                  <div className="font-medium">Browse Library</div>
+                  <div className="font-medium">Browse Stories</div>
                   <div className="text-sm text-muted-foreground">Discover new stories</div>
                 </div>
               </Link>
