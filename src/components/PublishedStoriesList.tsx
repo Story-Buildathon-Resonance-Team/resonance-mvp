@@ -108,15 +108,13 @@ export function PublishedStoriesList() {
               </Button>
               
               <Button asChild size="sm" variant="outline">
-                <a
-                  href={`https://gateway.pinata.cloud/ipfs/${story.contentCID}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href={`/stories/${story.ipId}`}
                   className="flex items-center gap-1"
                 >
                   <Eye className="h-3 w-3" />
-                  View
-                </a>
+                  Read
+                </Link>
               </Button>
             </div>
           </div>

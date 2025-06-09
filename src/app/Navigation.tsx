@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "../components/ui/button";
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import { useDisconnect } from "wagmi";
 import { useUser } from "./Web3Providers";
 import { useAppStore } from "@/stores";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { BookOpen, Menu, X, LayoutDashboard, User, Settings, LogOut, ChevronDown } from "lucide-react";
 
 export default function Navigation() {
@@ -24,14 +24,23 @@ export default function Navigation() {
   const { address, isConnected, userName } = useUser();
   const { mobileMenuOpen, setMobileMenuOpen, navigate } = useAppStore();
   const router = useRouter();
+  const pathname = usePathname();
+  const hasRedirected = useRef(false);
 
-  // Navigate to dashboard when user connects
+  // Navigate to dashboard when user connects for the first time
   useEffect(() => {
-    if (isConnected && address) {
-      console.log("User connected, navigating to dashboard");
-      router.push('/dashboard');
+    if (isConnected && address && !hasRedirected.current) {
+      // Only redirect to dashboard if not already on a specific page
+      if (pathname === '/' || pathname === '') {
+        console.log("User connected, navigating to dashboard");
+        router.push('/dashboard');
+      }
+      hasRedirected.current = true;
+    } else if (!isConnected) {
+      // Reset the flag when user disconnects
+      hasRedirected.current = false;
     }
-  }, [isConnected, address, router]);
+  }, [isConnected, address, router, pathname]);
 
   useEffect(() => {
     if (isConnected && address) {

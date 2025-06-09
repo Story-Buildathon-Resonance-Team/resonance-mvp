@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { BookmarkIcon, ClockIcon, ExternalLinkIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import type { PublishedStory } from '@/stores/types'
+import Link from 'next/link'
 
 export default function BookmarkedStoriesList() {
   const { bookmarkedStories, readingProgress, publishedStories } = useStoryStore()
@@ -21,39 +22,39 @@ export default function BookmarkedStoriesList() {
       bookmarkedStories.includes(story.ipId)
     )
     
-    // Add mock bookmarked stories for demonstration
+    // Add mock bookmarked stories for demonstration using real story IDs
     const mockBookmarkedStories: PublishedStory[] = [
       {
-        ipId: 'mock-1',
-        title: 'The Digital Renaissance',
-        description: 'A fascinating exploration of how AI is reshaping art and creativity in the 21st century.',
+        ipId: '0xf85014aa8ECa28A5c8ceEfcC5dCeFB4416F51f08',
+        title: 'The Weight of Truth',
+        description: 'In a crumbling, post-apocalyptic city hunted by Purifier machines, Daniel searches for a genetic heir who can activate a long-lost device to restore humanity.',
         author: {
-          name: 'Alice Chen',
-          address: '0x1234...5678'
+          name: 'Nat',
+          address: '0x1BB1EB6b6676A6b0850547a70019112c41495BA2'
         },
-        contentCID: 'QmExample1',
-        imageCID: 'QmImage1',
+        contentCID: 'bafkreid34mk4ojned6wlylkcvploxqxfcrolmc6dago4zg3gzpaafxzelq',
+        imageCID: 'bafybeigmqq35e2wly6qy6enenumudd5bbp67h3koascgyuagixrxq5njly',
         txHash: '0xabcd...efgh',
         tokenId: '1',
-        licenseType: 'commercial-use',
+        licenseType: 'non-commercial',
         publishedAt: Date.now() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
-        explorerUrl: 'https://explorer.story.foundation/ipa/mock-1'
+        explorerUrl: 'https://explorer.story.foundation/ipa/0xf85014aa8ECa28A5c8ceEfcC5dCeFB4416F51f08'
       },
       {
-        ipId: 'mock-2',
-        title: 'Quantum Storytelling',
-        description: 'How quantum computing will revolutionize narrative structures and interactive fiction.',
+        ipId: '0x2139d4C281A07fd0311c118b02D396A764894E34',
+        title: 'The Missing Piece',
+        description: 'On the run from her sister\'s ruthless regime, Tamara discovers a bloody message in a remote cabin that hints at a deeper truth behind her bloodline and a soul-binding treaty.',
         author: {
-          name: 'Bob Martinez',
-          address: '0x9876...5432'
+          name: 'Nat',
+          address: '0x1BB1EB6b6676A6b0850547a70019112c41495BA2'
         },
-        contentCID: 'QmExample2',
-        imageCID: 'QmImage2',
+        contentCID: 'bafkreiaond2f2xj5bhtgjptgnphwn45wqizbhy5ju7z4px7ncfhugp4shu',
+        imageCID: 'bafybeiammagvjzcc7qln4ni6bjryrxtea5voz326vufkgfspcremp2avbm',
         txHash: '0xijkl...mnop',
         tokenId: '2',
         licenseType: 'non-commercial',
         publishedAt: Date.now() - 14 * 24 * 60 * 60 * 1000, // 14 days ago
-        explorerUrl: 'https://explorer.story.foundation/ipa/mock-2'
+        explorerUrl: 'https://explorer.story.foundation/ipa/0x2139d4C281A07fd0311c118b02D396A764894E34'
       }
     ]
 
@@ -167,8 +168,10 @@ export default function BookmarkedStoriesList() {
                 )}
                 
                 <div className="flex gap-2 pt-2">
-                  <Button size="sm" className="flex-1">
-                    {progress?.progress > 0 ? 'Continue Reading' : 'Start Reading'}
+                  <Button size="sm" className="flex-1" asChild>
+                    <Link href={`/stories/${story.ipId}`}>
+                      {progress?.progress > 0 ? 'Continue Reading' : 'Start Reading'}
+                    </Link>
                   </Button>
                   <Button 
                     size="sm" 
