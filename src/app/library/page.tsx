@@ -3,14 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  BookOpen,
-  ExternalLink,
-  User,
-  Calendar,
-  FileText,
-  Globe,
-} from "lucide-react";
+import { BookOpen, User, FileText, Globe, AlertCircle } from "lucide-react";
 import { users } from "../../data/user";
 import Link from "next/link";
 
@@ -28,8 +21,6 @@ export default function StoriesPage() {
 
   const getIPFSUrl = (cid: string) =>
     `https://gateway.pinata.cloud/ipfs/${cid}`;
-  const getExplorerUrl = (ipId: string) =>
-    `https://aeneid.explorer.story.foundation/ipa/${ipId}`;
 
   return (
     <div className='w-full max-w-6xl mx-auto space-y-8'>
@@ -97,31 +88,25 @@ export default function StoriesPage() {
 
                 {/* Action Buttons */}
                 <div className='flex gap-2 pt-2'>
-                  {story.contentCID && (
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      className='flex-1'
-                      onClick={() =>
-                        window.open(getIPFSUrl(story.contentCID), "_blank")
-                      }
-                    >
-                      <FileText className='h-4 w-4 mr-1' />
-                      Read Story
-                    </Button>
-                  )}
-
-                  {story.ipId && (
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={() =>
-                        window.open(getExplorerUrl(story.ipId), "_blank")
-                      }
-                    >
-                      <ExternalLink className='h-4 w-4' />
-                    </Button>
-                  )}
+                  {story.ipId && story.contentCID ? (
+                    <Link href={`/stories/${story.ipId}`} target='_blank'>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        className='flex-1 cursor-pointer'
+                      >
+                        <FileText className='h-4 w-4 mr-1' />
+                        Read Story
+                      </Button>
+                    </Link>
+                  ) : story.contentCID && !story.ipId ? (
+                    <div className='flex-1 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800'>
+                      <AlertCircle className='h-3 w-3 inline mr-1' />
+                      This is a test app and some configuration might be
+                      missing. Make sure your story has an ipId in the user
+                      object (check user.ts file in the data folder)
+                    </div>
+                  ) : null}
                 </div>
 
                 {/* IPFS Links */}
@@ -136,19 +121,6 @@ export default function StoriesPage() {
                         className='hover:underline'
                       >
                         IP Metadata
-                      </a>
-                    </div>
-                  )}
-                  {story.nftMetadataCID && (
-                    <div className='flex items-center gap-1'>
-                      <Globe className='h-3 w-3' />
-                      <a
-                        href={getIPFSUrl(story.nftMetadataCID)}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='hover:underline'
-                      >
-                        NFT Metadata
                       </a>
                     </div>
                   )}
