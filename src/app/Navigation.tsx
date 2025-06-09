@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { useConnectModal } from "@tomo-inc/tomo-evm-kit";
 import { useUser } from "./Web3Providers";
+import { useAppStore } from "@/stores";
 import Link from "next/link";
 import { BookOpen, Home, Menu, X } from "lucide-react";
 
 export default function Navigation() {
   const { openConnectModal } = useConnectModal();
   const { address, isConnected, userName } = useUser();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, setMobileMenuOpen, navigate } = useAppStore();
 
   useEffect(() => {
     if (isConnected && address) {
@@ -21,11 +22,16 @@ export default function Navigation() {
   }, [isConnected, address]);
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
+    setMobileMenuOpen(false);
+  };
+
+  const handleNavigation = (href: string) => {
+    navigate(href);
+    closeMobileMenu();
   };
 
   return (
@@ -36,6 +42,7 @@ export default function Navigation() {
         <Link
           href='/'
           className='flex items-center gap-2 text-lg font-semibold'
+          onClick={() => navigate('/')}
         >
           <BookOpen className='h-6 w-6' />
           <span>Resonance</span>
@@ -45,7 +52,7 @@ export default function Navigation() {
         <div className='hidden md:flex items-center gap-4'>
           {isConnected && (
             <div className='flex items-center gap-3'>
-              <Link href='/'>
+              <Link href='/' onClick={() => navigate('/')}>
                 <Button
                   variant='ghost'
                   size='sm'
@@ -55,7 +62,7 @@ export default function Navigation() {
                   Home
                 </Button>
               </Link>
-              <Link href='/library'>
+              <Link href='/library' onClick={() => navigate('/library')}>
                 <Button
                   variant='ghost'
                   size='sm'
@@ -65,7 +72,7 @@ export default function Navigation() {
                   Library
                 </Button>
               </Link>
-              <Link href='/publish-form'>
+              <Link href='/publish-form' onClick={() => navigate('/publish-form')}>
                 <Button variant='outline' size='sm'>
                   Publish Story
                 </Button>
@@ -109,7 +116,7 @@ export default function Navigation() {
               onClick={toggleMobileMenu}
               className='p-2'
             >
-              {isMobileMenuOpen ? (
+              {mobileMenuOpen ? (
                 <X className='h-5 w-5' />
               ) : (
                 <Menu className='h-5 w-5' />
@@ -120,10 +127,10 @@ export default function Navigation() {
       </div>
 
       {/* Mobile Menu - Dropdown */}
-      {isConnected && isMobileMenuOpen && (
+      {isConnected && mobileMenuOpen && (
         <div className='md:hidden mt-4 bg-card border border-border rounded-lg shadow-lg'>
           <div className='flex flex-col p-2'>
-            <Link href='/' onClick={closeMobileMenu}>
+            <Link href='/' onClick={() => handleNavigation('/')}>
               <Button
                 variant='ghost'
                 size='sm'
@@ -133,17 +140,17 @@ export default function Navigation() {
                 Home
               </Button>
             </Link>
-            <Link href='/stories' onClick={closeMobileMenu}>
+            <Link href='/library' onClick={() => handleNavigation('/library')}>
               <Button
                 variant='ghost'
                 size='sm'
                 className='w-full justify-start gap-2'
               >
                 <BookOpen className='h-4 w-4' />
-                Stories
+                Library
               </Button>
             </Link>
-            <Link href='/publish-form' onClick={closeMobileMenu}>
+            <Link href='/publish-form' onClick={() => handleNavigation('/publish-form')}>
               <Button
                 variant='outline'
                 size='sm'

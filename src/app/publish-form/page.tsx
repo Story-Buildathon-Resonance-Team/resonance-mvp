@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -39,10 +39,12 @@ import {
   CheckCircle,
   Info,
   ImageIcon,
+  Save,
 } from "lucide-react";
 import { registerStoryAsIP } from "../../services/storyService";
 import { uploadStoryToPinata } from "../../utils/pinata";
 import { useUser } from "../Web3Providers";
+import { usePublishStore, useStoryStore } from "@/stores";
 import { users } from "../../data/user";
 import SuccessModal from "../../components/SuccessModal";
 import StoryUploadFormStep1 from "../../components/StoryUploadFormStep1";
@@ -136,12 +138,20 @@ const steps: Step[] = [
 export default function PaginatedStoryForm({
   onSuccess,
 }: PaginatedStoryFormProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{
-    type: "success" | "error" | null;
-    message: string;
-  }>({ type: null, message: "" });
+  // Replace useState with Zustand store
+  const {
+    currentStep,
+    formData,
+    isSubmitting,
+    submitStatus,
+    setCurrentStep,
+    updateFormData,
+    setIsSubmitting,
+    setSubmitStatus,
+    resetForm,
+  } = usePublishStore();
+
+  const { addPublishedStory } = useStoryStore();
   const [successResult, setSuccessResult] = useState<any>(null);
 
   const { address, isConnected, userName } = useUser();
@@ -168,14 +178,22 @@ export default function PaginatedStoryForm({
   const form = useForm<FormData>({
     resolver: zodResolver(completeSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      contentType: "text" as const,
-      content: "",
-      licenseType: "non-commercial" as const,
+      title: formData.title || "",
+      description: formData.description || "",
+      contentType: (formData.contentType as "text" | "pdf") || "text",
+      content: formData.content || "",
+      licenseType: (formData.licenseType as "non-commercial" | "commercial-use" | "commercial-remix") || "non-commercial",
     },
     mode: "onChange",
   });
+
+  // Auto-save form data to store whenever form changes
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      updateFormData(value);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, updateFormData]);
 
   const getCurrentStepSchema = () => {
     return (
@@ -217,16 +235,21 @@ export default function PaginatedStoryForm({
   };
 
   const fillSampleStory = () => {
-    form.setValue("title", "Your story title here");
-    form.setValue(
-      "description",
-      "A brief description of your story. 1-2 sentences is enough."
-    );
-    form.setValue("contentType", "text");
-    form.setValue(
-      "content",
-      `Paste your story here. Make sure it is between 500 to 1000 words long. This is a test app, so you can use a short story, a scenario, or even a poem. The content should be in plain text format, without any special formatting or HTML tags. Just write your story as you would in a text editor.`
-    );
+    const sampleData = {
+      title: "Your story title here",
+      description: "A brief description of your story. 1-2 sentences is enough.",
+      contentType: "text" as const,
+      content: `Paste your story here. Make sure it is between 500 to 1000 words long. This is a test app, so you can use a short story, a scenario, or even a poem. The content should be in plain text format, without any special formatting or HTML tags. Just write your story as you would in a text editor.`,
+    };
+    
+    // Update form
+    form.setValue("title", sampleData.title);
+    form.setValue("description", sampleData.description);
+    form.setValue("contentType", sampleData.contentType);
+    form.setValue("content", sampleData.content);
+    
+    // Update store
+    updateFormData(sampleData);
   };
 
   const onSubmit = async (data: FormData) => {
@@ -288,7 +311,26 @@ export default function PaginatedStoryForm({
         // Show success modal
         setSuccessResult(registrationResult);
         
+        // Add to published stories store
+        addPublishedStory({
+          ipId: registrationResult.ipId,
+          title: data.title,
+          description: data.description,
+          author: {
+            name: authorName,
+            address: address,
+          },
+          contentCID: pinataResult.contentCID,
+          imageCID: pinataResult.imageCID,
+          txHash: registrationResult.txHash || '',
+          tokenId: registrationResult.tokenId || '',
+          licenseType: data.licenseType,
+          publishedAt: Date.now(),
+          explorerUrl: registrationResult.explorerUrl || '',
+        });
+        
         form.reset();
+        resetForm();
         onSuccess?.(registrationResult);
       } else {
         throw new Error(registrationResult.error || "Registration failed - no IP ID returned");
@@ -343,6 +385,12 @@ export default function PaginatedStoryForm({
         <p className="text-xl text-muted-foreground">
           Your story is the seed of infinite possibilities.
         </p>
+        {formData.lastSaved && (
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Save className="h-4 w-4" />
+            Auto-saved {new Date(formData.lastSaved).toLocaleTimeString()}
+          </div>
+        )}
       </div>
       <br /><br />
       <Card className="w-full max-w-4xl mx-auto">
