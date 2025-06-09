@@ -14,7 +14,7 @@ export interface StoryRegistrationData {
     name: string;
     address: Address;
   };
-  licenseType: "non-commercial" | "commercial-remix";
+  licenseType: "non-commercial" | "commercial-remix" | "commercial-use";
 }
 
 export interface StoryRegistrationResult {
@@ -47,7 +47,9 @@ export async function registerStoryAsIP(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.error || `HTTP error! status: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -69,7 +71,7 @@ export async function registerStoryAsIP(
     };
   } catch (error) {
     console.error("Story registration error:", error);
-    
+
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error occurred",

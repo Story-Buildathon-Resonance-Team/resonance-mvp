@@ -45,6 +45,7 @@ import { uploadStoryToPinata } from "../../utils/pinata";
 import { useUser } from "../Web3Providers";
 import { users } from "../../data/user";
 import SuccessModal from "../../components/SuccessModal";
+import StoryUploadFormStep1 from "../../components/StoryUploadFormStep1";
 
 // Base schema without refinement
 const baseSchema = z.object({
@@ -169,9 +170,9 @@ export default function PaginatedStoryForm({
     defaultValues: {
       title: "",
       description: "",
-      contentType: "text",
+      contentType: "text" as const,
       content: "",
-      licenseType: "non-commercial",
+      licenseType: "non-commercial" as const,
     },
     mode: "onChange",
   });
@@ -332,6 +333,18 @@ export default function PaginatedStoryForm({
           onClose={() => setSuccessResult(null)}
         />
       )}
+
+<br /><br />
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <h1 className="text-3xl font-bold">Create. Protect. Inspire.</h1>
+        </div>
+        <p className="text-xl text-muted-foreground">
+          Your story is the seed of infinite possibilities.
+        </p>
+      </div>
+      <br /><br />
       <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -402,197 +415,11 @@ export default function PaginatedStoryForm({
 
             {/* Step 1: Upload Story */}
             {currentStep === 1 && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-muted-foreground">
-                    <strong>Author:</strong> {authorName}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={fillSampleStory}
-                    className="flex items-center gap-2"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Fill Sample Story
-                  </Button>
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Story Title</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter your story title..."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Synopsis</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Brief synopsis of your story..."
-                          className="min-h-[80px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        A short summary that will help others discover your
-                        story
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Content Type Selection */}
-                <FormField
-                  control={form.control}
-                  name="contentType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Content Type</FormLabel>
-                      <FormControl>
-                        <div className="flex gap-4">
-                          <label className="flex items-center space-x-2 cursor-pointer">
-                            <input
-                              type="radio"
-                              value="text"
-                              checked={field.value === "text"}
-                              onChange={field.onChange}
-                            />
-                            <span>Text Content</span>
-                          </label>
-                          <label className="flex items-center space-x-2 cursor-pointer">
-                            <input
-                              type="radio"
-                              value="pdf"
-                              checked={field.value === "pdf"}
-                              onChange={field.onChange}
-                            />
-                            <span>PDF Upload</span>
-                          </label>
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Choose how you want to provide your story content
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Text Content */}
-                {form.watch("contentType") === "text" && (
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Story Content</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Write your story here..."
-                            className="min-h-[300px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Your complete story content in plain text
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                {/* PDF Upload */}
-                {form.watch("contentType") === "pdf" && (
-                  <FormField
-                    control={form.control}
-                    name="storyFile"
-                    render={({ field: { onChange, value, ...field } }) => (
-                      <FormItem>
-                        <FormLabel>Story PDF File</FormLabel>
-                        <FormControl>
-                          <div className="space-y-4">
-                            <Input
-                              type="file"
-                              accept=".pdf"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                onChange(file);
-                              }}
-                              {...field}
-                            />
-                            {value && (
-                              <div className="p-4 border border-dashed rounded-lg">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <FileText className="h-4 w-4" />
-                                  Selected: {value.name} ({(value.size / 1024 / 1024).toFixed(2)} MB)
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          Upload your story as a PDF file (max 10MB recommended)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                <FormField
-                  control={form.control}
-                  name="coverImage"
-                  render={({ field: { onChange, value, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>Cover Image *</FormLabel>
-                      <FormControl>
-                        <div className="space-y-4">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              onChange(file);
-                            }}
-                            {...field}
-                          />
-                          {value && (
-                            <div className="p-4 border border-dashed rounded-lg">
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <ImageIcon className="h-4 w-4" />
-                                Selected: {value.name}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Upload a cover image for your story (JPG, PNG). This is
-                        required for IP registration.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <StoryUploadFormStep1 
+                form={form}
+                authorName={authorName}
+                fillSampleStory={fillSampleStory}
+              />
             )}
 
             {/* Step 2: License Terms */}
@@ -608,7 +435,7 @@ export default function PaginatedStoryForm({
                         <div className="space-y-4">
                           <div className="grid gap-4">
                             <label
-                              className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${
+                              className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
                                 field.value === "non-commercial"
                                   ? "border-primary bg-primary/5"
                                   : ""
@@ -619,26 +446,29 @@ export default function PaginatedStoryForm({
                                 value="non-commercial"
                                 checked={field.value === "non-commercial"}
                                 onChange={field.onChange}
-                                className="mt-1"
+                                className="mt-1 flex-shrink-0"
                               />
-                              <div className="space-y-1">
+                              <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
                                 <div className="font-medium">
-                                  Non-Commercial Social Remixing
+                                  Non-Commercial Remix License
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  Others can remix and build upon your story for
-                                  non-commercial purposes. Perfect for
-                                  encouraging creative collaboration and viral
-                                  storytelling.
+                                  Perfect for building your creative community:
                                 </div>
+                                <ul className="text-sm text-muted-foreground space-y-1 ml-2">
+                                  <li className="break-words">• Writers and fans can remix your stories for free</li>
+                                  <li className="break-words">• You receive full attribution for every derivative work</li>
+                                  <li className="break-words">• Build passionate communities around your universe</li>
+                                  <li className="break-words">• See which characters/plots resonate most with audiences</li>
+                                </ul>
                                 <Badge variant="secondary" className="text-xs">
-                                  Recommended for community building
+                                  Ideal for: Community building and creative experimentation
                                 </Badge>
                               </div>
                             </label>
 
                             <label
-                              className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${
+                              className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
                                 field.value === "commercial-use"
                                   ? "border-primary bg-primary/5"
                                   : ""
@@ -649,24 +479,27 @@ export default function PaginatedStoryForm({
                                 value="commercial-use"
                                 checked={field.value === "commercial-use"}
                                 onChange={field.onChange}
-                                className="mt-1"
+                                className="mt-1 flex-shrink-0"
                               />
-                              <div className="space-y-1">
+                              <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
                                 <div className="font-medium">
-                                  Commercial Use Only
+                                  Commercial Use License
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  Others can use your story commercially with 10% revenue share.
-                                  No derivatives allowed - protects your original work.
+                                  Turn your story universe into a thriving creative economy:
                                 </div>
+                                <ul className="text-sm text-muted-foreground space-y-1 ml-2">
+                                  <li className="break-words">• Other creators pay you a 10% revenue share when they commercially use your characters, settings, or storylines</li>
+                                  <li className="break-words">• Perfect for businesses that want to use your story in marketing, products, or services without creating remixes</li>
+                                </ul>
                                 <Badge variant="secondary" className="text-xs">
-                                  Commercial + Protected
+                                  Ideal for: Writers ready to build sustainable income from their fictional universes
                                 </Badge>
                               </div>
                             </label>
 
                             <label
-                              className={`flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 ${
+                              className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
                                 field.value === "commercial-remix"
                                   ? "border-primary bg-primary/5"
                                   : ""
@@ -677,18 +510,22 @@ export default function PaginatedStoryForm({
                                 value="commercial-remix"
                                 checked={field.value === "commercial-remix"}
                                 onChange={field.onChange}
-                                className="mt-1"
+                                className="mt-1 flex-shrink-0"
                               />
-                              <div className="space-y-1">
+                              <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
                                 <div className="font-medium">
-                                  Commercial Remix
+                                  Commercial Remix License
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  Others can use your story commercially and create derivatives.
-                                  You earn 25% revenue share from all uses.
+                                  Turn your stories into revenue-generating universes:
                                 </div>
+                                <ul className="text-sm text-muted-foreground space-y-1 ml-2">
+                                  <li className="break-words">• Creators pay you a 25% revenue share from commercial remixes</li>
+                                  <li className="break-words">• You receive full attribution for every derivative work</li>
+                                  <li className="break-words">• Your original work becomes more valuable with each adaptation</li>
+                                </ul>
                                 <Badge variant="secondary" className="text-xs">
-                                  Maximum Monetization
+                                  Ideal for: Proven story universes and scalable income
                                 </Badge>
                               </div>
                             </label>
@@ -733,10 +570,10 @@ export default function PaginatedStoryForm({
                       <div>
                         <strong>License:</strong>{" "}
                         {form.watch("licenseType") === "non-commercial"
-                          ? "Non-Commercial Social Remixing"
+                          ? "Non-Commercial Remix License"
                           : form.watch("licenseType") === "commercial-use"
-                          ? "Commercial Use Only (10% revenue share)"
-                          : "Commercial Remix (25% revenue share)"}
+                          ? "Commercial Use License (10% revenue share)"
+                          : "Commercial Remix License (25% revenue share)"}
                       </div>
                       <div>
                         <strong>Content Type:</strong>{" "}
@@ -751,7 +588,7 @@ export default function PaginatedStoryForm({
                       {form.watch("contentType") === "pdf" && form.watch("storyFile") && (
                         <div>
                           <strong>PDF File:</strong>{" "}
-                          {form.watch("storyFile")?.name} ({(form.watch("storyFile")?.size / 1024 / 1024).toFixed(2)} MB)
+                          {form.watch("storyFile")?.name} ({((form.watch("storyFile")?.size || 0) / 1024 / 1024).toFixed(2)} MB)
                         </div>
                       )}
                       <div>
@@ -833,7 +670,7 @@ export default function PaginatedStoryForm({
                   type="button"
                   onClick={handleNext}
                   disabled={isSubmitting}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-teal-500 hover:from-purple-600 hover:to-teal-600 text-white border-0"
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />
@@ -842,7 +679,7 @@ export default function PaginatedStoryForm({
                 <Button
                   type="submit"
                   disabled={isSubmitting || !address}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-teal-500 hover:from-purple-600 hover:to-teal-600 text-white border-0"
                 >
                   {isSubmitting ? (
                     <>
