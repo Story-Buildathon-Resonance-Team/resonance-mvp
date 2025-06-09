@@ -5,26 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
-  Upload,
   Shield,
   Globe,
-  ArrowRight,
   Sparkles,
-  FileText,
   Users,
   Droplets,
-  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "./Web3Providers";
 
 export default function HomePage() {
-  const { isConnected, userName } = useUser();
+  const { isConnected } = useUser();
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen space-y-8'>
       {/* Hero Section */}
-      <div className='text-center space-y-4 max-w-2xl mt-20 mb-20'>
+      <div className='text-center space-y-4 max-w-6xl mt-20 mb-20'>
         <div className='flex items-center justify-center gap-2 mb-4'>
           <h1 className='text-5xl font-bold'>Stories That Spark Stories</h1>
         </div>
@@ -40,7 +36,7 @@ export default function HomePage() {
       </div>
 
       {/* Feature Cards */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full mt-12 mb-16'>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full mt-12 mb-16'>
         <Card className='text-center'>
           <CardHeader>
             <Shield className='h-8 w-8 text-blue-500 mx-auto mb-2' />
@@ -187,10 +183,10 @@ export default function HomePage() {
       </div>
 
       {/* Footer Call-to-Action Section */}
-      <div className='w-full max-w-4xl text-center space-y-6 mt-20 mb-16'>
+      <div className='w-full max-w-6xl text-center space-y-6 mt-20 mb-16'>
         <div className='space-y-4'>
           <h2 className='text-4xl font-bold'>Ready to Begin Your Story?</h2>
-          <p className='text-lg text-muted-foreground max-w-2xl mx-auto'>
+          <p className='text-lg text-muted-foreground max-w-4xl mx-auto'>
             Join a community where creativity multiplies and every story has the
             potential to become a universe.
           </p>

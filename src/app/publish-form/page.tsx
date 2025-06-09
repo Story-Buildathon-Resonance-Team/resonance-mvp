@@ -354,7 +354,7 @@ export default function PaginatedStoryForm({
 
   if (!isConnected || !address) {
     return (
-      <Card className="w-full max-w-4xl mx-auto">
+      <Card className="w-full max-w-6xl mx-auto">
         <CardContent className="p-8">
           <Alert>
             <Info className="h-4 w-4" />
@@ -393,7 +393,7 @@ export default function PaginatedStoryForm({
         )}
       </div>
       <br /><br />
-      <Card className="w-full max-w-4xl mx-auto">
+      <Card className="w-full max-w-6xl mx-auto">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>

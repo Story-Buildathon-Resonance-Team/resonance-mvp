@@ -16,7 +16,7 @@ import { useUser } from "./Web3Providers";
 import { useAppStore } from "@/stores";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, Home, Menu, X, LayoutDashboard, User, Settings, LogOut, ChevronDown } from "lucide-react";
+import { BookOpen, Menu, X, LayoutDashboard, User, Settings, LogOut, ChevronDown } from "lucide-react";
 
 export default function Navigation() {
   const { openConnectModal } = useConnectModal();
@@ -121,7 +121,7 @@ export default function Navigation() {
   };
 
   return (
-    <nav className='w-full max-w-4xl'>
+    <nav className='w-full max-w-6xl'>
       {/* Desktop Navigation */}
       <div className='flex justify-between items-center'>
         {/* Logo/Home Link */}
