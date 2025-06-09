@@ -156,7 +156,7 @@ const ReaderPage = () => {
 
                 {/* Story Content */}
                 <div className='prose prose-lg max-w-none text-foreground leading-relaxed'>
-                  <div className='columns-1 md:columns-2 gap-12 text-justify space-y-6'>
+                  <div className='columns-1 gap-12 text-justify space-y-6'>
                     {paragraphs.map((paragraph, index) => (
                       <p
                         key={index}
