@@ -11,15 +11,15 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
-    <html lang='en'>
+    <html lang='en' className="min-h-screen">
       <head>
         <title>Resonance MVP</title>
       </head>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${inter.className} antialiased min-h-screen`}>
         <StoreProvider>
           <Web3Providers>
             {/* Sticky Navigation */}
-            <header className="sticky top-0 z-50 bg-background border-b border-border">
+            <header className="sticky top-0 z-50 bg-card backdrop-blur-xl border-b border-border">
               <div className="flex justify-center p-4">
                 <Navigation />
               </div>

@@ -718,7 +718,7 @@ export default function PaginatedStoryForm({
                   type="button"
                   onClick={handleNext}
                   disabled={isSubmitting}
-                  className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-teal-500 hover:from-purple-600 hover:to-teal-600 text-white border-0"
+                  className="flex items-center gap-2"
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />
@@ -727,7 +727,7 @@ export default function PaginatedStoryForm({
                 <Button
                   type="submit"
                   disabled={isSubmitting || !address}
-                  className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-teal-500 hover:from-purple-600 hover:to-teal-600 text-white border-0"
+                  className="flex items-center gap-2"
                 >
                   {isSubmitting ? (
                     <>

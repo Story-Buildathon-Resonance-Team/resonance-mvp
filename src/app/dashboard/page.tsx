@@ -105,15 +105,15 @@ export default function DashboardPage() {
             <div className="text-sm text-muted-foreground">Drafts</div>
           </div>
           <div className="text-center p-4 bg-muted/30 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{stats.totalPublished}</div>
+            <div className="text-2xl font-bold text-primary">{stats.totalPublished}</div>
             <div className="text-sm text-muted-foreground">Published</div>
           </div>
           <div className="text-center p-4 bg-muted/30 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{stats.totalBookmarked}</div>
+            <div className="text-2xl font-bold text-primary">{stats.totalBookmarked}</div>
             <div className="text-sm text-muted-foreground">Bookmarked</div>
           </div>
           <div className="text-center p-4 bg-muted/30 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">{stats.recentActivity}</div>
+            <div className="text-2xl font-bold text-primary">{stats.recentActivity}</div>
             <div className="text-sm text-muted-foreground">This Week</div>
           </div>
         </div>

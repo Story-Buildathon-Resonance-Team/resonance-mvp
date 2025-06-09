@@ -39,7 +39,7 @@ export default function HomePage() {
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full mt-12 mb-16'>
         <Card className='text-center'>
           <CardHeader>
-            <Shield className='h-8 w-8 text-blue-500 mx-auto mb-2' />
+            <Shield className='h-8 w-8 text-primary mx-auto mb-2' />
             <CardTitle className='text-lg'>Secure & Share</CardTitle>
           </CardHeader>
           <CardContent>
@@ -53,7 +53,7 @@ export default function HomePage() {
 
         <Card className='text-center'>
           <CardHeader>
-            <Globe className='h-8 w-8 text-green-500 mx-auto mb-2' />
+            <Globe className='h-8 w-8 text-primary mx-auto mb-2' />
             <CardTitle className='text-lg'>Creative Playground</CardTitle>
           </CardHeader>
           <CardContent>
@@ -67,7 +67,7 @@ export default function HomePage() {
 
         <Card className='text-center'>
           <CardHeader>
-            <Users className='h-8 w-8 text-purple-500 mx-auto mb-2' />
+            <Users className='h-8 w-8 text-primary mx-auto mb-2' />
             <CardTitle className='text-lg'>Community Impact</CardTitle>
           </CardHeader>
           <CardContent>
@@ -92,7 +92,7 @@ export default function HomePage() {
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           {/* Top Story Card */}
           <Card className='overflow-hidden group hover:shadow-lg transition-all duration-300'>
-            <div className='h-48 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 relative'>
+            <div className='h-48 bg-gradient-to-br from-primary via-primary to-accent relative'>
               <div className='absolute top-4 right-4'>
                 <Badge className='bg-white/20 text-white border-white/30 hover:bg-white/30'>
                   Top Story
@@ -118,16 +118,16 @@ export default function HomePage() {
               </p>
               <div className='flex items-center justify-between text-sm'>
                 <div className='flex items-center gap-4'>
-                  <div className='flex items-center gap-1 text-green-600'>
+                  <div className='flex items-center gap-1 text-primary'>
                     <Users className='h-4 w-4' />
                     <span>12 Collaborators</span>
                   </div>
-                  <div className='flex items-center gap-1 text-blue-600'>
+                  <div className='flex items-center gap-1 text-primary'>
                     <Droplets className='h-4 w-4' />
                     <span>2.3k Tips</span>
                   </div>
                 </div>
-                <span className='text-blue-600 font-medium'>
+                <span className='text-primary font-medium'>
                   by Elena Rodriguez
                 </span>
               </div>
@@ -136,7 +136,7 @@ export default function HomePage() {
 
           {/* Top Remix Card */}
           <Card className='overflow-hidden group hover:shadow-lg transition-all duration-300'>
-            <div className='h-48 bg-gradient-to-br from-teal-400 via-teal-500 to-emerald-600 relative'>
+            <div className='h-48 bg-gradient-to-br from-accent via-accent to-primary relative'>
               <div className='absolute top-4 right-4'>
                 <Badge className='bg-white/20 text-white border-white/30 hover:bg-white/30'>
                   Top Remix
@@ -164,16 +164,16 @@ export default function HomePage() {
               </p>
               <div className='flex items-center justify-between text-sm'>
                 <div className='flex items-center gap-4'>
-                  <div className='flex items-center gap-1 text-green-600'>
+                  <div className='flex items-center gap-1 text-primary'>
                     <Users className='h-4 w-4' />
                     <span>8 Collaborators</span>
                   </div>
-                  <div className='flex items-center gap-1 text-blue-600'>
+                  <div className='flex items-center gap-1 text-primary'>
                     <Droplets className='h-4 w-4' />
                     <span>1.8k Tips</span>
                   </div>
                 </div>
-                <span className='text-blue-600 font-medium'>
+                <span className='text-primary font-medium'>
                   by Marcus Chen
                 </span>
               </div>
@@ -195,12 +195,12 @@ export default function HomePage() {
         <div className='pt-4'>
           {isConnected ? (
             <Link href='/publish-form'>
-              <Button className='bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white px-8 py-3 text-lg font-medium'>
+              <Button size='lg'>
                 Start Creating
               </Button>
             </Link>
           ) : (
-            <Button className='bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white px-8 py-3 text-lg font-medium'>
+            <Button size='lg'>
               Start Creating
             </Button>
           )}

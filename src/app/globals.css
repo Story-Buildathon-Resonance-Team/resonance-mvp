@@ -7,35 +7,35 @@
   --background: oklch(0.09 0.005 240);
   --foreground: oklch(0.95 0.005 240);
   --radius: 0.625rem;
-  --card: oklch(0.12 0.01 240);
+  --card: oklch(0.18 0.03 280);
   --card-foreground: oklch(0.95 0.005 240);
-  --popover: oklch(0.12 0.01 240);
+  --popover: oklch(0.18 0.03 280);
   --popover-foreground: oklch(0.95 0.005 240);
-  --primary: oklch(0.45 0.15 240);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.18 0.01 240);
+  --primary: oklch(0.55 0.18 280);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.22 0.03 280);
   --secondary-foreground: oklch(0.9 0.005 240);
-  --muted: oklch(0.15 0.008 240);
+  --muted: oklch(0.20 0.02 280);
   --muted-foreground: oklch(0.65 0.015 240);
-  --accent: oklch(0.18 0.01 240);
+  --accent: oklch(0.22 0.03 280);
   --accent-foreground: oklch(0.9 0.005 240);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.25 0.008 240);
-  --input: oklch(0.18 0.01 240);
-  --ring: oklch(0.45 0.15 240);
+  --border: oklch(0.28 0.02 280);
+  --input: oklch(0.22 0.03 280);
+  --ring: oklch(0.55 0.18 280);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.12 0.01 240);
+  --sidebar: oklch(0.18 0.03 280);
   --sidebar-foreground: oklch(0.95 0.005 240);
-  --sidebar-primary: oklch(0.45 0.15 240);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.18 0.01 240);
+  --sidebar-primary: oklch(0.55 0.18 280);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.22 0.03 280);
   --sidebar-accent-foreground: oklch(0.9 0.005 240);
-  --sidebar-border: oklch(0.25 0.008 240);
-  --sidebar-ring: oklch(0.45 0.15 240);
+  --sidebar-border: oklch(0.28 0.02 280);
+  --sidebar-ring: oklch(0.55 0.18 280);
 }
 
 @theme inline {
@@ -86,43 +86,45 @@
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(135deg, #1a0f3a 0%, #2d1b69 25%, #1e1a4a 50%, #0f0a2e 75%, #1a0f3a 100%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
 }
 
 .dark {
   --background: oklch(0.09 0.005 240);
   --foreground: oklch(0.95 0.005 240);
-  --card: oklch(0.12 0.01 240);
+  --card: oklch(0.18 0.03 280);
   --card-foreground: oklch(0.95 0.005 240);
-  --popover: oklch(0.12 0.01 240);
+  --popover: oklch(0.18 0.03 280);
   --popover-foreground: oklch(0.95 0.005 240);
-  --primary: oklch(0.45 0.15 240);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.18 0.01 240);
+  --primary: oklch(0.55 0.18 280);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.22 0.03 280);
   --secondary-foreground: oklch(0.9 0.005 240);
-  --muted: oklch(0.15 0.008 240);
+  --muted: oklch(0.20 0.02 280);
   --muted-foreground: oklch(0.65 0.015 240);
-  --accent: oklch(0.18 0.01 240);
+  --accent: oklch(0.22 0.03 280);
   --accent-foreground: oklch(0.9 0.005 240);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.25 0.008 240);
-  --input: oklch(0.18 0.01 240);
-  --ring: oklch(0.45 0.15 240);
+  --border: oklch(0.28 0.02 280);
+  --input: oklch(0.22 0.03 280);
+  --ring: oklch(0.55 0.18 280);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.12 0.01 240);
+  --sidebar: oklch(0.18 0.03 280);
   --sidebar-foreground: oklch(0.95 0.005 240);
-  --sidebar-primary: oklch(0.45 0.15 240);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.18 0.01 240);
+  --sidebar-primary: oklch(0.55 0.18 280);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.22 0.03 280);
   --sidebar-accent-foreground: oklch(0.9 0.005 240);
-  --sidebar-border: oklch(0.25 0.008 240);
-  --sidebar-ring: oklch(0.45 0.15 240);
+  --sidebar-border: oklch(0.28 0.02 280);
+  --sidebar-ring: oklch(0.55 0.18 280);
 }
 
 @layer base {
@@ -130,6 +132,13 @@ body {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+  }
+  
+  /* Override the background for the main app to use the gradient */
+  html {
+    background: linear-gradient(135deg, #1a0f3a 0%, #2d1b69 25%, #1e1a4a 50%, #0f0a2e 75%, #1a0f3a 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
   }
 }
