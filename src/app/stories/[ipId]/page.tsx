@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { users, StoryEntry } from "@/data/user";
@@ -13,6 +13,7 @@ interface StoryWithAuthor extends StoryEntry {
 
 const ReaderPage = () => {
   const params = useParams();
+  const router = useRouter();
   const ipId = params.ipId as string;
 
   const [story, setStory] = useState<StoryWithAuthor | null>(null);
@@ -30,6 +31,19 @@ const ReaderPage = () => {
 
   const getIPFSUrl = (cid: string) =>
     `https://gateway.pinata.cloud/ipfs/${cid}`;
+
+  // Navigation handlers for remix functionality
+  const handleRemixStory = () => {
+    if (story) {
+      router.push(`/remix-form?originalStoryId=${story.ipId}`);
+    }
+  };
+
+  const handleRemixSuggestion = (suggestion: { emoji: string; text: string }) => {
+    if (story) {
+      router.push(`/remix-form?originalStoryId=${story.ipId}&suggestion=${encodeURIComponent(suggestion.text)}`);
+    }
+  };
 
   useEffect(() => {
     // Find the story by ipId
@@ -204,6 +218,7 @@ const ReaderPage = () => {
                     <div
                       key={index}
                       className='flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-transparent hover:border-primary/40 hover:bg-primary/20 transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group'
+                      onClick={() => handleRemixSuggestion(suggestion)}
                     >
                       <span className='text-lg'>{suggestion.emoji}</span>
                       <span className='text-muted-foreground group-hover:text-primary transition-colors'>
@@ -221,9 +236,7 @@ const ReaderPage = () => {
                 <div className='flex flex-col gap-4'>
                   <Button
                     className='w-full font-semibold'
-                    onClick={() =>
-                      console.log("Remix functionality coming soon")
-                    }
+                    onClick={handleRemixStory}
                   >
                     Remix This Story
                   </Button>

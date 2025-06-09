@@ -27,6 +27,7 @@ export interface PublishedStory {
   licenseType: string
   publishedAt: number
   explorerUrl: string
+  originalStoryId?: string // Optional field to track if this is a remix
 }
 
 export interface ReadingProgress {

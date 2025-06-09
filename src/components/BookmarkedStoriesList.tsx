@@ -170,7 +170,7 @@ export default function BookmarkedStoriesList() {
                 <div className="flex gap-2 pt-2">
                   <Button size="sm" className="flex-1" asChild>
                     <Link href={`/stories/${story.ipId}`}>
-                      {progress?.progress > 0 ? 'Continue Reading' : 'Start Reading'}
+                    {progress?.progress > 0 ? 'Continue Reading' : 'Start Reading'}
                     </Link>
                   </Button>
                   <Button 
