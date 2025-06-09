@@ -35,10 +35,10 @@ export default function StoriesPage() {
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <h1 className="text-4xl font-bold">Published Stories</h1>
+          <h1 className="text-3xl font-bold">Published Stories</h1>
         </div>
         <p className="text-xl text-muted-foreground">
-          Discover stories registered as IP assets on Story Protocol
+          Discover stories registered as IP assets on Story Protocol.
         </p>
       </div>
 

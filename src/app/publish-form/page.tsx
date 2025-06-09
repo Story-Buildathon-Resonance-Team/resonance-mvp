@@ -333,6 +333,17 @@ export default function PaginatedStoryForm({
           onClose={() => setSuccessResult(null)}
         />
       )}
+
+<br /><br />
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <h1 className="text-3xl font-bold">Create. Protect. Inspire.</h1>
+        </div>
+        <p className="text-xl text-muted-foreground">
+          Your story is the seed of infinite possibilities.
+        </p>
+      </div>
       <br /><br />
       <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
