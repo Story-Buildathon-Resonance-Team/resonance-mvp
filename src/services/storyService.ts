@@ -4,6 +4,8 @@
  */
 
 import { Address } from "viem";
+import { useStoryStore } from "../stores/storyStore";
+import { PublishedStory } from "../stores/types";
 
 export interface StoryRegistrationData {
   title: string;
@@ -26,6 +28,7 @@ export interface StoryRegistrationResult {
   storyData?: any;
   explorerUrl?: string;
   error?: string;
+  publishedStory?: PublishedStory;
 }
 
 /**
@@ -77,6 +80,39 @@ export async function registerStoryAsIP(
       error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
+}
+
+/**
+ * Register a story as an IP asset and prepare it for store addition
+ */
+export async function registerStoryAsIPWithStore(
+  data: StoryRegistrationData
+): Promise<StoryRegistrationResult> {
+  const result = await registerStoryAsIP(data);
+  
+  if (result.success && result.storyData) {
+    // Create a PublishedStory object for the store
+    const publishedStory: PublishedStory = {
+      ipId: result.ipId!,
+      title: data.title,
+      description: data.description,
+      author: data.author,
+      contentCID: data.contentCID,
+      imageCID: data.imageCID,
+      txHash: result.txHash!,
+      tokenId: result.tokenId!,
+      licenseType: data.licenseType,
+      publishedAt: Date.now(),
+      explorerUrl: result.explorerUrl!,
+    };
+
+    return {
+      ...result,
+      publishedStory,
+    };
+  }
+  
+  return result;
 }
 
 /**

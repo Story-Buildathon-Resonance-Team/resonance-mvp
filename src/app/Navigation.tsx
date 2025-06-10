@@ -166,14 +166,14 @@ export default function Navigation() {
                   Publish a Story
                 </Button>
               </Link>
-              <Link href='/library' onClick={() => navigate('/library')}>
+              <Link href='/stories' onClick={() => navigate('/stories')}>
                 <Button
                   variant='ghost'
                   size='sm'
                   className='flex items-center gap-2'
                 >
                   <BookOpen className='h-4 w-4' />
-                  Library
+                  Stories
                 </Button>
               </Link>
               <Link href='/dashboard' onClick={() => navigate('/dashboard')}>
@@ -231,14 +231,14 @@ export default function Navigation() {
                   Publish a Story
                 </Button>
               </Link>
-              <Link href='/library' onClick={() => navigate('/library')}>
+              <Link href='/stories' onClick={() => navigate('/stories')}>
                 <Button
                   variant='ghost'
                   size='sm'
                   className='flex items-center gap-2'
                 >
                   <BookOpen className='h-4 w-4' />
-                  Library
+                  Stories
                 </Button>
               </Link>
               <Link href='/dashboard' onClick={() => navigate('/dashboard')}>

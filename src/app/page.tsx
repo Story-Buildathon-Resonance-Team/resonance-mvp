@@ -13,9 +13,16 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "./Web3Providers";
+import { useStoryStore } from "../stores/storyStore";
 
 export default function HomePage() {
   const { isConnected } = useUser();
+  const { publishedStories } = useStoryStore();
+
+  // Get the latest published stories for display
+  const latestStories = publishedStories
+    .sort((a, b) => b.publishedAt - a.publishedAt)
+    .slice(0, 2);
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen space-y-8'>
@@ -93,95 +100,156 @@ export default function HomePage() {
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-          {/* Top Story Card */}
-          <Card className='overflow-hidden group hover:shadow-lg transition-all duration-300'>
-            <div className='h-48 bg-gradient-to-br from-primary via-primary to-accent relative'>
-              <div className='absolute top-4 right-4'>
-                <Badge className='bg-white/20 text-white border-white/30 hover:bg-white/30'>
-                  Top Story
-                </Badge>
-              </div>
-              <div className='absolute inset-0 flex items-center justify-center'>
-                <div className='flex space-x-2'>
-                  <div className='w-2 h-2 bg-white/40 rounded-full'></div>
-                  <div className='w-2 h-2 bg-white/60 rounded-full'></div>
-                  <div className='w-2 h-2 bg-white/40 rounded-full'></div>
-                </div>
-              </div>
-            </div>
-            <CardHeader>
-              <CardTitle className='text-xl'>The Quantum Gardens</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              <p className='text-muted-foreground'>
-                In a world where reality bends through botanical manipulation,
-                Maya discovers her grandmother's secret garden holds the key to
-                rewriting the laws of physics. A story that has blossomed into
-                12 unique interpretations.
-              </p>
-              <div className='flex items-center justify-between text-sm'>
-                <div className='flex items-center gap-4'>
-                  <div className='flex items-center gap-1 text-primary'>
-                    <Users className='h-4 w-4' />
-                    <span>12 Collaborators</span>
-                  </div>
-                  <div className='flex items-center gap-1 text-primary'>
-                    <Droplets className='h-4 w-4' />
-                    <span>2.3k Tips</span>
+          {latestStories.length > 0 ? (
+            // Show latest published stories
+            latestStories.map((story, index) => (
+              <Card key={story.ipId} className='overflow-hidden group hover:shadow-lg transition-all duration-300'>
+                <div className='h-48 relative overflow-hidden'>
+                  {story.imageCID ? (
+                    <img
+                      src={`https://gateway.pinata.cloud/ipfs/${story.imageCID}`}
+                      alt={story.title}
+                      className='w-full h-full object-cover'
+                    />
+                  ) : (
+                    <div className={`h-full bg-gradient-to-br ${index === 0 ? 'from-primary via-primary to-accent' : 'from-accent via-accent to-primary'}`}>
+                      <div className='absolute inset-0 flex items-center justify-center'>
+                        <div className='flex space-x-2'>
+                          <div className='w-2 h-2 bg-white/40 rounded-full'></div>
+                          <div className='w-2 h-2 bg-white/60 rounded-full'></div>
+                          <div className='w-2 h-2 bg-white/40 rounded-full'></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className='absolute top-4 right-4'>
+                    <Badge className='bg-white/20 text-white border-white/30 hover:bg-white/30'>
+                      {story.originalStoryId ? 'Latest Remix' : 'Latest Story'}
+                    </Badge>
                   </div>
                 </div>
-                <span className='text-primary font-medium'>
-                  by Elena Rodriguez
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+                <CardHeader>
+                  <CardTitle className='text-xl line-clamp-2'>{story.title}</CardTitle>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                  <p className='text-muted-foreground line-clamp-3'>
+                    {story.description}
+                  </p>
+                  <div className='flex items-center justify-between text-sm'>
+                    <div className='flex items-center gap-4'>
+                      <div className='flex items-center gap-1 text-primary'>
+                        <BookOpen className='h-4 w-4' />
+                        <span>{story.licenseType === 'non-commercial' ? 'Non-Commercial' : story.licenseType === 'commercial-use' ? 'Commercial Use' : 'Commercial Remix'}</span>
+                      </div>
+                    </div>
+                    <span className='text-primary font-medium'>
+                      by {story.author.name}
+                    </span>
+                  </div>
+                  <div className='pt-2'>
+                    <Link href={`/stories/${story.ipId}`}>
+                      <Button variant="outline" size="sm" className='w-full'>
+                        Read Story
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            // Fallback to hardcoded examples when no stories are published
+            <>
+              {/* Top Story Card */}
+              <Card className='overflow-hidden group hover:shadow-lg transition-all duration-300'>
+                <div className='h-48 bg-gradient-to-br from-primary via-primary to-accent relative'>
+                  <div className='absolute top-4 right-4'>
+                    <Badge className='bg-white/20 text-white border-white/30 hover:bg-white/30'>
+                      Top Story
+                    </Badge>
+                  </div>
+                  <div className='absolute inset-0 flex items-center justify-center'>
+                    <div className='flex space-x-2'>
+                      <div className='w-2 h-2 bg-white/40 rounded-full'></div>
+                      <div className='w-2 h-2 bg-white/60 rounded-full'></div>
+                      <div className='w-2 h-2 bg-white/40 rounded-full'></div>
+                    </div>
+                  </div>
+                </div>
+                <CardHeader>
+                  <CardTitle className='text-xl'>The Quantum Gardens</CardTitle>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                  <p className='text-muted-foreground'>
+                    In a world where reality bends through botanical manipulation,
+                    Maya discovers her grandmother's secret garden holds the key to
+                    rewriting the laws of physics. A story that has blossomed into
+                    12 unique interpretations.
+                  </p>
+                  <div className='flex items-center justify-between text-sm'>
+                    <div className='flex items-center gap-4'>
+                      <div className='flex items-center gap-1 text-primary'>
+                        <Users className='h-4 w-4' />
+                        <span>12 Collaborators</span>
+                      </div>
+                      <div className='flex items-center gap-1 text-primary'>
+                        <Droplets className='h-4 w-4' />
+                        <span>2.3k Tips</span>
+                      </div>
+                    </div>
+                    <span className='text-primary font-medium'>
+                      by Elena Rodriguez
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Top Remix Card */}
-          <Card className='overflow-hidden group hover:shadow-lg transition-all duration-300'>
-            <div className='h-48 bg-gradient-to-br from-accent via-accent to-primary relative'>
-              <div className='absolute top-4 right-4'>
-                <Badge className='bg-white/20 text-white border-white/30 hover:bg-white/30'>
-                  Top Remix
-                </Badge>
-              </div>
-              <div className='absolute inset-0 flex items-center justify-center'>
-                <div className='flex space-x-2'>
-                  <div className='w-2 h-2 bg-white/40 rounded-full'></div>
-                  <div className='w-2 h-2 bg-white/60 rounded-full'></div>
-                  <div className='w-2 h-2 bg-white/40 rounded-full'></div>
-                </div>
-              </div>
-            </div>
-            <CardHeader>
-              <CardTitle className='text-xl'>
-                Quantum Gardens: The Underground
-              </CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              <p className='text-muted-foreground'>
-                A thrilling remix exploring the dark underbelly of Maya's world,
-                where rogue botanists use quantum flora for corporate espionage.
-                This interpretation has sparked 8 new derivative works of its
-                own.
-              </p>
-              <div className='flex items-center justify-between text-sm'>
-                <div className='flex items-center gap-4'>
-                  <div className='flex items-center gap-1 text-primary'>
-                    <Users className='h-4 w-4' />
-                    <span>8 Collaborators</span>
+              {/* Top Remix Card */}
+              <Card className='overflow-hidden group hover:shadow-lg transition-all duration-300'>
+                <div className='h-48 bg-gradient-to-br from-accent via-accent to-primary relative'>
+                  <div className='absolute top-4 right-4'>
+                    <Badge className='bg-white/20 text-white border-white/30 hover:bg-white/30'>
+                      Top Remix
+                    </Badge>
                   </div>
-                  <div className='flex items-center gap-1 text-primary'>
-                    <Droplets className='h-4 w-4' />
-                    <span>1.8k Tips</span>
+                  <div className='absolute inset-0 flex items-center justify-center'>
+                    <div className='flex space-x-2'>
+                      <div className='w-2 h-2 bg-white/40 rounded-full'></div>
+                      <div className='w-2 h-2 bg-white/60 rounded-full'></div>
+                      <div className='w-2 h-2 bg-white/40 rounded-full'></div>
+                    </div>
                   </div>
                 </div>
-                <span className='text-primary font-medium'>
-                  by Marcus Chen
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+                <CardHeader>
+                  <CardTitle className='text-xl'>
+                    Quantum Gardens: The Underground
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                  <p className='text-muted-foreground'>
+                    A thrilling remix exploring the dark underbelly of Maya's world,
+                    where rogue botanists use quantum flora for corporate espionage.
+                    This interpretation has sparked 8 new derivative works of its
+                    own.
+                  </p>
+                  <div className='flex items-center justify-between text-sm'>
+                    <div className='flex items-center gap-4'>
+                      <div className='flex items-center gap-1 text-primary'>
+                        <Users className='h-4 w-4' />
+                        <span>8 Collaborators</span>
+                      </div>
+                      <div className='flex items-center gap-1 text-primary'>
+                        <Droplets className='h-4 w-4' />
+                        <span>1.8k Tips</span>
+                      </div>
+                    </div>
+                    <span className='text-primary font-medium'>
+                      by Marcus Chen
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
       </div>
 
