@@ -38,9 +38,7 @@ export function PublishedStoriesList() {
         <p className="text-muted-foreground mb-6">
           Publish your first story to share it with the world on the blockchain.
         </p>
-        <Link href="/publish-form">
-          <Button>Publish Your First Story</Button>
-        </Link>
+        
       </div>
     );
   }

@@ -5,20 +5,13 @@ import { useStoryStore } from '@/stores'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { DraftsList } from '@/components/DraftsList'
 import { PublishedStoriesList } from '@/components/PublishedStoriesList'
 import DashboardDataSeeder from '@/components/DashboardDataSeeder'
 import { 
   PlusIcon,
   FileTextIcon,
-  BookOpenIcon,
-  EyeIcon,
-  TrendingUpIcon,
-  ClockIcon,
-  BookmarkIcon,
-  GitFork
-} from 'lucide-react'
+  BookOpenIcon} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 
