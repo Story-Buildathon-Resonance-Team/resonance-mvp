@@ -119,31 +119,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* Technology Badges */}
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-12 animate-fade-in-up delay-500">
-              <Badge
-                variant="secondary"
-                className="flex items-center gap-2 px-4 py-2 text-sm backdrop-blur-sm"
-              >
-                <Shield className="h-4 w-4" />
-                Story Protocol
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="flex items-center gap-2 px-4 py-2 text-sm backdrop-blur-sm"
-              >
-                <Globe className="h-4 w-4" />
-                Pinata IPFS
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="flex items-center gap-2 px-4 py-2 text-sm backdrop-blur-sm"
-              >
-                <Zap className="h-4 w-4" />
-                Tomo EVM
-              </Badge>
-            </div>
-
             {/* Stats Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-20 animate-fade-in-up delay-600">
               <div className="text-center space-y-3">
@@ -531,43 +506,6 @@ export default function HomePage() {
                     </Link>
                   </>
                 )}
-              </div>
-
-              {/* Technology Stack */}
-              <div className="pt-12 space-y-6">
-                <p className="text-base font-medium text-muted-foreground">
-                  Powered by cutting-edge technology
-                </p>
-                <div className="flex flex-wrap items-center justify-center gap-4">
-                  <Badge
-                    variant="secondary"
-                    className="flex items-center gap-2 px-4 py-2 text-sm backdrop-blur-sm"
-                  >
-                    <Shield className="h-4 w-4" />
-                    Story Protocol
-                  </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="flex items-center gap-2 px-4 py-2 text-sm backdrop-blur-sm"
-                  >
-                    <Globe className="h-4 w-4" />
-                    Pinata IPFS
-                  </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="flex items-center gap-2 px-4 py-2 text-sm backdrop-blur-sm"
-                  >
-                    <Zap className="h-4 w-4" />
-                    Tomo EVM Kit
-                  </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="flex items-center gap-2 px-4 py-2 text-sm backdrop-blur-sm"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    Next.js
-                  </Badge>
-                </div>
               </div>
             </CardContent>
           </Card>
