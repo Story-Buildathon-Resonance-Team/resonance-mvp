@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { users, StoryEntry } from "@/data/user";
+import { useStoryStore } from "@/stores/storyStore";
 import { Loader2, AlertCircle } from "lucide-react";
 
 interface StoryWithAuthor extends StoryEntry {
@@ -15,6 +16,7 @@ const ReaderPage = () => {
   const params = useParams();
   const router = useRouter();
   const ipId = params.ipId as string;
+  const { publishedStories } = useStoryStore();
 
   const [story, setStory] = useState<StoryWithAuthor | null>(null);
   const [storyContent, setStoryContent] = useState<string>("");
@@ -46,8 +48,24 @@ const ReaderPage = () => {
   };
 
   useEffect(() => {
-    // Find the story by ipId
+    // Find the story by ipId - check both user data and store
     const findStory = () => {
+      // First check the store for published stories
+      const storeStory = publishedStories.find((s) => s.ipId === ipId);
+      if (storeStory) {
+        return {
+          ipId: storeStory.ipId,
+          ipMetadataCID: storeStory.contentCID,
+          nftMetadataCID: storeStory.contentCID,
+          contentCID: storeStory.contentCID,
+          imageCID: storeStory.imageCID,
+          title: storeStory.title,
+          synopsis: storeStory.description,
+          author: storeStory.author.name || storeStory.author.address.slice(0, 8) + "...",
+        };
+      }
+
+      // Fallback to user data
       for (const user of users) {
         const foundStory = user.stories.find((s) => s.ipId === ipId);
         if (foundStory) {
@@ -107,7 +125,7 @@ const ReaderPage = () => {
     };
 
     fetchStoryContent();
-  }, [ipId]);
+  }, [ipId, publishedStories]);
 
   // Parse story content into paragraphs
   const parseStoryContent = (content: string) => {

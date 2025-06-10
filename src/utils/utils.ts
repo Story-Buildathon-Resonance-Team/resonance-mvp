@@ -14,7 +14,7 @@ export const SPGNFTContractAddress: Address =
 export const NonCommercialSocialRemixingTermsId = '1'
 export const NonCommercialSocialRemixingTerms: LicenseTerms = {
     transferable: true,
-    royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E',
+    royaltyPolicy: '0x0000000000000000000000000000000000000000',
     defaultMintingFee: 0n,
     expiration: 0n,
     commercialUse: false,

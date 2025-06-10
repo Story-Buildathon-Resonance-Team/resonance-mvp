@@ -20,7 +20,7 @@ export default function StoriesPage() {
         ...story,
         author: user.userName || user.walletAddress.slice(0, 8) + "...",
         authorAddress: user.walletAddress,
-        publishedAt: story.publishedAt || null, // Use existing timestamp or null
+        publishedAt: story.publishedAt || new Date(0).toISOString(), // Use existing date or default
         licenseType: 'non-commercial', // Default license type
       }))
   );

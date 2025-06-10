@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../components/ui/button";
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ import { useUser } from "./Web3Providers";
 import { useAppStore } from "@/stores";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { BookOpen, Menu, X, LayoutDashboard, User, Settings, LogOut, ChevronDown } from "lucide-react";
+import { BookOpen, Menu, X, LayoutDashboard, User, Settings, LogOut, ChevronDown, Sparkles } from "lucide-react";
 
 export default function Navigation() {
   const { openConnectModal } = useConnectModal();
@@ -26,6 +26,11 @@ export default function Navigation() {
   const router = useRouter();
   const pathname = usePathname();
   const hasRedirected = useRef(false);
+  
+  // Floating navbar state
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   // Navigate to dashboard when user connects for the first time
   useEffect(() => {
@@ -49,6 +54,28 @@ export default function Navigation() {
       console.log("Not connected");
     }
   }, [isConnected, address]);
+
+  // Handle scroll behavior for floating navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Set scrolled state for styling
+      setIsScrolled(currentScrollY > 50);
+      
+      // Handle navbar visibility
+      if (currentScrollY < lastScrollY.current || currentScrollY < 100) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setIsVisible(false);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -98,7 +125,7 @@ export default function Navigation() {
         <Button
           variant='default'
           size={size}
-          className='cursor-pointer'
+          className='cursor-pointer gradient-purple-cyan text-white font-semibold hover:shadow-glow transition-all duration-300'
           onClick={handleLogin}
         >
           Login
@@ -112,7 +139,7 @@ export default function Navigation() {
           <Button
             variant='outline'
             size={size}
-            className='cursor-pointer flex items-center gap-2'
+            className='cursor-pointer flex items-center gap-2 border-white/20 text-white hover:bg-white/10 hover:border-cyan-300/50 hover:text-cyan-300 transition-all duration-300'
           >
             <User className="h-4 w-4" />
             <span>{userName}</span>
@@ -144,55 +171,85 @@ export default function Navigation() {
   };
 
   return (
-    <nav className='w-full max-w-6xl'>
+    <nav className={`
+      w-full transition-all duration-300 ease-out
+      ${isScrolled 
+        ? 'max-w-4xl mx-auto mt-4 px-6 py-3 glass rounded-full shadow-neon' 
+        : 'px-0 py-0'
+      }
+      ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}
+    `}>
       {/* Desktop Navigation */}
       <div className='flex justify-between items-center'>
         {/* Logo/Home Link */}
         <Link
-          href='/'
-          className='flex items-center gap-2 text-lg font-semibold'
-          onClick={() => navigate('/')}
+          href={isConnected ? '/dashboard' : '/'}
+          className={`flex items-center gap-3 font-bold text-white hover:text-cyan-300 hover:scale-105 transition-all duration-300 ${
+            isScrolled ? 'text-lg' : 'text-xl'
+          }`}
+          onClick={() => navigate(isConnected ? '/dashboard' : '/')}
         >
-          <BookOpen className='h-6 w-6' />
-          <span>Resonance</span>
+          <div className={`gradient-purple-cyan rounded-lg flex items-center justify-center transition-all duration-300 shadow-glow ${
+            isScrolled ? 'w-7 h-7' : 'w-8 h-8'
+          }`}>
+            <BookOpen className={`text-white transition-all duration-300 ${
+              isScrolled ? 'h-4 w-4' : 'h-5 w-5'
+            }`} />
+          </div>
+          <span className={isScrolled ? 'hidden sm:block' : ''}>Resonance</span>
         </Link>
 
         {/* Desktop Navigation Links - Hidden on Mobile */}
-        <div className='hidden md:flex items-center gap-4'>
+        <div className={`hidden md:flex items-center transition-all duration-300 ${
+          isScrolled ? 'gap-3' : 'gap-6'
+        }`}>
           {isConnected && (
-            <div className='flex items-center gap-3'>
-              <Link href='/publish-form' onClick={() => navigate('/publish-form')}>
-                <Button variant='default' size='sm'>
-                  Publish a Story
-                </Button>
-              </Link>
-              <Link href='/library' onClick={() => navigate('/library')}>
+            <div className={`flex items-center transition-all duration-300 ${
+              isScrolled ? 'gap-2' : 'gap-4'
+            }`}>
+              <Link href='/stories' onClick={() => navigate('/stories')}>
                 <Button
                   variant='ghost'
-                  size='sm'
-                  className='flex items-center gap-2'
+                  size={isScrolled ? 'sm' : 'sm'}
+                  className={`flex items-center gap-2 text-white hover:text-cyan-300 hover:bg-white/10 transition-all duration-300 ${
+                    isScrolled ? 'px-3 py-2' : ''
+                  }`}
                 >
                   <BookOpen className='h-4 w-4' />
-                  Library
+                  <span className={isScrolled ? 'hidden lg:block' : ''}>Stories</span>
                 </Button>
               </Link>
               <Link href='/dashboard' onClick={() => navigate('/dashboard')}>
                 <Button
                   variant='ghost'
-                  size='sm'
-                  className='flex items-center gap-2'
+                  size={isScrolled ? 'sm' : 'sm'}
+                  className={`flex items-center gap-2 text-white hover:text-cyan-300 hover:bg-white/10 transition-all duration-300 ${
+                    isScrolled ? 'px-3 py-2' : ''
+                  }`}
                 >
                   <LayoutDashboard className='h-4 w-4' />
-                  Dashboard
+                  <span className={isScrolled ? 'hidden lg:block' : ''}>Dashboard</span>
+                </Button>
+              </Link>
+              <Link href='/publish-form' onClick={() => navigate('/publish-form')}>
+                <Button 
+                  variant='default' 
+                  size={isScrolled ? 'sm' : 'sm'} 
+                  className={`gradient-purple-cyan hover:shadow-glow text-white font-semibold transition-all duration-300 ${
+                    isScrolled ? 'px-3 py-2' : ''
+                  }`}
+                >
+                  <Sparkles className='h-4 w-4 mr-2' />
+                  <span className={isScrolled ? 'hidden xl:block' : ''}>Publish Story</span>
                 </Button>
               </Link>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-3'>
             {/* Login/User Dropdown */}
-            <UserDropdown />
+            <UserDropdown size={isScrolled ? 'sm' : 'default'} />
           </div>
         </div>
 
@@ -231,14 +288,14 @@ export default function Navigation() {
                   Publish a Story
                 </Button>
               </Link>
-              <Link href='/library' onClick={() => navigate('/library')}>
+              <Link href='/stories' onClick={() => navigate('/stories')}>
                 <Button
                   variant='ghost'
                   size='sm'
                   className='flex items-center gap-2'
                 >
                   <BookOpen className='h-4 w-4' />
-                  Library
+                  Stories
                 </Button>
               </Link>
               <Link href='/dashboard' onClick={() => navigate('/dashboard')}>
