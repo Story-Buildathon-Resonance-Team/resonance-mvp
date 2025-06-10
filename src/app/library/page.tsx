@@ -20,7 +20,7 @@ export default function StoriesPage() {
         ...story,
         author: user.userName || user.walletAddress.slice(0, 8) + "...",
         authorAddress: user.walletAddress,
-        publishedAt: Date.now(), // Add timestamp for sorting
+        publishedAt: story.publishedAt || null, // Use existing timestamp or null
         licenseType: 'non-commercial', // Default license type
       }))
   );
