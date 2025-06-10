@@ -156,11 +156,6 @@ export default function Navigation() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handlePreferences} className="cursor-pointer">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Preferences</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
             <LogOut className="mr-2 h-4 w-4" />
             <span>Logout</span>
