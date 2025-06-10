@@ -93,6 +93,19 @@ export const users: UserEntry[] = [
         synopsis:
           "Amid the flickering hope of distant stars and the golden glow of rebellion, a weary captain and a gifted child uncover a cosmic secret that could ignite a new future for humanity.",
       },
+      {
+        ipId: "0xb07834B2d74cf0F64302a08976c4B3f2F623A4fC",
+        ipMetadataCID:
+          "bafkreiebaccn373nssmwouffngi4cqogpxrrfkrjcd63py7lzlehu4v5ry",
+        nftMetadataCID:
+          "bafkreiacqrnew23d7jxhl3gyke3s6tp2uj2mwutxyvbgcnsq4kyubfcnuy",
+        contentCID:
+          "bafkreibbcy66r7cmzoolta46hh65dkyaiotedtcntpsytxu6rnz4xgim5q",
+        imageCID: "bafybeigrawa3glvh6rephb2xfzt5lwed2eghjmfbpafgyyvzdpqf3x7gku",
+        title: "First Humans: Temple of Origins",
+        synopsis:
+          "Ji-Won and Lee-Hyun, members of an advanced ancient civilization, must separate as she joins a secret colonization mission while he stays behind to guide humanity's development through hidden genetic codes.",
+      },
     ],
   },
   {

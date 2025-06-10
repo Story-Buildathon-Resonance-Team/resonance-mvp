@@ -21,13 +21,13 @@ interface StoryRegistrationRequest {
     name: string;
     address: Address;
   };
-  licenseType: "non-commercial" | "commercial-use" | "commercial-remix";
+  licenseTypes: ("non-commercial" | "commercial-use" | "commercial-remix")[];
 }
 
 export async function GET() {
   return NextResponse.json({
     message: "Story registration API is running",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 
@@ -39,6 +39,21 @@ export async function POST(request: NextRequest) {
     const data: StoryRegistrationRequest = await request.json();
     console.log("Request data parsed successfully");
 
+    // Validate license types array
+    if (
+      !data.licenseTypes ||
+      !Array.isArray(data.licenseTypes) ||
+      data.licenseTypes.length === 0
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "At least one license type must be selected",
+        },
+        { status: 400 }
+      );
+    }
+
     // Initialize server-side config
     console.log("Initializing server config...");
     const { client } = initializeServerConfig();
@@ -47,7 +62,7 @@ export async function POST(request: NextRequest) {
     console.log("Registration data:", {
       title: data.title,
       author: data.author,
-      licenseType: data.licenseType,
+      licenseTypes: data.licenseTypes,
       contentCID: data.contentCID,
       imageCID: data.imageCID,
     });
@@ -63,6 +78,19 @@ export async function POST(request: NextRequest) {
     console.log("Generated hashes:", { imageHash, mediaHash });
 
     // 2. Generate IP Metadata
+    const licenseDescriptions = data.licenseTypes.map((type) => {
+      switch (type) {
+        case "non-commercial":
+          return "Non-Commercial Social Remixing";
+        case "commercial-use":
+          return "Commercial Use Only (10% revenue share)";
+        case "commercial-remix":
+          return "Commercial Remix (25% revenue share)";
+        default:
+          return type;
+      }
+    });
+
     const ipMetadata: IpMetadata = client.ipAsset.generateIpMetadata({
       title: data.title,
       description: data.description,
@@ -99,14 +127,18 @@ export async function POST(request: NextRequest) {
           value: "Fiction Story",
         },
         {
-          trait_type: "License Type",
+          trait_type: "License Count",
+          value: data.licenseTypes.length.toString(),
+        },
+        ...data.licenseTypes.map((type, index) => ({
+          trait_type: `License ${index + 1}`,
           value:
-            data.licenseType === "non-commercial"
+            type === "non-commercial"
               ? "Non-Commercial Social Remixing"
-              : data.licenseType === "commercial-use"
+              : type === "commercial-use"
               ? "Commercial Use Only"
               : "Commercial Remix",
-        },
+        })),
         {
           trait_type: "Created",
           value: new Date().toISOString(),
@@ -135,20 +167,18 @@ export async function POST(request: NextRequest) {
     });
 
     // 5. Determine license terms
-    let licenseTermsData;
-    if (data.licenseType === "non-commercial") {
-      licenseTermsData = [{ 
-        terms: NonCommercialSocialRemixingTerms
-      }];
-    } else if (data.licenseType === "commercial-use") {
-      licenseTermsData = [{ 
-        terms: CommercialUseOnlyTerms
-      }];
-    } else {
-      licenseTermsData = [{ 
-        terms: CommercialRemixTerms
-      }];
-    }
+    const licenseTermsData = data.licenseTypes.map((licenseType) => {
+      switch (licenseType) {
+        case "non-commercial":
+          return { terms: NonCommercialSocialRemixingTerms };
+        case "commercial-use":
+          return { terms: CommercialUseOnlyTerms };
+        case "commercial-remix":
+          return { terms: CommercialRemixTerms };
+        default:
+          throw new Error(`Invalid license type: ${licenseType}`);
+      }
+    });
 
     console.log("License terms:", licenseTermsData);
     console.log("PIL Template Address:", PILTemplateAddress);
@@ -179,9 +209,9 @@ export async function POST(request: NextRequest) {
       imageCID: data.imageCID,
       ipId: response.ipId!,
       txHash: response.txHash!,
-      licenseTermsIds: response.licenseTermsIds!.map(id => id.toString()),
+      licenseTermsIds: response.licenseTermsIds!.map((id) => id.toString()),
       tokenId: response.tokenId?.toString(),
-      licenseType: data.licenseType,
+      licenseTypes: data.licenseTypes,
       createdAt: new Date().toISOString(),
       ipMetadataURI: `https://ipfs.io/ipfs/${ipIpfsHash}`,
       nftMetadataURI: `https://ipfs.io/ipfs/${nftIpfsHash}`,
@@ -204,7 +234,7 @@ export async function POST(request: NextRequest) {
       success: true,
       ipId: response.ipId!,
       txHash: response.txHash!,
-      licenseTermsIds: response.licenseTermsIds!.map(id => id.toString()),
+      licenseTermsIds: response.licenseTermsIds!.map((id) => id.toString()),
       tokenId: response.tokenId?.toString(),
       storyData,
       explorerUrl,
@@ -212,20 +242,25 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("=== STORY REGISTRATION FAILED ===");
     console.error("Error details:", error);
-    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
+    console.error(
+      "Error stack:",
+      error instanceof Error ? error.stack : "No stack trace"
+    );
 
     // Return a proper JSON error response
     return NextResponse.json(
       {
         success: false,
-        error: `Failed to register story: ${error instanceof Error ? error.message : "Unknown error"}`,
-        details: error instanceof Error ? error.stack : String(error)
+        error: `Failed to register story: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        details: error instanceof Error ? error.stack : String(error),
       },
-      { 
+      {
         status: 500,
         headers: {
-          'Content-Type': 'application/json',
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
   }
