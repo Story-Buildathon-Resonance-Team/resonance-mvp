@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { users, StoryEntry } from "@/data/user";
@@ -13,6 +13,7 @@ interface StoryWithAuthor extends StoryEntry {
 
 const ReaderPage = () => {
   const params = useParams();
+  const router = useRouter();
   const ipId = params.ipId as string;
 
   const [story, setStory] = useState<StoryWithAuthor | null>(null);
@@ -30,6 +31,19 @@ const ReaderPage = () => {
 
   const getIPFSUrl = (cid: string) =>
     `https://gateway.pinata.cloud/ipfs/${cid}`;
+
+  // Navigation handlers for remix functionality
+  const handleRemixStory = () => {
+    if (story) {
+      router.push(`/remix-form?originalStoryId=${story.ipId}`);
+    }
+  };
+
+  const handleRemixSuggestion = (suggestion: { emoji: string; text: string }) => {
+    if (story) {
+      router.push(`/remix-form?originalStoryId=${story.ipId}&suggestion=${encodeURIComponent(suggestion.text)}`);
+    }
+  };
 
   useEffect(() => {
     // Find the story by ipId
@@ -105,7 +119,7 @@ const ReaderPage = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800 flex items-center justify-center'>
+      <div className='min-h-screen flex items-center justify-center'>
         <div className='flex items-center gap-3 text-foreground'>
           <Loader2 className='h-8 w-8 animate-spin' />
           <span className='text-lg'>Loading story...</span>
@@ -116,8 +130,8 @@ const ReaderPage = () => {
 
   if (error) {
     return (
-      <div className='min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800 flex items-center justify-center p-4'>
-        <Card className='max-w-2xl w-full bg-card/60 backdrop-blur-xl border-destructive/20'>
+      <div className='min-h-screen flex items-center justify-center p-4'>
+        <Card className='max-w-2xl w-full bg-card backdrop-blur-xl border-destructive/20'>
           <CardContent className='p-8 text-center'>
             <AlertCircle className='h-16 w-16 mx-auto mb-4 text-destructive' />
             <h2 className='text-xl font-semibold mb-4 text-foreground'>
@@ -135,16 +149,16 @@ const ReaderPage = () => {
   const paragraphs = parseStoryContent(storyContent);
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800 p-4 md:p-8'>
-      <div className='max-w-7xl mx-auto'>
+    <div className='min-h-screen p-4 md:p-8'>
+      <div className='max-w-6xl mx-auto'>
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-12'>
           {/* Main Content */}
           <div className='lg:col-span-2'>
-            <Card className='bg-card/60 backdrop-blur-xl border-primary/20 shadow-2xl'>
+            <Card className='bg-card backdrop-blur-xl border-primary/20 shadow-2xl'>
               <CardContent className='p-6 md:p-12'>
                 {/* Story Header */}
                 <div className='text-center mb-12 pb-8 border-b-2 border-primary/30'>
-                  <h1 className='text-3xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-foreground via-primary to-blue-400 bg-clip-text text-transparent leading-tight'>
+                  <h1 className='text-3xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent leading-tight'>
                     {story.title}
                   </h1>
                   {story.synopsis && (
@@ -174,9 +188,9 @@ const ReaderPage = () => {
           {/* Sidebar */}
           <div className='lg:col-span-1 flex flex-col gap-6'>
             {/* Author Section */}
-            <Card className='bg-card/80 backdrop-blur-lg border-primary/20'>
+            <Card className='bg-card backdrop-blur-lg border-primary/20'>
               <CardContent className='p-6 text-center'>
-                <div className='w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl'>
+                <div className='w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full mx-auto mb-4 flex items-center justify-center text-2xl'>
                   ✍️
                 </div>
                 <h3 className='text-xl font-semibold mb-4'>{story.author}</h3>
@@ -194,7 +208,7 @@ const ReaderPage = () => {
             </Card>
 
             {/* Remix Ideas */}
-            <Card className='bg-gradient-to-br from-primary/10 to-blue-500/10 border-primary/30 backdrop-blur-lg'>
+            <Card className='bg-card border-primary/30 backdrop-blur-lg'>
               <CardContent className='p-6'>
                 <h4 className='text-xl font-semibold mb-6 text-primary'>
                   Remix Ideas
@@ -204,6 +218,7 @@ const ReaderPage = () => {
                     <div
                       key={index}
                       className='flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-transparent hover:border-primary/40 hover:bg-primary/20 transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group'
+                      onClick={() => handleRemixSuggestion(suggestion)}
                     >
                       <span className='text-lg'>{suggestion.emoji}</span>
                       <span className='text-muted-foreground group-hover:text-primary transition-colors'>
@@ -216,20 +231,18 @@ const ReaderPage = () => {
             </Card>
 
             {/* Action Buttons */}
-            <Card className='bg-card/80 backdrop-blur-lg border-primary/20'>
+            <Card className='bg-card backdrop-blur-lg border-primary/20'>
               <CardContent className='p-6'>
                 <div className='flex flex-col gap-4'>
                   <Button
-                    className='w-full bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90 text-primary-foreground font-semibold py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1'
-                    onClick={() =>
-                      console.log("Remix functionality coming soon")
-                    }
+                    className='w-full font-semibold'
+                    onClick={handleRemixStory}
                   >
                     Remix This Story
                   </Button>
                   <Button
                     variant='outline'
-                    className='w-full border-2 border-primary/40 text-primary hover:bg-primary/10 hover:border-primary/60 py-6 rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1'
+                    className='w-full font-semibold'
                     onClick={() => console.log("Tip functionality coming soon")}
                   >
                     Tip This Story

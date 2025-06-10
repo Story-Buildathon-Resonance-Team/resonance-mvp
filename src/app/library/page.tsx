@@ -89,7 +89,7 @@ export default function StoriesPage() {
                 {/* Action Buttons */}
                 <div className='flex gap-2 pt-2'>
                   {story.ipId && story.contentCID ? (
-                    <Link href={`/stories/${story.ipId}`} target='_blank'>
+                    <Link href={`/stories/${story.ipId}`}>
                       <Button
                         variant='outline'
                         size='sm'
