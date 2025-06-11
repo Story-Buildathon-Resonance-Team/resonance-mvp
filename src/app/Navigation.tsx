@@ -47,7 +47,6 @@ export default function Navigation() {
     if (isConnected && address && !hasRedirected.current) {
       // Only redirect to dashboard if not already on a specific page
       if (pathname === "/" || pathname === "") {
-        console.log("User connected, navigating to dashboard");
         router.push("/dashboard");
       }
       hasRedirected.current = true;
@@ -56,14 +55,6 @@ export default function Navigation() {
       hasRedirected.current = false;
     }
   }, [isConnected, address, router, pathname]);
-
-  useEffect(() => {
-    if (isConnected && address) {
-      console.log("Connected address:", address);
-    } else {
-      console.log("Not connected");
-    }
-  }, [isConnected, address]);
 
   // Handle scroll behavior for floating navbar
   useEffect(() => {
@@ -102,24 +93,12 @@ export default function Navigation() {
 
   const handleLogout = () => {
     disconnect?.();
-    console.log("User logged out");
-  };
-
-  const handlePreferences = () => {
-    // TODO: Navigate to preferences page or open preferences modal
-    console.log("Opening preferences");
-    navigate("/preferences");
   };
 
   const handleLogin = () => {
-    console.log("Login button clicked!");
-    console.log("openConnectModal:", openConnectModal);
-    console.log("typeof openConnectModal:", typeof openConnectModal);
-
     if (openConnectModal) {
       try {
         openConnectModal();
-        console.log("openConnectModal called successfully");
       } catch (error) {
         console.error("Error calling openConnectModal:", error);
       }
@@ -166,19 +145,8 @@ export default function Navigation() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={handlePreferences}
-            className='cursor-pointer'
-          >
-            <Settings className='mr-2 h-4 w-4' />
-            <span>Preferences</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={handleLogout}
-            className='cursor-pointer text-red-600'
-          >
-            <LogOut className='mr-2 h-4 w-4' />
+          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
+            <LogOut className="mr-2 h-4 w-4" />
             <span>Logout</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
