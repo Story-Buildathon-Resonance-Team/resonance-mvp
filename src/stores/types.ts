@@ -22,6 +22,8 @@ export interface PublishedStory {
   };
   contentCID: string;
   imageCID: string;
+  nftMetadataCID: string;
+  ipMetadataCID: string;
   txHash: string;
   tokenId: string;
   licenseTypes: ("non-commercial" | "commercial-use" | "commercial-remix")[];

@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { users, StoryEntry } from "@/data/user";
 import { useStoryStore } from "@/stores/storyStore";
 import { Loader2, AlertCircle } from "lucide-react";
-import { DetailedLicenseTerms } from "@/types/license";
 
 interface StoryWithAuthor extends StoryEntry {
   author: string;
@@ -21,12 +20,25 @@ interface AssetData {
   description: string;
 }
 
+interface NFTMetadataAttribute {
+  trait_type: string;
+  value: string;
+}
+
+interface NFTMetadata {
+  name: string;
+  description: string;
+  image: string;
+  animation_url: string;
+  attributes: NFTMetadataAttribute[];
+}
+
 interface ProcessedLicenseData {
   hasLicenses: boolean;
   allowsRemix: boolean;
   isCommercialUseOnly: boolean;
   licenseCount: number;
-  licenses: DetailedLicenseTerms[];
+  licenses: string[];
 }
 
 interface StoryContentData {
@@ -72,31 +84,68 @@ const ReaderPage = () => {
   const getIPFSUrl = (cid: string) =>
     `https://gateway.pinata.cloud/ipfs/${cid}`;
 
-  // Process license data to determine remix capabilities
-  const processLicenseData = (
-    licenses: DetailedLicenseTerms[]
+  // Process license data from NFT metadata attributes
+  const processLicenseDataFromMetadata = (
+    attributes: NFTMetadataAttribute[]
   ): ProcessedLicenseData => {
-    const hasLicenses = licenses.length > 0;
-
-    if (!hasLicenses) {
+    // Add guard clause to handle undefined or invalid attributes
+    if (!attributes || !Array.isArray(attributes) || attributes.length === 0) {
       return {
         hasLicenses: false,
-        allowsRemix: true, // Default to allowing remix if no licenses
+        allowsRemix: true, // Default to allowing remix if no attributes found
         isCommercialUseOnly: false,
         licenseCount: 0,
         licenses: [],
       };
     }
 
-    // Check if ANY license allows derivatives (remix)
-    const allowsRemix = licenses.some(
-      (license) => license.terms.derivativesAllowed === true
+    const licenses: string[] = [];
+
+    // Check for OLD format (single License Type)
+    const oldLicenseType = attributes.find(
+      (attr) => attr.trait_type === "License Type"
     );
 
-    // Check if ALL licenses are commercial use only (templateId "2")
-    const isCommercialUseOnly =
-      licenses.length > 0 &&
-      licenses.every((license) => license.licenseTemplateId === "2");
+    if (oldLicenseType) {
+      licenses.push(oldLicenseType.value);
+    } else {
+      // Check for NEW format (multiple licenses)
+      const licenseCountAttr = attributes.find(
+        (attr) => attr.trait_type === "License Count"
+      );
+
+      if (licenseCountAttr) {
+        const licenseCount = parseInt(licenseCountAttr.value, 10);
+        for (let i = 1; i <= licenseCount; i++) {
+          const licenseAttr = attributes.find(
+            (attr) => attr.trait_type === `License ${i}`
+          );
+          if (licenseAttr) {
+            licenses.push(licenseAttr.value);
+          }
+        }
+      }
+    }
+
+    const hasLicenses = licenses.length > 0;
+
+    if (!hasLicenses) {
+      return {
+        hasLicenses: false,
+        allowsRemix: true, // Default to allowing remix if no licenses found
+        isCommercialUseOnly: false,
+        licenseCount: 0,
+        licenses: [],
+      };
+    }
+
+    // Check if ALL licenses are Commercial Use (blocks remixes)
+    const isCommercialUseOnly = licenses.every(
+      (license) => license === "Commercial Use"
+    );
+
+    // Allow remixes if ANY license allows it (i.e., not all are Commercial Use)
+    const allowsRemix = !isCommercialUseOnly;
 
     return {
       hasLicenses,
@@ -106,24 +155,10 @@ const ReaderPage = () => {
       licenses,
     };
   };
-
   // Navigation handlers for remix functionality
   const handleRemixStory = () => {
     if (story) {
       router.push(`/remix-form?originalStoryId=${story.ipId}`);
-    }
-  };
-
-  const handleRemixSuggestion = (suggestion: {
-    emoji: string;
-    text: string;
-  }) => {
-    if (story) {
-      router.push(
-        `/remix-form?originalStoryId=${
-          story.ipId
-        }&suggestion=${encodeURIComponent(suggestion.text)}`
-      );
     }
   };
 
@@ -146,20 +181,32 @@ const ReaderPage = () => {
     }
   };
 
-  // Fetch and process license data from API
-  const fetchLicenseData = async (ipId: string) => {
+  // Fetch and process license data from NFT metadata
+  const fetchLicenseDataFromMetadata = async (nftMetadataCID: string) => {
     try {
       setLicenseLoading(true);
       setLicenseError("");
-      const response = await fetch(`/api/licenses/${ipId}`);
+
+      const response = await fetch(getIPFSUrl(nftMetadataCID));
       if (!response.ok) {
-        throw new Error(`Failed to fetch license data: ${response.statusText}`);
+        throw new Error(`Failed to fetch NFT metadata: ${response.statusText}`);
       }
-      const rawLicenses: DetailedLicenseTerms[] = await response.json();
-      const processedData = processLicenseData(rawLicenses);
+
+      const nftMetadata: NFTMetadata = await response.json();
+      const processedData = processLicenseDataFromMetadata(
+        nftMetadata.attributes
+      );
       setLicenseData(processedData);
     } catch (error) {
-      console.error("Error fetching license data:", error);
+      console.error("Error fetching NFT metadata:", error);
+      // Default to allowing remixes on error
+      setLicenseData({
+        hasLicenses: false,
+        allowsRemix: true,
+        isCommercialUseOnly: false,
+        licenseCount: 0,
+        licenses: [],
+      });
       setLicenseError("Failed to load license data");
     } finally {
       setLicenseLoading(false);
@@ -251,10 +298,15 @@ const ReaderPage = () => {
     }
 
     // Check for required fields
-    if (!foundStory.title || !foundStory.contentCID) {
+    if (
+      !foundStory.title ||
+      !foundStory.contentCID ||
+      !foundStory.nftMetadataCID
+    ) {
       const missingFields = [];
       if (!foundStory.title) missingFields.push("title");
       if (!foundStory.contentCID) missingFields.push("contentCID");
+      if (!foundStory.nftMetadataCID) missingFields.push("nftMetadataCID");
 
       setError(
         `Sorry, this is a test app and some configuration is missing. The following required fields are missing: ${missingFields.join(
@@ -272,7 +324,7 @@ const ReaderPage = () => {
     Promise.all([
       fetchStoryContent(foundStory.contentCID),
       fetchAssetData(ipId),
-      fetchLicenseData(ipId),
+      fetchLicenseDataFromMetadata(foundStory.nftMetadataCID),
     ]);
   }, [ipId, publishedStories]);
 
@@ -302,7 +354,7 @@ const ReaderPage = () => {
       return "License terms not available";
     }
     if (licenseData.isCommercialUseOnly) {
-      return "This story was registered with a Commercial Use license. No remixes allowed.";
+      return "This story was registered with Commercial Use license(s) only. No remixes allowed.";
     }
     if (!licenseData.allowsRemix) {
       return "This story's license does not allow remixes.";
@@ -455,8 +507,7 @@ const ReaderPage = () => {
                     {suggestions.map((suggestion, index) => (
                       <div
                         key={index}
-                        className='flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-transparent hover:border-primary/40 hover:bg-primary/20 transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group'
-                        onClick={() => handleRemixSuggestion(suggestion)}
+                        className='flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-transparent hover:border-primary/40 hover:bg-primary/20 transition-all duration-300 hover:-translate-y-0.5 group'
                       >
                         <span className='text-lg'>{suggestion.emoji}</span>
                         <span className='text-muted-foreground group-hover:text-primary transition-colors'>
@@ -499,22 +550,6 @@ const ReaderPage = () => {
                       </>
                     ) : (
                       "Remix This Story"
-                    )}
-                  </Button>
-
-                  <Button
-                    variant='outline'
-                    className='w-full font-semibold'
-                    onClick={() => console.log("Tip functionality coming soon")}
-                    disabled={licenseLoading || !shouldShowRemixFeatures()}
-                  >
-                    {licenseLoading ? (
-                      <>
-                        <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                        Checking license...
-                      </>
-                    ) : (
-                      "Tip This Story"
                     )}
                   </Button>
 

@@ -12,6 +12,8 @@ export interface StoryRegistrationData {
   description: string;
   contentCID: string;
   imageCID: string;
+  nftMetadataCID: string;
+  ipMetadataCID: string;
   author: {
     name: string;
     address: Address;
@@ -132,6 +134,8 @@ export async function registerStoryAsIPWithStore(
       author: data.author,
       contentCID: data.contentCID,
       imageCID: data.imageCID,
+      nftMetadataCID: data.nftMetadataCID,
+      ipMetadataCID: data.ipMetadataCID,
       txHash: result.txHash!,
       tokenId: result.tokenId!,
       licenseTypes: data.licenseTypes,
