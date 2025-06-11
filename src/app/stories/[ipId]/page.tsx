@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { users, StoryEntry } from "@/data/user";
 import { useStoryStore } from "@/stores/storyStore";
 import { Loader2, AlertCircle } from "lucide-react";
+import { DetailedLicenseTerms } from "@/types/license";
 
 interface StoryWithAuthor extends StoryEntry {
   author: string;
@@ -20,12 +21,12 @@ interface AssetData {
   description: string;
 }
 
-interface LicenseData {
+interface ProcessedLicenseData {
   hasLicenses: boolean;
-  isCommercialUseOnly: boolean;
   allowsRemix: boolean;
+  isCommercialUseOnly: boolean;
   licenseCount: number;
-  licenses: any[];
+  licenses: DetailedLicenseTerms[];
 }
 
 interface StoryContentData {
@@ -48,7 +49,9 @@ const ReaderPage = () => {
   const [story, setStory] = useState<StoryWithAuthor | null>(null);
   const [storyContent, setStoryContent] = useState<string>("");
   const [assetData, setAssetData] = useState<AssetData | null>(null);
-  const [licenseData, setLicenseData] = useState<LicenseData | null>(null);
+  const [licenseData, setLicenseData] = useState<ProcessedLicenseData | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [contentLoading, setContentLoading] = useState(true);
   const [assetLoading, setAssetLoading] = useState(true);
@@ -68,6 +71,41 @@ const ReaderPage = () => {
 
   const getIPFSUrl = (cid: string) =>
     `https://gateway.pinata.cloud/ipfs/${cid}`;
+
+  // Process license data to determine remix capabilities
+  const processLicenseData = (
+    licenses: DetailedLicenseTerms[]
+  ): ProcessedLicenseData => {
+    const hasLicenses = licenses.length > 0;
+
+    if (!hasLicenses) {
+      return {
+        hasLicenses: false,
+        allowsRemix: true, // Default to allowing remix if no licenses
+        isCommercialUseOnly: false,
+        licenseCount: 0,
+        licenses: [],
+      };
+    }
+
+    // Check if ANY license allows derivatives (remix)
+    const allowsRemix = licenses.some(
+      (license) => license.terms.derivativesAllowed === true
+    );
+
+    // Check if ALL licenses are commercial use only (templateId "2")
+    const isCommercialUseOnly =
+      licenses.length > 0 &&
+      licenses.every((license) => license.licenseTemplateId === "2");
+
+    return {
+      hasLicenses,
+      allowsRemix,
+      isCommercialUseOnly,
+      licenseCount: licenses.length,
+      licenses,
+    };
+  };
 
   // Navigation handlers for remix functionality
   const handleRemixStory = () => {
@@ -108,7 +146,7 @@ const ReaderPage = () => {
     }
   };
 
-  // Fetch license data from API
+  // Fetch and process license data from API
   const fetchLicenseData = async (ipId: string) => {
     try {
       setLicenseLoading(true);
@@ -117,8 +155,9 @@ const ReaderPage = () => {
       if (!response.ok) {
         throw new Error(`Failed to fetch license data: ${response.statusText}`);
       }
-      const data = await response.json();
-      setLicenseData(data);
+      const rawLicenses: DetailedLicenseTerms[] = await response.json();
+      const processedData = processLicenseData(rawLicenses);
+      setLicenseData(processedData);
     } catch (error) {
       console.error("Error fetching license data:", error);
       setLicenseError("Failed to load license data");
@@ -248,7 +287,27 @@ const ReaderPage = () => {
   // Determine if remix functionality should be shown
   const shouldShowRemixFeatures = () => {
     if (licenseError || !licenseData) return true; // Default to showing if we can't determine
-    return licenseData.allowsRemix && !licenseData.isCommercialUseOnly;
+    return licenseData.allowsRemix;
+  };
+
+  // Get remix status message
+  const getRemixStatusMessage = () => {
+    if (licenseLoading) {
+      return "Checking license terms...";
+    }
+    if (licenseError) {
+      return "Unable to verify license terms";
+    }
+    if (!licenseData) {
+      return "License terms not available";
+    }
+    if (licenseData.isCommercialUseOnly) {
+      return "This story was registered with a Commercial Use license. No remixes allowed.";
+    }
+    if (!licenseData.allowsRemix) {
+      return "This story's license does not allow remixes.";
+    }
+    return null;
   };
 
   // Get origin status text
@@ -295,6 +354,7 @@ const ReaderPage = () => {
   if (!story) return null;
 
   const paragraphs = parseStoryContent(storyContent);
+  const remixStatusMessage = getRemixStatusMessage();
 
   return (
     <div className='min-h-screen p-4 md:p-8'>
@@ -384,7 +444,7 @@ const ReaderPage = () => {
               </CardContent>
             </Card>
 
-            {/* Remix Ideas or Commercial Use Message */}
+            {/* Remix Ideas or License Restriction Message */}
             {shouldShowRemixFeatures() ? (
               <Card className='bg-card border-primary/30 backdrop-blur-lg'>
                 <CardContent className='p-6'>
@@ -411,12 +471,12 @@ const ReaderPage = () => {
               <Card className='bg-card border-amber-500/30 backdrop-blur-lg'>
                 <CardContent className='p-6'>
                   <h4 className='text-xl font-semibold mb-4 text-amber-500'>
-                    Commercial Use License
+                    License Restriction
                   </h4>
                   <div className='bg-amber-500/10 border border-amber-500/30 rounded-lg p-4'>
                     <p className='text-amber-400 text-sm'>
-                      This story was registered with a Commercial Use license.
-                      No remixes allowed.
+                      {remixStatusMessage ||
+                        "Remix not available for this story."}
                     </p>
                   </div>
                 </CardContent>
@@ -427,41 +487,36 @@ const ReaderPage = () => {
             <Card className='bg-card backdrop-blur-lg border-primary/20'>
               <CardContent className='p-6'>
                 <div className='flex flex-col gap-4'>
-                  {shouldShowRemixFeatures() && (
-                    <>
-                      <Button
-                        className='w-full font-semibold'
-                        onClick={handleRemixStory}
-                        disabled={licenseLoading}
-                      >
-                        {licenseLoading ? (
-                          <>
-                            <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                            Loading...
-                          </>
-                        ) : (
-                          "Remix This Story"
-                        )}
-                      </Button>
-                      <Button
-                        variant='outline'
-                        className='w-full font-semibold'
-                        onClick={() =>
-                          console.log("Tip functionality coming soon")
-                        }
-                        disabled={licenseLoading}
-                      >
-                        {licenseLoading ? (
-                          <>
-                            <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                            Loading...
-                          </>
-                        ) : (
-                          "Tip This Story"
-                        )}
-                      </Button>
-                    </>
-                  )}
+                  <Button
+                    className='w-full font-semibold'
+                    onClick={handleRemixStory}
+                    disabled={licenseLoading || !shouldShowRemixFeatures()}
+                  >
+                    {licenseLoading ? (
+                      <>
+                        <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                        Checking license...
+                      </>
+                    ) : (
+                      "Remix This Story"
+                    )}
+                  </Button>
+
+                  <Button
+                    variant='outline'
+                    className='w-full font-semibold'
+                    onClick={() => console.log("Tip functionality coming soon")}
+                    disabled={licenseLoading || !shouldShowRemixFeatures()}
+                  >
+                    {licenseLoading ? (
+                      <>
+                        <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                        Checking license...
+                      </>
+                    ) : (
+                      "Tip This Story"
+                    )}
+                  </Button>
 
                   {licenseError && (
                     <div className='bg-destructive/10 border border-destructive/30 rounded-lg p-3'>
