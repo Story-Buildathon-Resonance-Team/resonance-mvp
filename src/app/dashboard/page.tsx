@@ -76,7 +76,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="max-w-6xl mx-auto px-6 py-8">
       <DashboardDataSeeder />
       
       {/* Header Section */}
@@ -100,19 +100,19 @@ export default function DashboardPage() {
 
         {/* Quick Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="text-center p-4 bg-muted/30 rounded-lg">
+          <div className="text-center p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
             <div className="text-2xl font-bold text-primary">{stats.totalDrafts}</div>
             <div className="text-sm text-muted-foreground">Drafts</div>
           </div>
-          <div className="text-center p-4 bg-muted/30 rounded-lg">
+          <div className="text-center p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
             <div className="text-2xl font-bold text-primary">{stats.totalPublished}</div>
             <div className="text-sm text-muted-foreground">Published</div>
           </div>
-          <div className="text-center p-4 bg-muted/30 rounded-lg">
+          <div className="text-center p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
             <div className="text-2xl font-bold text-primary">{stats.totalBookmarked}</div>
             <div className="text-sm text-muted-foreground">Bookmarked</div>
           </div>
-          <div className="text-center p-4 bg-muted/30 rounded-lg">
+          <div className="text-center p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
             <div className="text-2xl font-bold text-primary">{stats.recentActivity}</div>
             <div className="text-sm text-muted-foreground">This Week</div>
           </div>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
       <div className="space-y-6">
         {/* Stories Toggle */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center bg-muted rounded-lg p-1">
+          <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-1">
             <Button
               variant={activeView === 'drafts' ? 'default' : 'ghost'}
               size="sm"

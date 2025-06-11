@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +26,26 @@ import { useStoryStore } from "../stores/storyStore";
 export default function HomePage() {
   const { isConnected } = useUser();
   const { publishedStories } = useStoryStore();
+  const router = useRouter();
+
+  // Automatically redirect logged-in users to dashboard
+  useEffect(() => {
+    if (isConnected) {
+      router.push("/dashboard");
+    }
+  }, [isConnected, router]);
+
+  // Don't render the landing page if user is connected (they'll be redirected)
+  if (isConnected) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Get the latest published stories for display
   const latestStories = publishedStories

@@ -198,24 +198,6 @@ export default function StoriesPage() {
         </Card>
       )}
 
-      {/* Call to Action */}
-      <Card className='text-center p-6 bg-primary/5 border-primary/20'>
-        <CardContent>
-          <h3 className='text-lg font-semibold mb-2'>
-            Ready to Share Your Story?
-          </h3>
-          <p className='text-muted-foreground mb-4'>
-            Register your fiction as intellectual property and join the
-            decentralized storytelling revolution.
-          </p>
-          <Link href='/publish-form'>
-            <Button>
-              <BookOpen className='h-4 w-4 mr-2' />
-              Publish Your Story
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
-    </div>
+          </div>
   );
 }

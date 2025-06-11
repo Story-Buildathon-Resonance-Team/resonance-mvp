@@ -40,7 +40,6 @@ export default function StoriesPage() {
     licenseType: story.licenseType,
   }));
 
-  // Combine and deduplicate stories (store stories take precedence)
   const allStoriesMap = new Map();
   
   // Add user stories first
@@ -66,9 +65,7 @@ export default function StoriesPage() {
     `https://gateway.pinata.cloud/ipfs/${cid}`;
 
   return (
-    <div className='w-full max-w-6xl mx-auto space-y-8'>
-      <br />
-      <br />
+    <div className='max-w-6xl mx-auto px-6 py-8 space-y-8'>
       {/* Header */}
       <div className='text-center space-y-4'>
         <div className='flex items-center justify-center gap-2 mb-4'>

@@ -5,7 +5,9 @@ import "./globals.css";
 import { PropsWithChildren } from "react";
 import Web3Providers from "./Web3Providers";
 import Navigation from "./Navigation";
+import Sidebar from "./Sidebar";
 import { StoreProvider } from "@/stores/StoreProvider";
+import LayoutWrapper from "./LayoutWrapper";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -24,17 +26,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <body className={`${inter.className} antialiased h-full overflow-x-hidden`}>
         <StoreProvider>
           <Web3Providers>
-            {/* Fixed Navigation */}
-            <header className="fixed top-0 left-0 right-0 z-50">
-              <div className="container mx-auto px-6 py-6">
-                <Navigation />
-              </div>
-            </header>
-            
-            {/* Main Content - Full Screen */}
-            <main className='w-full min-h-screen pt-24'>
+            <LayoutWrapper>
               {children}
-            </main>
+            </LayoutWrapper>
           </Web3Providers>
         </StoreProvider>
       </body>
