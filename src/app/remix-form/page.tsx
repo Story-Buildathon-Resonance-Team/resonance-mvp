@@ -180,7 +180,7 @@ export default function RemixStoryForm({
     resetForm,
   } = usePublishStore();
 
-  const { addPublishedStory } = useStoryStore();
+  const { addPublishedStory, publishedStories } = useStoryStore();
   const [successResult, setSuccessResult] = useState<unknown>(null);
 
   const { address, isConnected, userName } = useUser();
@@ -189,12 +189,28 @@ export default function RemixStoryForm({
   useEffect(() => {
     if (originalStoryId) {
       const findStory = () => {
+        // First check the store for published stories (custom stories)
+        const storeStory = publishedStories.find((s) => s.ipId === originalStoryId);
+        if (storeStory) {
+          return {
+            ipId: storeStory.ipId,
+            title: storeStory.title,
+            description: storeStory.description,
+            author: storeStory.author.name || storeStory.author.address.slice(0, 8) + "...",
+            licenseType: storeStory.licenseTypes?.[0] || 'non-commercial', // Use first license type
+            contentCID: storeStory.contentCID,
+            imageCID: storeStory.imageCID,
+          };
+        }
+
+        // Fallback to static user data (preloaded stories)
         for (const user of users) {
           const foundStory = user.stories.find((s) => s.ipId === originalStoryId);
           if (foundStory) {
             return {
               ...foundStory,
               author: user.userName || user.walletAddress.slice(0, 8) + "...",
+              licenseType: 'non-commercial', // Default for static stories
             };
           }
         }
@@ -207,7 +223,7 @@ export default function RemixStoryForm({
     } else {
       setLoadingOriginalStory(false);
     }
-  }, [originalStoryId]);
+  }, [originalStoryId, publishedStories]);
 
   // Get author name from user data or fallback to wallet address
   const getAuthorName = (): string => {
@@ -228,13 +244,14 @@ export default function RemixStoryForm({
 
   const authorName = getAuthorName();
 
-  // Pre-populate form with remix-specific defaults
+  // Pre-populate form with remix-specific defaults and license inheritance
   const defaultValues = {
     title: originalStory ? `Remix of ${(originalStory as { title: string }).title}` : "",
     description: suggestionText ? decodeURIComponent(suggestionText) : "",
     contentType: "text" as const,
     content: "",
-    licenseType: "non-commercial" as const,
+    // Inherit license from parent story, with fallback to non-commercial
+    licenseType: (originalStory as { licenseType?: string })?.licenseType as "non-commercial" | "commercial-use" | "commercial-remix" || "non-commercial" as const,
   };
 
   const form = useForm<FormData>({
@@ -246,8 +263,13 @@ export default function RemixStoryForm({
   // Update form when original story loads
   useEffect(() => {
     if (originalStory && !form.watch("title")) {
+      const inheritedLicense = (originalStory as { licenseType?: string })?.licenseType || 'non-commercial';
       form.setValue("title", `Remix of ${(originalStory as { title: string }).title}`);
-      updateFormData({ title: `Remix of ${(originalStory as { title: string }).title}` });
+      form.setValue("licenseType", inheritedLicense as "non-commercial" | "commercial-use" | "commercial-remix");
+      updateFormData({ 
+        title: `Remix of ${(originalStory as { title: string }).title}`,
+        licenseType: inheritedLicense as "non-commercial" | "commercial-use" | "commercial-remix"
+      });
     }
     if (suggestionText && !form.watch("description")) {
       const decodedSuggestion = decodeURIComponent(suggestionText);
@@ -406,9 +428,11 @@ export default function RemixStoryForm({
           },
           contentCID: pinataResult.contentCID,
           imageCID: pinataResult.imageCID,
+          nftMetadataCID: pinataResult.contentCID, // Using contentCID as fallback
+          ipMetadataCID: pinataResult.contentCID, // Using contentCID as fallback
           txHash: registrationResult.txHash || '',
           tokenId: registrationResult.tokenId || '',
-          licenseType: data.licenseType,
+          licenseTypes: [data.licenseType], // Convert single license to array
           publishedAt: Date.now(),
           explorerUrl: registrationResult.explorerUrl || '',
           originalStoryId, // Track as remix
@@ -593,6 +617,24 @@ export default function RemixStoryForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>License Type for Your Remix</FormLabel>
+                        {originalStory && (
+                          <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                            <div className="flex items-start gap-3">
+                              <LinkIcon className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                              <div className="space-y-2">
+                                <div className="text-sm font-medium text-blue-900">
+                                  License Inheritance
+                                </div>
+                                <div className="text-sm text-blue-800">
+                                  Your remix will automatically inherit the <strong>"{(originalStory as { licenseType?: string })?.licenseType || 'non-commercial'}"</strong> license from the original story <strong>"{(originalStory as { title: string }).title}"</strong> by <strong>{(originalStory as { author: string }).author}</strong>.
+                                </div>
+                                <div className="text-xs text-blue-600">
+                                  This ensures proper attribution and maintains the licensing chain for derivative works.
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <FormControl>
                           <div className="space-y-4">
                             <div className="grid gap-4">

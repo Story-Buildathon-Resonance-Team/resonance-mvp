@@ -12,13 +12,18 @@ export interface StoryRegistrationData {
   description: string;
   contentCID: string;
   imageCID: string;
-  nftMetadataCID: string;
-  ipMetadataCID: string;
+  nftMetadataCID?: string;
+  ipMetadataCID?: string;
   author: {
     name: string;
     address: Address;
   };
-  licenseTypes: ("non-commercial" | "commercial-use" | "commercial-remix")[];
+  licenseTypes?: ("non-commercial" | "commercial-use" | "commercial-remix")[];
+  licenseType?: "non-commercial" | "commercial-use" | "commercial-remix";
+  // Remix-specific fields
+  originalStoryId?: string;
+  originalTitle?: string;
+  originalAuthor?: string;
 }
 
 export interface StoryRegistrationResult {
@@ -42,16 +47,20 @@ export async function registerStoryAsIP(
   try {
     console.log("Registering story as IP:", data.title);
 
-    // Validate license types array
-    if (
-      !data.licenseTypes ||
-      !Array.isArray(data.licenseTypes) ||
-      data.licenseTypes.length === 0
-    ) {
+    // Handle both single license type (remix) and multiple license types (original story)
+    let licenseTypes: ("non-commercial" | "commercial-use" | "commercial-remix")[];
+    
+    if (data.licenseType) {
+      // Single license type (typically for remixes)
+      licenseTypes = [data.licenseType];
+    } else if (data.licenseTypes && data.licenseTypes.length > 0) {
+      // Multiple license types (typically for original stories)
+      licenseTypes = data.licenseTypes;
+    } else {
       throw new Error("At least one license type must be provided");
     }
 
-    if (data.licenseTypes.length > 3) {
+    if (licenseTypes.length > 3) {
       throw new Error("Maximum 3 license types allowed");
     }
 
@@ -61,7 +70,7 @@ export async function registerStoryAsIP(
       "commercial-use",
       "commercial-remix",
     ];
-    const invalidLicenses = data.licenseTypes.filter(
+    const invalidLicenses = licenseTypes.filter(
       (type) => !validLicenseTypes.includes(type)
     );
     if (invalidLicenses.length > 0) {
@@ -69,10 +78,10 @@ export async function registerStoryAsIP(
     }
 
     // Check for duplicates
-    const uniqueLicenses = [...new Set(data.licenseTypes)];
-    if (uniqueLicenses.length !== data.licenseTypes.length) {
+    const uniqueLicenses = [...new Set(licenseTypes)];
+    if (uniqueLicenses.length !== licenseTypes.length) {
       console.warn("Duplicate license types detected, removing duplicates");
-      data.licenseTypes = uniqueLicenses;
+      licenseTypes = uniqueLicenses;
     }
 
     const response = await fetch("/api/register-story", {
@@ -80,7 +89,10 @@ export async function registerStoryAsIP(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        ...data,
+        licenseTypes: licenseTypes,
+      }),
     });
 
     if (!response.ok) {
