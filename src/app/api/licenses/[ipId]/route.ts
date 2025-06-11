@@ -1,8 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CommercialUseOnlyTermsId } from "@/utils/utils";
+import { getIPLicensesFromStory } from "@/lib/licenses";
+import { DetailedLicenseTerms, OffchainTerms } from "@/types/license";
 
 // Set cache control headers for 15 minutes
 export const revalidate = 900; // 15 minutes in seconds
+
+// Helper function to convert GitHub URLs to raw format if needed. This function ensures that when Story Protocol stores GitHub URLs as license term URIs, the API can successfully fetch the actual license document content.
+function convertToRawGitHubUrl(url: string): string {
+  // Check if it's a GitHub repository URL that needs conversion
+  if (url.includes("github.com") && url.includes("/blob/")) {
+    // Replace 'github.com' with 'raw.githubusercontent.com' and remove '/blob'
+    return url
+      .replace("github.com", "raw.githubusercontent.com")
+      .replace("/blob/", "/");
+  }
+  return url;
+}
+
+// Helper function to validate if a URL is legitimate
+function isValidUrl(urlString: string): boolean {
+  try {
+    // Check if string is a valid URL format
+    const url = new URL(urlString);
+    // Ensure protocol is http or https (not ipfs:// or other non-web protocols)
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (error) {
+    return false;
+  }
+}
 
 export async function GET(
   request: NextRequest,
@@ -13,65 +38,71 @@ export async function GET(
   const ipId = resolvedParams.ipId;
 
   try {
-    // Fetch licenses from Story Protocol API
-    const response = await fetch(
-      `https://api.storyapis.com/api/v3/assets/${ipId}/licenses`,
-      {
-        headers: {
-          "X-Api-Key": process.env.X_API_KEY!,
-          "X-Chain": process.env.X_CHAIN!,
-        },
-        next: { revalidate },
-      }
-    );
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: `Failed to fetch license data: ${response.statusText}` },
-        { status: response.status }
-      );
-    }
-
-    const apiResponse = await response.json();
-    const licenses = apiResponse.data || [];
+    // Fetch PIL Flavor licenses from Story Protocol API
+    const licenses = await getIPLicensesFromStory(ipId);
 
     if (!licenses || licenses.length === 0) {
-      // No licenses found
-      return NextResponse.json({
-        hasLicenses: false,
-        isCommercialUseOnly: false,
-        allowsRemix: true, // Default to allowing remix if no licenses
-        licenseCount: 0,
-        licenses: [],
-      });
+      // No PIL Flavor licenses found, return empty array with 200 status
+      return NextResponse.json([], { status: 200 });
     }
 
-    // Filter out disabled licenses
-    const activeLicenses = licenses.filter((license: any) => !license.disabled);
+    // Fetch off-chain terms for each license with a valid URI
+    const enhancedLicenses = await Promise.all(
+      licenses.map(async (license: DetailedLicenseTerms) => {
+        // Skip fetching if there's no URI or it's not a valid URL
+        if (!license.terms.uri || !isValidUrl(license.terms.uri)) {
+          console.log(
+            `License ${license.id} has no valid URI for off-chain terms`
+          );
+          return license;
+        }
 
-    // Check if there's only one license and it's Commercial Use Only (ID "2")
-    const isCommercialUseOnly =
-      activeLicenses.length === 1 &&
-      activeLicenses[0].licenseTermsId === CommercialUseOnlyTermsId;
+        try {
+          // Convert GitHub URLs to raw format if needed
+          const fetchUrl = convertToRawGitHubUrl(license.terms.uri);
+          console.log(`Fetching off-chain terms from: ${fetchUrl}`);
 
-    // Commercial Use Only doesn't allow derivatives/remixes
-    const allowsRemix = !isCommercialUseOnly;
+          // Fetch the off-chain terms from the license URI with a timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-    return NextResponse.json({
-      hasLicenses: activeLicenses.length > 0,
-      isCommercialUseOnly,
-      allowsRemix,
-      licenseCount: activeLicenses.length,
-      licenses: activeLicenses.map((license: any) => ({
-        id: license.id,
-        licenseTermsId: license.licenseTermsId,
-        disabled: license.disabled,
-      })),
-    });
+          try {
+            const response = await fetch(fetchUrl, {
+              signal: controller.signal,
+            });
+
+            if (response.ok) {
+              const offchainTerms = await response.json();
+              // Return license with off-chain terms attached
+              return {
+                ...license,
+                offchainTerms: offchainTerms as OffchainTerms,
+              };
+            } else {
+              console.warn(
+                `Failed to fetch off-chain terms: ${response.status} ${response.statusText}`
+              );
+            }
+          } finally {
+            clearTimeout(timeoutId);
+          }
+        } catch (error) {
+          console.error(
+            `Failed to fetch off-chain terms for license ${license.id}:`,
+            error instanceof Error ? error.message : error
+          );
+        }
+
+        // Return license without off-chain terms if fetch failed
+        return license;
+      })
+    );
+
+    return NextResponse.json(enhancedLicenses);
   } catch (error) {
-    console.error("Error fetching license data from Story:", error);
+    console.error("Error fetching licenses from Story:", error);
     return NextResponse.json(
-      { error: "Failed to fetch license data from Story Protocol" },
+      { error: "Failed to fetch licenses from Story Protocol" },
       { status: 500 }
     );
   }
