@@ -12,11 +12,13 @@ export interface StoryRegistrationData {
   description: string;
   contentCID: string;
   imageCID: string;
+  nftMetadataCID: string;
+  ipMetadataCID: string;
   author: {
     name: string;
     address: Address;
   };
-  licenseType: "non-commercial" | "commercial-remix" | "commercial-use";
+  licenseTypes: ("non-commercial" | "commercial-use" | "commercial-remix")[];
 }
 
 export interface StoryRegistrationResult {
@@ -39,6 +41,39 @@ export async function registerStoryAsIP(
 ): Promise<StoryRegistrationResult> {
   try {
     console.log("Registering story as IP:", data.title);
+
+    // Validate license types array
+    if (
+      !data.licenseTypes ||
+      !Array.isArray(data.licenseTypes) ||
+      data.licenseTypes.length === 0
+    ) {
+      throw new Error("At least one license type must be provided");
+    }
+
+    if (data.licenseTypes.length > 3) {
+      throw new Error("Maximum 3 license types allowed");
+    }
+
+    // Validate individual license types
+    const validLicenseTypes = [
+      "non-commercial",
+      "commercial-use",
+      "commercial-remix",
+    ];
+    const invalidLicenses = data.licenseTypes.filter(
+      (type) => !validLicenseTypes.includes(type)
+    );
+    if (invalidLicenses.length > 0) {
+      throw new Error(`Invalid license types: ${invalidLicenses.join(", ")}`);
+    }
+
+    // Check for duplicates
+    const uniqueLicenses = [...new Set(data.licenseTypes)];
+    if (uniqueLicenses.length !== data.licenseTypes.length) {
+      console.warn("Duplicate license types detected, removing duplicates");
+      data.licenseTypes = uniqueLicenses;
+    }
 
     const response = await fetch("/api/register-story", {
       method: "POST",
@@ -89,7 +124,7 @@ export async function registerStoryAsIPWithStore(
   data: StoryRegistrationData
 ): Promise<StoryRegistrationResult> {
   const result = await registerStoryAsIP(data);
-  
+
   if (result.success && result.storyData) {
     // Create a PublishedStory object for the store
     const publishedStory: PublishedStory = {
@@ -99,9 +134,11 @@ export async function registerStoryAsIPWithStore(
       author: data.author,
       contentCID: data.contentCID,
       imageCID: data.imageCID,
+      nftMetadataCID: data.nftMetadataCID,
+      ipMetadataCID: data.ipMetadataCID,
       txHash: result.txHash!,
       tokenId: result.tokenId!,
-      licenseType: data.licenseType,
+      licenseTypes: data.licenseTypes,
       publishedAt: Date.now(),
       explorerUrl: result.explorerUrl!,
     };
@@ -111,7 +148,7 @@ export async function registerStoryAsIPWithStore(
       publishedStory,
     };
   }
-  
+
   return result;
 }
 

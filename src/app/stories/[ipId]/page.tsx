@@ -12,6 +12,46 @@ interface StoryWithAuthor extends StoryEntry {
   author: string;
 }
 
+interface AssetData {
+  childrenCount: number;
+  parentCount: number;
+  ipId: string;
+  title: string;
+  description: string;
+}
+
+interface NFTMetadataAttribute {
+  trait_type: string;
+  value: string;
+}
+
+interface NFTMetadata {
+  name: string;
+  description: string;
+  image: string;
+  animation_url: string;
+  attributes: NFTMetadataAttribute[];
+}
+
+interface ProcessedLicenseData {
+  hasLicenses: boolean;
+  allowsRemix: boolean;
+  isCommercialUseOnly: boolean;
+  licenseCount: number;
+  licenses: string[];
+}
+
+interface StoryContentData {
+  title?: string;
+  description?: string;
+  content?: string;
+  author?: string;
+  createdAt?: string;
+  type?: string;
+  contentType?: string;
+  version?: string;
+}
+
 const ReaderPage = () => {
   const params = useParams();
   const router = useRouter();
@@ -20,8 +60,18 @@ const ReaderPage = () => {
 
   const [story, setStory] = useState<StoryWithAuthor | null>(null);
   const [storyContent, setStoryContent] = useState<string>("");
+  const [assetData, setAssetData] = useState<AssetData | null>(null);
+  const [licenseData, setLicenseData] = useState<ProcessedLicenseData | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
+  const [contentLoading, setContentLoading] = useState(true);
+  const [assetLoading, setAssetLoading] = useState(true);
+  const [licenseLoading, setLicenseLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const [contentError, setContentError] = useState<string>("");
+  const [assetError, setAssetError] = useState<string>("");
+  const [licenseError, setLicenseError] = useState<string>("");
 
   const suggestions = [
     { emoji: "🎨", text: "Write fan fiction" },
@@ -34,6 +84,77 @@ const ReaderPage = () => {
   const getIPFSUrl = (cid: string) =>
     `https://gateway.pinata.cloud/ipfs/${cid}`;
 
+  // Process license data from NFT metadata attributes
+  const processLicenseDataFromMetadata = (
+    attributes: NFTMetadataAttribute[]
+  ): ProcessedLicenseData => {
+    // Add guard clause to handle undefined or invalid attributes
+    if (!attributes || !Array.isArray(attributes) || attributes.length === 0) {
+      return {
+        hasLicenses: false,
+        allowsRemix: true, // Default to allowing remix if no attributes found
+        isCommercialUseOnly: false,
+        licenseCount: 0,
+        licenses: [],
+      };
+    }
+
+    const licenses: string[] = [];
+
+    // Check for OLD format (single License Type)
+    const oldLicenseType = attributes.find(
+      (attr) => attr.trait_type === "License Type"
+    );
+
+    if (oldLicenseType) {
+      licenses.push(oldLicenseType.value);
+    } else {
+      // Check for NEW format (multiple licenses)
+      const licenseCountAttr = attributes.find(
+        (attr) => attr.trait_type === "License Count"
+      );
+
+      if (licenseCountAttr) {
+        const licenseCount = parseInt(licenseCountAttr.value, 10);
+        for (let i = 1; i <= licenseCount; i++) {
+          const licenseAttr = attributes.find(
+            (attr) => attr.trait_type === `License ${i}`
+          );
+          if (licenseAttr) {
+            licenses.push(licenseAttr.value);
+          }
+        }
+      }
+    }
+
+    const hasLicenses = licenses.length > 0;
+
+    if (!hasLicenses) {
+      return {
+        hasLicenses: false,
+        allowsRemix: true, // Default to allowing remix if no licenses found
+        isCommercialUseOnly: false,
+        licenseCount: 0,
+        licenses: [],
+      };
+    }
+
+    // Check if ALL licenses are Commercial Use (blocks remixes)
+    const isCommercialUseOnly = licenses.every(
+      (license) => license === "Commercial Use"
+    );
+
+    // Allow remixes if ANY license allows it (i.e., not all are Commercial Use)
+    const allowsRemix = !isCommercialUseOnly;
+
+    return {
+      hasLicenses,
+      allowsRemix,
+      isCommercialUseOnly,
+      licenseCount: licenses.length,
+      licenses,
+    };
+  };
   // Navigation handlers for remix functionality
   const handleRemixStory = () => {
     if (story) {
@@ -41,9 +162,95 @@ const ReaderPage = () => {
     }
   };
 
-  const handleRemixSuggestion = (suggestion: { emoji: string; text: string }) => {
-    if (story) {
-      router.push(`/remix-form?originalStoryId=${story.ipId}&suggestion=${encodeURIComponent(suggestion.text)}`);
+  // Fetch asset data from API
+  const fetchAssetData = async (ipId: string) => {
+    try {
+      setAssetLoading(true);
+      setAssetError("");
+      const response = await fetch(`/api/stories/${ipId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch asset data: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setAssetData(data);
+    } catch (error) {
+      console.error("Error fetching asset data:", error);
+      setAssetError("Failed to load asset data");
+    } finally {
+      setAssetLoading(false);
+    }
+  };
+
+  // Fetch and process license data from NFT metadata
+  const fetchLicenseDataFromMetadata = async (nftMetadataCID: string) => {
+    try {
+      setLicenseLoading(true);
+      setLicenseError("");
+
+      const response = await fetch(getIPFSUrl(nftMetadataCID));
+      if (!response.ok) {
+        throw new Error(`Failed to fetch NFT metadata: ${response.statusText}`);
+      }
+
+      const nftMetadata: NFTMetadata = await response.json();
+      const processedData = processLicenseDataFromMetadata(
+        nftMetadata.attributes
+      );
+      setLicenseData(processedData);
+    } catch (error) {
+      console.error("Error fetching NFT metadata:", error);
+      // Default to allowing remixes on error
+      setLicenseData({
+        hasLicenses: false,
+        allowsRemix: true,
+        isCommercialUseOnly: false,
+        licenseCount: 0,
+        licenses: [],
+      });
+      setLicenseError("Failed to load license data");
+    } finally {
+      setLicenseLoading(false);
+    }
+  };
+
+  // Enhanced content fetching to handle both plain text and JSON formats
+  const fetchStoryContent = async (contentCID: string) => {
+    try {
+      setContentLoading(true);
+      setContentError("");
+      const response = await fetch(getIPFSUrl(contentCID));
+      if (!response.ok) {
+        throw new Error("Failed to fetch story content");
+      }
+
+      const contentType = response.headers.get("content-type");
+      const rawContent = await response.text();
+
+      // Try to parse as JSON first
+      try {
+        const jsonContent: StoryContentData = JSON.parse(rawContent);
+        // If it's a JSON object with content field, extract it
+        if (
+          jsonContent &&
+          typeof jsonContent === "object" &&
+          "content" in jsonContent
+        ) {
+          setStoryContent(jsonContent.content || "");
+        } else {
+          // If it's JSON but not in expected format, use the raw content
+          setStoryContent(rawContent);
+        }
+      } catch {
+        // If JSON parsing fails, treat as plain text
+        setStoryContent(rawContent);
+      }
+    } catch (err) {
+      setContentError(
+        "Failed to load story content from IPFS. Please try again later."
+      );
+      console.error("Error fetching story content:", err);
+    } finally {
+      setContentLoading(false);
     }
   };
 
@@ -61,7 +268,9 @@ const ReaderPage = () => {
           imageCID: storeStory.imageCID,
           title: storeStory.title,
           synopsis: storeStory.description,
-          author: storeStory.author.name || storeStory.author.address.slice(0, 8) + "...",
+          author:
+            storeStory.author.name ||
+            storeStory.author.address.slice(0, 8) + "...",
         };
       }
 
@@ -89,10 +298,15 @@ const ReaderPage = () => {
     }
 
     // Check for required fields
-    if (!foundStory.title || !foundStory.contentCID) {
+    if (
+      !foundStory.title ||
+      !foundStory.contentCID ||
+      !foundStory.nftMetadataCID
+    ) {
       const missingFields = [];
       if (!foundStory.title) missingFields.push("title");
       if (!foundStory.contentCID) missingFields.push("contentCID");
+      if (!foundStory.nftMetadataCID) missingFields.push("nftMetadataCID");
 
       setError(
         `Sorry, this is a test app and some configuration is missing. The following required fields are missing: ${missingFields.join(
@@ -104,27 +318,14 @@ const ReaderPage = () => {
     }
 
     setStory(foundStory);
+    setLoading(false);
 
-    // Fetch story content from IPFS
-    const fetchStoryContent = async () => {
-      try {
-        const response = await fetch(getIPFSUrl(foundStory.contentCID));
-        if (!response.ok) {
-          throw new Error("Failed to fetch story content");
-        }
-        const content = await response.text();
-        setStoryContent(content);
-      } catch (err) {
-        setError(
-          "Failed to load story content from IPFS. Please try again later."
-        );
-        console.error("Error fetching story content:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStoryContent();
+    // Fetch all data in parallel
+    Promise.all([
+      fetchStoryContent(foundStory.contentCID),
+      fetchAssetData(ipId),
+      fetchLicenseDataFromMetadata(foundStory.nftMetadataCID),
+    ]);
   }, [ipId, publishedStories]);
 
   // Parse story content into paragraphs
@@ -133,6 +334,46 @@ const ReaderPage = () => {
       .split("\n\n")
       .filter((paragraph) => paragraph.trim().length > 0)
       .map((paragraph) => paragraph.trim());
+  };
+
+  // Determine if remix functionality should be shown
+  const shouldShowRemixFeatures = () => {
+    if (licenseError || !licenseData) return true; // Default to showing if we can't determine
+    return licenseData.allowsRemix;
+  };
+
+  // Get remix status message
+  const getRemixStatusMessage = () => {
+    if (licenseLoading) {
+      return "Checking license terms...";
+    }
+    if (licenseError) {
+      return "Unable to verify license terms";
+    }
+    if (!licenseData) {
+      return "License terms not available";
+    }
+    if (licenseData.isCommercialUseOnly) {
+      return "This story was registered with Commercial Use license(s) only. No remixes allowed.";
+    }
+    if (!licenseData.allowsRemix) {
+      return "This story's license does not allow remixes.";
+    }
+    return null;
+  };
+
+  // Get origin status text
+  const getOriginStatus = () => {
+    if (assetError || !assetData) return "Loading...";
+    return assetData.parentCount === 0
+      ? "This is an original"
+      : "This is a remix";
+  };
+
+  // Get connected works count
+  const getConnectedWorksCount = () => {
+    if (assetError || !assetData) return "Loading...";
+    return assetData.childrenCount;
   };
 
   if (loading) {
@@ -165,6 +406,7 @@ const ReaderPage = () => {
   if (!story) return null;
 
   const paragraphs = parseStoryContent(storyContent);
+  const remixStatusMessage = getRemixStatusMessage();
 
   return (
     <div className='min-h-screen p-4 md:p-8'>
@@ -188,16 +430,28 @@ const ReaderPage = () => {
 
                 {/* Story Content */}
                 <div className='prose prose-lg max-w-none text-foreground leading-relaxed'>
-                  <div className='columns-1 gap-12 text-justify space-y-6'>
-                    {paragraphs.map((paragraph, index) => (
-                      <p
-                        key={index}
-                        className='text-base md:text-lg leading-relaxed mb-6'
-                      >
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
+                  {contentLoading ? (
+                    <div className='flex items-center justify-center py-12'>
+                      <Loader2 className='h-8 w-8 animate-spin mr-3' />
+                      <span>Loading story content...</span>
+                    </div>
+                  ) : contentError ? (
+                    <div className='text-center py-12'>
+                      <AlertCircle className='h-12 w-12 mx-auto mb-4 text-destructive' />
+                      <p className='text-destructive'>{contentError}</p>
+                    </div>
+                  ) : (
+                    <div className='columns-1 gap-12 text-justify space-y-6'>
+                      {paragraphs.map((paragraph, index) => (
+                        <p
+                          key={index}
+                          className='text-base md:text-lg leading-relaxed mb-6'
+                        >
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -214,57 +468,96 @@ const ReaderPage = () => {
                 <h3 className='text-xl font-semibold mb-4'>{story.author}</h3>
 
                 <div className='mb-4'>
-                  <div className='bg-emerald-500/20 border border-emerald-500/40 rounded-xl px-4 py-3 text-emerald-400 text-sm font-medium'>
-                    This is an original
-                  </div>
+                  {assetLoading ? (
+                    <div className='bg-muted/20 border border-muted/40 rounded-xl px-4 py-3 text-muted-foreground text-sm font-medium'>
+                      <Loader2 className='h-4 w-4 inline mr-2 animate-spin' />
+                      Loading...
+                    </div>
+                  ) : assetError ? (
+                    <div className='bg-destructive/20 border border-destructive/40 rounded-xl px-4 py-3 text-destructive text-sm font-medium'>
+                      Failed to load
+                    </div>
+                  ) : (
+                    <div
+                      className={`border rounded-xl px-4 py-3 text-sm font-medium ${
+                        assetData?.parentCount === 0
+                          ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
+                          : "bg-blue-500/20 border-blue-500/40 text-blue-400"
+                      }`}
+                    >
+                      {getOriginStatus()}
+                    </div>
+                  )}
                 </div>
 
                 <div className='bg-primary/10 border border-primary/30 rounded-xl px-4 py-3 text-primary text-sm'>
-                  Connected works: 12
+                  Connected works: {getConnectedWorksCount()}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Remix Ideas */}
-            <Card className='bg-card border-primary/30 backdrop-blur-lg'>
-              <CardContent className='p-6'>
-                <h4 className='text-xl font-semibold mb-6 text-primary'>
-                  Remix Ideas
-                </h4>
-                <div className='space-y-3'>
-                  {suggestions.map((suggestion, index) => (
-                    <div
-                      key={index}
-                      className='flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-transparent hover:border-primary/40 hover:bg-primary/20 transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group'
-                      onClick={() => handleRemixSuggestion(suggestion)}
-                    >
-                      <span className='text-lg'>{suggestion.emoji}</span>
-                      <span className='text-muted-foreground group-hover:text-primary transition-colors'>
-                        {suggestion.text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Remix Ideas or License Restriction Message */}
+            {shouldShowRemixFeatures() ? (
+              <Card className='bg-card border-primary/30 backdrop-blur-lg'>
+                <CardContent className='p-6'>
+                  <h4 className='text-xl font-semibold mb-6 text-primary'>
+                    Remix Ideas
+                  </h4>
+                  <div className='space-y-3'>
+                    {suggestions.map((suggestion, index) => (
+                      <div
+                        key={index}
+                        className='flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-transparent hover:border-primary/40 hover:bg-primary/20'
+                      >
+                        <span className='text-lg'>{suggestion.emoji}</span>
+                        <span className='text-muted-foreground group-hover:text-primary transition-colors'>
+                          {suggestion.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className='bg-card border-amber-500/30 backdrop-blur-lg'>
+                <CardContent className='p-6'>
+                  <h4 className='text-xl font-semibold mb-4 text-amber-500'>
+                    License Restriction
+                  </h4>
+                  <div className='bg-amber-500/10 border border-amber-500/30 rounded-lg p-4'>
+                    <p className='text-amber-400 text-sm'>
+                      {remixStatusMessage ||
+                        "Remix not available for this story."}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Action Buttons */}
             <Card className='bg-card backdrop-blur-lg border-primary/20'>
               <CardContent className='p-6'>
                 <div className='flex flex-col gap-4'>
                   <Button
-                    className='w-full font-semibold'
+                    className='w-full font-semibold cursor-pointer'
                     onClick={handleRemixStory}
+                    disabled={licenseLoading || !shouldShowRemixFeatures()}
                   >
-                    Remix This Story
+                    {licenseLoading ? (
+                      <>
+                        <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                        Checking license...
+                      </>
+                    ) : (
+                      "Remix This Story"
+                    )}
                   </Button>
-                  <Button
-                    variant='outline'
-                    className='w-full font-semibold'
-                    onClick={() => console.log("Tip functionality coming soon")}
-                  >
-                    Tip This Story
-                  </Button>
+
+                  {licenseError && (
+                    <div className='bg-destructive/10 border border-destructive/30 rounded-lg p-3'>
+                      <p className='text-destructive text-sm'>{licenseError}</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
