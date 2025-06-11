@@ -11,7 +11,7 @@ import Link from "next/link";
 export default function StoriesPage() {
   // Get published stories from both user data and store
   const { publishedStories } = useStoryStore();
-  
+
   // Get all published stories from user data
   const userStories = users.flatMap((user) =>
     user.stories
@@ -21,7 +21,7 @@ export default function StoriesPage() {
         author: user.userName || user.walletAddress.slice(0, 8) + "...",
         authorAddress: user.walletAddress,
         publishedAt: story.publishedAt || null, // Use existing timestamp or null
-        licenseType: 'non-commercial', // Default license type
+        licenseType: "non-commercial", // Default license type
       }))
   );
 
@@ -42,24 +42,24 @@ export default function StoriesPage() {
 
   // Combine and deduplicate stories (store stories take precedence)
   const allStoriesMap = new Map();
-  
+
   // Add user stories first
-  userStories.forEach(story => {
+  userStories.forEach((story) => {
     if (story.ipId) {
       allStoriesMap.set(story.ipId, story);
     }
   });
-  
+
   // Add store stories (will override user stories with same ipId)
-  storeStories.forEach(story => {
+  storeStories.forEach((story) => {
     if (story.ipId) {
       allStoriesMap.set(story.ipId, story);
     }
   });
 
   // Convert back to array and sort by publication date (newest first)
-  const allStories = Array.from(allStoriesMap.values()).sort((a, b) => 
-    (b.publishedAt || 0) - (a.publishedAt || 0)
+  const allStories = Array.from(allStoriesMap.values()).sort(
+    (a, b) => (b.publishedAt || 0) - (a.publishedAt || 0)
   );
 
   const getIPFSUrl = (cid: string) =>
@@ -112,7 +112,6 @@ export default function StoriesPage() {
                   <User className='h-4 w-4' />
                   <span>{story.author}</span>
                 </div>
-
                 {/* Action Buttons */}
                 <div className='flex gap-2 pt-2'>
                   {story.ipId && story.contentCID ? (

@@ -65,23 +65,28 @@ const baseSchema = z.object({
   content: z.string().optional(),
   storyFile: z.instanceof(File).optional(),
   coverImage: z.instanceof(File, { message: "Cover image is required" }),
-  licenseType: z.enum(["non-commercial", "commercial-use", "commercial-remix"], {
-    required_error: "Please select a license type",
-  }),
+  licenseTypes: z
+    .array(z.enum(["non-commercial", "commercial-use", "commercial-remix"]))
+    .min(1, "At least one license type must be selected")
+    .max(3, "Maximum 3 license types allowed"),
 });
 
 // Complete form schema with refinement
-const completeSchema = baseSchema.refine((data) => {
-  if (data.contentType === "text") {
-    return data.content && data.content.length >= 50;
-  } else if (data.contentType === "pdf") {
-    return data.storyFile && data.storyFile.type === "application/pdf";
+const completeSchema = baseSchema.refine(
+  (data) => {
+    if (data.contentType === "text") {
+      return data.content && data.content.length >= 50;
+    } else if (data.contentType === "pdf") {
+      return data.storyFile && data.storyFile.type === "application/pdf";
+    }
+    return false;
+  },
+  {
+    message:
+      "Please provide either text content (min 50 characters) or upload a PDF file",
+    path: ["content"],
   }
-  return false;
-}, {
-  message: "Please provide either text content (min 50 characters) or upload a PDF file",
-  path: ["content"],
-});
+);
 
 // Step-specific schemas for validation
 const storyContentSchema = baseSchema.pick({
@@ -94,7 +99,7 @@ const storyContentSchema = baseSchema.pick({
 });
 
 const licenseSchema = baseSchema.pick({
-  licenseType: true,
+  licenseTypes: true,
 });
 
 type FormData = z.infer<typeof completeSchema>;
@@ -182,7 +187,14 @@ export default function PaginatedStoryForm({
       description: formData.description || "",
       contentType: (formData.contentType as "text" | "pdf") || "text",
       content: formData.content || "",
-      licenseType: (formData.licenseType as "non-commercial" | "commercial-use" | "commercial-remix") || "non-commercial",
+      licenseTypes: formData.licenseType
+        ? [
+            formData.licenseType as
+              | "non-commercial"
+              | "commercial-use"
+              | "commercial-remix",
+          ]
+        : undefined,
     },
     mode: "onChange",
   });
@@ -237,17 +249,18 @@ export default function PaginatedStoryForm({
   const fillSampleStory = () => {
     const sampleData = {
       title: "Your story title here",
-      description: "A brief description of your story. 1-2 sentences is enough.",
+      description:
+        "A brief description of your story. 1-2 sentences is enough.",
       contentType: "text" as const,
       content: `Paste your story here. Make sure it is between 500 to 1000 words long. This is a test app, so you can use a short story, a scenario, or even a poem. The content should be in plain text format, without any special formatting or HTML tags. Just write your story as you would in a text editor.`,
     };
-    
+
     // Update form
     form.setValue("title", sampleData.title);
     form.setValue("description", sampleData.description);
     form.setValue("contentType", sampleData.contentType);
     form.setValue("content", sampleData.content);
-    
+
     // Update store
     updateFormData(sampleData);
   };
@@ -292,7 +305,7 @@ export default function PaginatedStoryForm({
           name: authorName,
           address: address,
         },
-        licenseType: data.licenseType,
+        licenseTypes: data.licenseTypes,
       });
 
       if (registrationResult.success && registrationResult.ipId) {
@@ -310,7 +323,7 @@ export default function PaginatedStoryForm({
 
         // Show success modal
         setSuccessResult(registrationResult);
-        
+
         // Add to published stories store
         addPublishedStory({
           ipId: registrationResult.ipId,
@@ -322,18 +335,20 @@ export default function PaginatedStoryForm({
           },
           contentCID: pinataResult.contentCID,
           imageCID: pinataResult.imageCID,
-          txHash: registrationResult.txHash || '',
-          tokenId: registrationResult.tokenId || '',
-          licenseType: data.licenseType,
+          txHash: registrationResult.txHash || "",
+          tokenId: registrationResult.tokenId || "",
+          licenseTypes: data.licenseTypes,
           publishedAt: Date.now(),
-          explorerUrl: registrationResult.explorerUrl || '',
+          explorerUrl: registrationResult.explorerUrl || "",
         });
-        
+
         form.reset();
         resetForm();
         onSuccess?.(registrationResult);
       } else {
-        throw new Error(registrationResult.error || "Registration failed - no IP ID returned");
+        throw new Error(
+          registrationResult.error || "Registration failed - no IP ID returned"
+        );
       }
     } catch (error) {
       console.error("Story submission error:", error);
@@ -354,10 +369,10 @@ export default function PaginatedStoryForm({
 
   if (!isConnected || !address) {
     return (
-      <Card className="w-full max-w-6xl mx-auto">
-        <CardContent className="p-8">
+      <Card className='w-full max-w-6xl mx-auto'>
+        <CardContent className='p-8'>
           <Alert>
-            <Info className="h-4 w-4" />
+            <Info className='h-4 w-4' />
             <AlertDescription>
               Please connect your wallet to publish a story.
             </AlertDescription>
@@ -376,377 +391,507 @@ export default function PaginatedStoryForm({
         />
       )}
 
-<br /><br />
+      <br />
+      <br />
       {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <h1 className="text-3xl font-bold">Create. Protect. Inspire.</h1>
+      <div className='text-center space-y-4'>
+        <div className='flex items-center justify-center gap-2 mb-4'>
+          <h1 className='text-3xl font-bold'>Create. Protect. Inspire.</h1>
         </div>
-        <p className="text-xl text-muted-foreground">
+        <p className='text-xl text-muted-foreground'>
           Your story is the seed of infinite possibilities.
         </p>
         {formData.lastSaved && (
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Save className="h-4 w-4" />
+          <div className='flex items-center justify-center gap-2 text-sm text-muted-foreground'>
+            <Save className='h-4 w-4' />
             Auto-saved {new Date(formData.lastSaved).toLocaleTimeString()}
           </div>
         )}
       </div>
-      <br /><br />
-      <Card className="w-full max-w-6xl mx-auto">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              Publish Your Story
-            </CardTitle>
-            <CardDescription>
-              Publish your fiction story and get your intellectual property
-              registered.
-            </CardDescription>
+      <br />
+      <br />
+      <Card className='w-full max-w-6xl mx-auto'>
+        <CardHeader>
+          <div className='flex items-center justify-between'>
+            <div>
+              <CardTitle className='flex items-center gap-2'>
+                <BookOpen className='h-5 w-5' />
+                Publish Your Story
+              </CardTitle>
+              <CardDescription>
+                Publish your fiction story and get your intellectual property
+                registered.
+              </CardDescription>
+            </div>
+            <Badge variant='outline'>
+              Step {currentStep} of {steps.length}
+            </Badge>
           </div>
-          <Badge variant="outline">
-            Step {currentStep} of {steps.length}
-          </Badge>
-        </div>
 
-        {/* Progress Bar */}
-        <div className="space-y-2">
-          <Progress value={progress} className="h-2" />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            {steps.map((step) => (
-              <div key={step.id} className="flex flex-col items-center gap-1">
-                <div
-                  className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                    step.id === currentStep
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : step.id < currentStep
-                      ? "border-green-500 bg-green-500 text-white"
-                      : "border-muted-foreground/20"
-                  }`}
-                >
-                  {step.id < currentStep ? (
-                    <CheckCircle className="h-4 w-4" />
-                  ) : (
-                    <step.icon className="h-4 w-4" />
-                  )}
+          {/* Progress Bar */}
+          <div className='space-y-2'>
+            <Progress value={progress} className='h-2' />
+            <div className='flex justify-between text-sm text-muted-foreground'>
+              {steps.map((step) => (
+                <div key={step.id} className='flex flex-col items-center gap-1'>
+                  <div
+                    className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+                      step.id === currentStep
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : step.id < currentStep
+                        ? "border-green-500 bg-green-500 text-white"
+                        : "border-muted-foreground/20"
+                    }`}
+                  >
+                    {step.id < currentStep ? (
+                      <CheckCircle className='h-4 w-4' />
+                    ) : (
+                      <step.icon className='h-4 w-4' />
+                    )}
+                  </div>
+                  <span
+                    className={`text-xs ${
+                      step.id === currentStep ? "font-medium" : ""
+                    }`}
+                  >
+                    {step.title}
+                  </span>
                 </div>
-                <span
-                  className={`text-xs ${
-                    step.id === currentStep ? "font-medium" : ""
-                  }`}
-                >
-                  {step.title}
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
 
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Current Step Header */}
-            {currentStepData && (
-              <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-                <currentStepData.icon className="h-6 w-6 text-primary" />
-                <div>
-                  <h3 className="font-semibold">{currentStepData.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {currentStepData.description}
-                  </p>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+              {/* Current Step Header */}
+              {currentStepData && (
+                <div className='flex items-center gap-3 p-4 bg-muted/50 rounded-lg'>
+                  <currentStepData.icon className='h-6 w-6 text-primary' />
+                  <div>
+                    <h3 className='font-semibold'>{currentStepData.title}</h3>
+                    <p className='text-sm text-muted-foreground'>
+                      {currentStepData.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Step 1: Upload Story */}
-            {currentStep === 1 && (
-              <StoryUploadFormStep1 
-                form={form}
-                authorName={authorName}
-                fillSampleStory={fillSampleStory}
-              />
-            )}
+              {/* Step 1: Upload Story */}
+              {currentStep === 1 && (
+                <StoryUploadFormStep1
+                  form={form}
+                  authorName={authorName}
+                  fillSampleStory={fillSampleStory}
+                />
+              )}
 
-            {/* Step 2: License Terms */}
-            {currentStep === 2 && (
-              <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="licenseType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>License Type</FormLabel>
-                      <FormControl>
-                        <div className="space-y-4">
-                          <div className="grid gap-4">
-                            <label
-                              className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
-                                field.value === "non-commercial"
-                                  ? "border-primary bg-primary/5"
-                                  : ""
-                              }`}
-                            >
-                              <input
-                                type="radio"
-                                value="non-commercial"
-                                checked={field.value === "non-commercial"}
-                                onChange={field.onChange}
-                                className="mt-1 flex-shrink-0"
-                              />
-                              <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
-                                <div className="font-medium">
-                                  Non-Commercial Remix License
+              {/* Step 2: License Terms */}
+              {currentStep === 2 && (
+                <div className='space-y-6'>
+                  <FormField
+                    control={form.control}
+                    name='licenseTypes'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>License Types</FormLabel>
+                        <FormDescription>
+                          Select one or more license types. Your story will be
+                          available under all selected licenses, giving readers
+                          flexibility in how they can use your work.
+                        </FormDescription>
+                        <FormControl>
+                          <div className='space-y-4'>
+                            <div className='grid gap-4'>
+                              <label
+                                className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
+                                  field.value?.includes("non-commercial")
+                                    ? "border-primary bg-primary/5"
+                                    : ""
+                                }`}
+                              >
+                                <input
+                                  type='checkbox'
+                                  checked={
+                                    field.value?.includes("non-commercial") ||
+                                    false
+                                  }
+                                  onChange={(e) => {
+                                    const currentValues = field.value || [];
+                                    if (e.target.checked) {
+                                      field.onChange([
+                                        ...currentValues,
+                                        "non-commercial",
+                                      ]);
+                                    } else {
+                                      field.onChange(
+                                        currentValues.filter(
+                                          (v) => v !== "non-commercial"
+                                        )
+                                      );
+                                    }
+                                  }}
+                                  className='mt-1 flex-shrink-0'
+                                />
+                                <div className='space-y-2 min-w-0 flex-1 overflow-hidden'>
+                                  <div className='font-medium'>
+                                    Non-Commercial Remix License
+                                  </div>
+                                  <div className='text-sm text-muted-foreground'>
+                                    Perfect for building your creative
+                                    community:
+                                  </div>
+                                  <ul className='text-sm text-muted-foreground space-y-1 ml-2'>
+                                    <li className='break-words'>
+                                      • Writers and fans can remix your stories
+                                      for free
+                                    </li>
+                                    <li className='break-words'>
+                                      • You receive full attribution for every
+                                      derivative work
+                                    </li>
+                                    <li className='break-words'>
+                                      • Build passionate communities around your
+                                      universe
+                                    </li>
+                                    <li className='break-words'>
+                                      • See which characters/plots resonate most
+                                      with audiences
+                                    </li>
+                                  </ul>
+                                  <Badge
+                                    variant='secondary'
+                                    className='text-xs'
+                                  >
+                                    Ideal for: Community building and creative
+                                    experimentation
+                                  </Badge>
                                 </div>
-                                <div className="text-sm text-muted-foreground">
-                                  Perfect for building your creative community:
+                              </label>
+
+                              <label
+                                className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
+                                  field.value?.includes("commercial-use")
+                                    ? "border-primary bg-primary/5"
+                                    : ""
+                                }`}
+                              >
+                                <input
+                                  type='checkbox'
+                                  checked={
+                                    field.value?.includes("commercial-use") ||
+                                    false
+                                  }
+                                  onChange={(e) => {
+                                    const currentValues = field.value || [];
+                                    if (e.target.checked) {
+                                      field.onChange([
+                                        ...currentValues,
+                                        "commercial-use",
+                                      ]);
+                                    } else {
+                                      field.onChange(
+                                        currentValues.filter(
+                                          (v) => v !== "commercial-use"
+                                        )
+                                      );
+                                    }
+                                  }}
+                                  className='mt-1 flex-shrink-0'
+                                />
+                                <div className='space-y-2 min-w-0 flex-1 overflow-hidden'>
+                                  <div className='font-medium'>
+                                    Commercial Use License
+                                  </div>
+                                  <div className='text-sm text-muted-foreground'>
+                                    Turn your story universe into a thriving
+                                    creative economy:
+                                  </div>
+                                  <ul className='text-sm text-muted-foreground space-y-1 ml-2'>
+                                    <li className='break-words'>
+                                      • Other creators pay you a 10% revenue
+                                      share when they commercially use your
+                                      characters, settings, or storylines
+                                    </li>
+                                    <li className='break-words'>
+                                      • Perfect for businesses that want to use
+                                      your story in marketing, products, or
+                                      services without creating remixes
+                                    </li>
+                                  </ul>
+                                  <Badge
+                                    variant='secondary'
+                                    className='text-xs'
+                                  >
+                                    Ideal for: Writers ready to build
+                                    sustainable income from their fictional
+                                    universes
+                                  </Badge>
                                 </div>
-                                <ul className="text-sm text-muted-foreground space-y-1 ml-2">
-                                  <li className="break-words">• Writers and fans can remix your stories for free</li>
-                                  <li className="break-words">• You receive full attribution for every derivative work</li>
-                                  <li className="break-words">• Build passionate communities around your universe</li>
-                                  <li className="break-words">• See which characters/plots resonate most with audiences</li>
-                                </ul>
-                                <Badge variant="secondary" className="text-xs">
-                                  Ideal for: Community building and creative experimentation
-                                </Badge>
+                              </label>
+
+                              <label
+                                className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
+                                  field.value?.includes("commercial-remix")
+                                    ? "border-primary bg-primary/5"
+                                    : ""
+                                }`}
+                              >
+                                <input
+                                  type='checkbox'
+                                  checked={
+                                    field.value?.includes("commercial-remix") ||
+                                    false
+                                  }
+                                  onChange={(e) => {
+                                    const currentValues = field.value || [];
+                                    if (e.target.checked) {
+                                      field.onChange([
+                                        ...currentValues,
+                                        "commercial-remix",
+                                      ]);
+                                    } else {
+                                      field.onChange(
+                                        currentValues.filter(
+                                          (v) => v !== "commercial-remix"
+                                        )
+                                      );
+                                    }
+                                  }}
+                                  className='mt-1 flex-shrink-0'
+                                />
+                                <div className='space-y-2 min-w-0 flex-1 overflow-hidden'>
+                                  <div className='font-medium'>
+                                    Commercial Remix License
+                                  </div>
+                                  <div className='text-sm text-muted-foreground'>
+                                    Turn your stories into revenue-generating
+                                    universes:
+                                  </div>
+                                  <ul className='text-sm text-muted-foreground space-y-1 ml-2'>
+                                    <li className='break-words'>
+                                      • Creators pay you a 25% revenue share
+                                      from commercial remixes
+                                    </li>
+                                    <li className='break-words'>
+                                      • You receive full attribution for every
+                                      derivative work
+                                    </li>
+                                    <li className='break-words'>
+                                      • Your original work becomes more valuable
+                                      with each adaptation
+                                    </li>
+                                  </ul>
+                                  <Badge
+                                    variant='secondary'
+                                    className='text-xs'
+                                  >
+                                    Ideal for: Proven story universes and
+                                    scalable income
+                                  </Badge>
+                                </div>
+                              </label>
+                            </div>
+                            {field.value && field.value.length > 0 && (
+                              <div className='p-3 bg-blue-50 border border-blue-200 rounded-lg'>
+                                <div className='text-sm font-medium text-blue-900 mb-2'>
+                                  Selected Licenses ({field.value.length}):
+                                </div>
+                                <div className='space-y-1'>
+                                  {field.value.map((license) => (
+                                    <div
+                                      key={license}
+                                      className='text-sm text-blue-800'
+                                    >
+                                      •{" "}
+                                      {license === "non-commercial"
+                                        ? "Non-Commercial Remix License"
+                                        : license === "commercial-use"
+                                        ? "Commercial Use License (10% revenue share)"
+                                        : "Commercial Remix License (25% revenue share)"}
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className='text-xs text-blue-700 mt-2'>
+                                  Users can choose any of these licensing
+                                  options when using your story.
+                                </div>
                               </div>
-                            </label>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Choose how others can use your story. This will be
+                          enforced on-chain through Story Protocol.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
-                            <label
-                              className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
-                                field.value === "commercial-use"
-                                  ? "border-primary bg-primary/5"
-                                  : ""
-                              }`}
-                            >
-                              <input
-                                type="radio"
-                                value="commercial-use"
-                                checked={field.value === "commercial-use"}
-                                onChange={field.onChange}
-                                className="mt-1 flex-shrink-0"
-                              />
-                              <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
-                                <div className="font-medium">
-                                  Commercial Use License
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  Turn your story universe into a thriving creative economy:
-                                </div>
-                                <ul className="text-sm text-muted-foreground space-y-1 ml-2">
-                                  <li className="break-words">• Other creators pay you a 10% revenue share when they commercially use your characters, settings, or storylines</li>
-                                  <li className="break-words">• Perfect for businesses that want to use your story in marketing, products, or services without creating remixes</li>
-                                </ul>
-                                <Badge variant="secondary" className="text-xs">
-                                  Ideal for: Writers ready to build sustainable income from their fictional universes
-                                </Badge>
-                              </div>
-                            </label>
+              {/* Step 3: Review & Publish */}
+              {currentStep === 3 && (
+                <div className='space-y-6'>
+                  <Alert>
+                    <CheckCircle className='h-4 w-4' />
+                    <AlertDescription>
+                      Please review your story details before registering as
+                      intellectual property.
+                    </AlertDescription>
+                  </Alert>
 
-                            <label
-                              className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
-                                field.value === "commercial-remix"
-                                  ? "border-primary bg-primary/5"
-                                  : ""
-                              }`}
-                            >
-                              <input
-                                type="radio"
-                                value="commercial-remix"
-                                checked={field.value === "commercial-remix"}
-                                onChange={field.onChange}
-                                className="mt-1 flex-shrink-0"
-                              />
-                              <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
-                                <div className="font-medium">
-                                  Commercial Remix License
+                  <div className='space-y-4'>
+                    <div className='grid gap-4 p-4 border rounded-lg'>
+                      <h3 className='font-semibold'>Story Details</h3>
+                      <div className='grid gap-2 text-sm'>
+                        <div>
+                          <strong>Title:</strong> {form.watch("title")}
+                        </div>
+                        <div>
+                          <strong>Synopsis:</strong> {form.watch("description")}
+                        </div>
+                        <div>
+                          <strong>Author:</strong> {authorName}
+                        </div>
+                        <div>
+                          <strong>
+                            Licenses ({form.watch("licenseTypes")?.length || 0}
+                            ):
+                          </strong>
+                          <div className='ml-4 mt-1 space-y-1'>
+                            {form
+                              .watch("licenseTypes")
+                              ?.map((licenseType, index) => (
+                                <div key={index}>
+                                  •{" "}
+                                  {licenseType === "non-commercial"
+                                    ? "Non-Commercial Remix License"
+                                    : licenseType === "commercial-use"
+                                    ? "Commercial Use License (10% revenue share)"
+                                    : "Commercial Remix License (25% revenue share)"}
                                 </div>
-                                <div className="text-sm text-muted-foreground">
-                                  Turn your stories into revenue-generating universes:
-                                </div>
-                                <ul className="text-sm text-muted-foreground space-y-1 ml-2">
-                                  <li className="break-words">• Creators pay you a 25% revenue share from commercial remixes</li>
-                                  <li className="break-words">• You receive full attribution for every derivative work</li>
-                                  <li className="break-words">• Your original work becomes more valuable with each adaptation</li>
-                                </ul>
-                                <Badge variant="secondary" className="text-xs">
-                                  Ideal for: Proven story universes and scalable income
-                                </Badge>
-                              </div>
-                            </label>
+                              )) || <div>None selected</div>}
                           </div>
                         </div>
-                      </FormControl>
-                      <FormDescription>
-                        Choose how others can use your story. This will be
-                        enforced on-chain through Story Protocol.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-
-            {/* Step 3: Review & Publish */}
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                <Alert>
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Please review your story details before registering as
-                    intellectual property.
-                  </AlertDescription>
-                </Alert>
-
-                <div className="space-y-4">
-                  <div className="grid gap-4 p-4 border rounded-lg">
-                    <h3 className="font-semibold">Story Details</h3>
-                    <div className="grid gap-2 text-sm">
-                      <div>
-                        <strong>Title:</strong> {form.watch("title")}
-                      </div>
-                      <div>
-                        <strong>Synopsis:</strong> {form.watch("description")}
-                      </div>
-                      <div>
-                        <strong>Author:</strong> {authorName}
-                      </div>
-                      <div>
-                        <strong>License:</strong>{" "}
-                        {form.watch("licenseType") === "non-commercial"
-                          ? "Non-Commercial Remix License"
-                          : form.watch("licenseType") === "commercial-use"
-                          ? "Commercial Use License (10% revenue share)"
-                          : "Commercial Remix License (25% revenue share)"}
-                      </div>
-                      <div>
-                        <strong>Content Type:</strong>{" "}
-                        {form.watch("contentType") === "text" ? "Text Content" : "PDF File"}
-                      </div>
-                      {form.watch("contentType") === "text" && (
                         <div>
-                          <strong>Content Length:</strong>{" "}
-                          {form.watch("content")?.length || 0} characters
+                          <strong>Content Type:</strong>{" "}
+                          {form.watch("contentType") === "text"
+                            ? "Text Content"
+                            : "PDF File"}
                         </div>
-                      )}
-                      {form.watch("contentType") === "pdf" && form.watch("storyFile") && (
+                        {form.watch("contentType") === "text" && (
+                          <div>
+                            <strong>Content Length:</strong>{" "}
+                            {form.watch("content")?.length || 0} characters
+                          </div>
+                        )}
+                        {form.watch("contentType") === "pdf" &&
+                          form.watch("storyFile") && (
+                            <div>
+                              <strong>PDF File:</strong>{" "}
+                              {form.watch("storyFile")?.name} (
+                              {(
+                                (form.watch("storyFile")?.size || 0) /
+                                1024 /
+                                1024
+                              ).toFixed(2)}{" "}
+                              MB)
+                            </div>
+                          )}
                         <div>
-                          <strong>PDF File:</strong>{" "}
-                          {form.watch("storyFile")?.name} ({((form.watch("storyFile")?.size || 0) / 1024 / 1024).toFixed(2)} MB)
+                          <strong>Cover Image:</strong>{" "}
+                          {form.watch("coverImage")
+                            ? form.watch("coverImage")?.name
+                            : "None"}
                         </div>
-                      )}
-                      <div>
-                        <strong>Cover Image:</strong>{" "}
-                        {form.watch("coverImage")
-                          ? form.watch("coverImage")?.name
-                          : "None"}
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <h4 className="font-medium mb-2">What happens next?</h4>
-                    <ol className="text-sm space-y-1 list-decimal list-inside text-muted-foreground">
-                      <li>Your story and images will be uploaded to IPFS</li>
-                      <li>
-                        Metadata will be generated following IP Asset standards
-                      </li>
-                      <li>
-                        Your story will be registered as an IP Asset on Story
-                        Protocol
-                      </li>
-                      <li>
-                        You'll receive an NFT representing ownership of your IP
-                      </li>
-                      <li>
-                        Others can discover and potentially remix your story
-                        based on your chosen license
-                      </li>
-                    </ol>
-                  </div>
-                </div>
-
-                {submitStatus.message && (
-                  <Alert
-                    className={
-                      submitStatus.type === "error"
-                        ? "border-destructive bg-destructive/10"
-                        : "border-green-500 bg-green-50"
-                    }
-                  >
-                    {submitStatus.type === "error" ? (
-                      <div className="space-y-2">
-                        <div className="font-medium text-destructive">Registration Failed</div>
-                        <AlertDescription className="text-sm">
+                  {submitStatus.message && (
+                    <Alert
+                      className={
+                        submitStatus.type === "error"
+                          ? "border-destructive bg-destructive/10"
+                          : "border-green-500 bg-green-50"
+                      }
+                    >
+                      {submitStatus.type === "error" ? (
+                        <div className='space-y-2'>
+                          <div className='font-medium text-destructive'>
+                            Registration Failed
+                          </div>
+                          <AlertDescription className='text-sm'>
+                            {submitStatus.message}
+                          </AlertDescription>
+                          <div className='text-xs text-muted-foreground'>
+                            This is usually due to license configuration issues.
+                            Please try again or contact support if the problem
+                            persists.
+                          </div>
+                        </div>
+                      ) : (
+                        <AlertDescription className='text-green-700'>
                           {submitStatus.message}
                         </AlertDescription>
-                        <div className="text-xs text-muted-foreground">
-                          This is usually due to license configuration issues. Please try again or contact support if the problem persists.
-                        </div>
-                      </div>
+                      )}
+                    </Alert>
+                  )}
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Navigation Buttons */}
+              <div className='flex justify-between'>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={handlePrevious}
+                  disabled={currentStep === 1 || isSubmitting}
+                  className='flex items-center gap-2'
+                >
+                  <ChevronLeft className='h-4 w-4' />
+                  Previous
+                </Button>
+
+                {currentStep < steps.length ? (
+                  <Button
+                    type='button'
+                    onClick={handleNext}
+                    disabled={isSubmitting}
+                    className='flex items-center gap-2'
+                  >
+                    Next
+                    <ChevronRight className='h-4 w-4' />
+                  </Button>
+                ) : (
+                  <Button
+                    type='submit'
+                    disabled={isSubmitting || !address}
+                    className='flex items-center gap-2'
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                        {submitStatus.message || "Publishing..."}
+                      </>
                     ) : (
-                      <AlertDescription className="text-green-700">
-                        {submitStatus.message}
-                      </AlertDescription>
+                      <>
+                        <Upload className='mr-2 h-4 w-4' />
+                        Publish Story as IP
+                      </>
                     )}
-                  </Alert>
+                  </Button>
                 )}
               </div>
-            )}
-
-            <Separator />
-
-            {/* Navigation Buttons */}
-            <div className="flex justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 1 || isSubmitting}
-                className="flex items-center gap-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </Button>
-
-              {currentStep < steps.length ? (
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || !address}
-                  className="flex items-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {submitStatus.message || "Publishing..."}
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Publish Story as IP
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </>
   );
 }

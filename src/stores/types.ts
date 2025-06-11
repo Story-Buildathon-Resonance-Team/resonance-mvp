@@ -1,166 +1,173 @@
 // Shared types for all stores
 export interface StoryDraft {
-  id: string
-  title: string
-  description: string
-  content: string
-  contentType: 'text' | 'pdf'
-  coverImage?: File
-  storyFile?: File
-  licenseType: 'non-commercial' | 'commercial-use' | 'commercial-remix'
-  lastSaved: number
-  isAutosaved: boolean
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  contentType: "text" | "pdf";
+  coverImage?: File;
+  storyFile?: File;
+  licenseType: "non-commercial" | "commercial-use" | "commercial-remix";
+  lastSaved: number;
+  isAutosaved: boolean;
 }
 
 export interface PublishedStory {
-  ipId: string
-  title: string
-  description: string
+  ipId: string;
+  title: string;
+  description: string;
   author: {
-    name: string
-    address: string
-  }
-  contentCID: string
-  imageCID: string
-  txHash: string
-  tokenId: string
-  licenseType: string
-  publishedAt: number
-  explorerUrl: string
-  originalStoryId?: string // Optional field to track if this is a remix
+    name: string;
+    address: string;
+  };
+  contentCID: string;
+  imageCID: string;
+  nftMetadataCID: string;
+  ipMetadataCID: string;
+  txHash: string;
+  tokenId: string;
+  licenseTypes: ("non-commercial" | "commercial-use" | "commercial-remix")[];
+  publishedAt: number;
+  explorerUrl: string;
+  originalStoryId?: string; // Optional field to track if this is a remix
 }
 
 export interface ReadingProgress {
-  storyId: string
-  progress: number // 0-100
-  lastRead: number
-  bookmarked: boolean
+  storyId: string;
+  progress: number; // 0-100
+  lastRead: number;
+  bookmarked: boolean;
 }
 
 export interface UserPreferences {
-  theme: 'light' | 'dark' | 'system'
-  readingSpeed: 'slow' | 'normal' | 'fast'
-  autoSave: boolean
+  theme: "light" | "dark" | "system";
+  readingSpeed: "slow" | "normal" | "fast";
+  autoSave: boolean;
   notifications: {
-    publishSuccess: boolean
-    newStories: boolean
-    derivatives: boolean
-  }
+    publishSuccess: boolean;
+    newStories: boolean;
+    derivatives: boolean;
+  };
 }
 
 export interface RemixedStory {
-  id: string
-  originalStoryId: string
-  originalTitle: string
+  id: string;
+  originalStoryId: string;
+  originalTitle: string;
   originalAuthor: {
-    name: string
-    address: string
-  }
-  remixTitle: string
-  remixDescription: string
-  remixedAt: number
-  ipId?: string // If the remix has been published
-  status: 'draft' | 'published'
-  contentCID?: string
-  imageCID?: string
+    name: string;
+    address: string;
+  };
+  remixTitle: string;
+  remixDescription: string;
+  remixedAt: number;
+  ipId?: string; // If the remix has been published
+  status: "draft" | "published";
+  contentCID?: string;
+  imageCID?: string;
 }
 
 // Store interfaces
 export interface AppStore {
   // UI State
-  isLoading: boolean
-  currentPage: string
-  mobileMenuOpen: boolean
-  
+  isLoading: boolean;
+  currentPage: string;
+  mobileMenuOpen: boolean;
+
   // Actions
-  setIsLoading: (loading: boolean) => void
-  setCurrentPage: (page: string) => void
-  setMobileMenuOpen: (open: boolean) => void
-  
+  setIsLoading: (loading: boolean) => void;
+  setCurrentPage: (page: string) => void;
+  setMobileMenuOpen: (open: boolean) => void;
+
   // Navigation
-  navigate: (page: string) => void
+  navigate: (page: string) => void;
 }
 
 export interface PublishStore {
   // Form State
-  currentStep: number
-  formData: Partial<StoryDraft>
-  isSubmitting: boolean
+  currentStep: number;
+  formData: Partial<StoryDraft>;
+  isSubmitting: boolean;
   submitStatus: {
-    type: 'success' | 'error' | null
-    message: string
-  }
-  
+    type: "success" | "error" | null;
+    message: string;
+  };
+
   // Actions
-  setCurrentStep: (step: number) => void
-  updateFormData: (data: Partial<StoryDraft>) => void
-  setIsSubmitting: (submitting: boolean) => void
-  setSubmitStatus: (status: { type: 'success' | 'error' | null; message: string }) => void
-  
+  setCurrentStep: (step: number) => void;
+  updateFormData: (data: Partial<StoryDraft>) => void;
+  setIsSubmitting: (submitting: boolean) => void;
+  setSubmitStatus: (status: {
+    type: "success" | "error" | null;
+    message: string;
+  }) => void;
+
   // Form Management
-  saveFormData: () => void
-  loadFormData: () => void
-  resetForm: () => void
-  validateCurrentStep: () => Promise<boolean>
-  
+  saveFormData: () => void;
+  loadFormData: () => void;
+  resetForm: () => void;
+  validateCurrentStep: () => Promise<boolean>;
+
   // Navigation
-  nextStep: () => void
-  previousStep: () => void
+  nextStep: () => void;
+  previousStep: () => void;
 }
 
 export interface UserPreferencesStore {
-  preferences: UserPreferences
-  
+  preferences: UserPreferences;
+
   // Actions
-  setTheme: (theme: UserPreferences['theme']) => void
-  setReadingSpeed: (speed: UserPreferences['readingSpeed']) => void
-  setAutoSave: (enabled: boolean) => void
-  updateNotificationSettings: (settings: Partial<UserPreferences['notifications']>) => void
-  
+  setTheme: (theme: UserPreferences["theme"]) => void;
+  setReadingSpeed: (speed: UserPreferences["readingSpeed"]) => void;
+  setAutoSave: (enabled: boolean) => void;
+  updateNotificationSettings: (
+    settings: Partial<UserPreferences["notifications"]>
+  ) => void;
+
   // Persistence
-  loadPreferences: () => void
-  savePreferences: () => void
+  loadPreferences: () => void;
+  savePreferences: () => void;
 }
 
 export interface StoryStore {
   // Drafts
-  drafts: StoryDraft[]
-  currentDraft: StoryDraft | null
-  
+  drafts: StoryDraft[];
+  currentDraft: StoryDraft | null;
+
   // Reading
-  readingProgress: ReadingProgress[]
-  bookmarkedStories: string[]
-  
+  readingProgress: ReadingProgress[];
+  bookmarkedStories: string[];
+
   // Published Stories (cached)
-  publishedStories: PublishedStory[]
-  
+  publishedStories: PublishedStory[];
+
   // Remixed Stories
-  remixedStories: RemixedStory[]
-  
+  remixedStories: RemixedStory[];
+
   // Actions - Drafts
-  createDraft: () => string
-  saveDraft: (id: string, data: Partial<StoryDraft>) => void
-  deleteDraft: (id: string) => void
-  loadDraft: (id: string) => void
-  setCurrentDraft: (draft: StoryDraft | null) => void
-  
+  createDraft: () => string;
+  saveDraft: (id: string, data: Partial<StoryDraft>) => void;
+  deleteDraft: (id: string) => void;
+  loadDraft: (id: string) => void;
+  setCurrentDraft: (draft: StoryDraft | null) => void;
+
   // Actions - Reading
-  updateReadingProgress: (storyId: string, progress: number) => void
-  toggleBookmark: (storyId: string) => void
-  
+  updateReadingProgress: (storyId: string, progress: number) => void;
+  toggleBookmark: (storyId: string) => void;
+
   // Actions - Published Stories
-  addPublishedStory: (story: PublishedStory) => void
-  
+  addPublishedStory: (story: PublishedStory) => void;
+
   // Actions - Remixed Stories
-  addRemixedStory: (story: RemixedStory) => void
-  updateRemixedStory: (id: string, updates: Partial<RemixedStory>) => void
-  deleteRemixedStory: (id: string) => void
-  
+  addRemixedStory: (story: RemixedStory) => void;
+  updateRemixedStory: (id: string, updates: Partial<RemixedStory>) => void;
+  deleteRemixedStory: (id: string) => void;
+
   // Persistence
-  loadFromStorage: () => void
-  saveToStorage: () => void
-  
+  loadFromStorage: () => void;
+  saveToStorage: () => void;
+
   // Auto-save
-  enableAutoSave: () => void
-  disableAutoSave: () => void
-} 
+  enableAutoSave: () => void;
+  disableAutoSave: () => void;
+}
