@@ -106,21 +106,22 @@ export const users: UserEntry[] = [
         synopsis:
           "Ji-Won and Lee-Hyun, members of an advanced ancient civilization, must separate as she joins a secret colonization mission while he stays behind to guide humanity's development through hidden genetic codes.",
       },
+      {
+        ipId: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
+        contentCID: "",
+        imageCID: "",
+        title: "The Architect's Burden",
+        synopsis:
+          "In a last-ditch effort to restore Earth's dying ecosystems, Dr. Elena Vasquez builds a machine that demands a human sacrifice to seed new life. But as the device awakens with a mind of its own, she realizes they may have engineered something far more dangerous than salvation.",
+      },
     ],
   },
   {
     userName: "",
     walletAddress: "",
     stories: [
-      {
-        ipId: "", // The IP ID returned by Story Protocol
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
       {
         ipId: "",
         ipMetadataCID: "",

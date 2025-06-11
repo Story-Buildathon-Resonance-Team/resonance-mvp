@@ -507,7 +507,7 @@ const ReaderPage = () => {
                     {suggestions.map((suggestion, index) => (
                       <div
                         key={index}
-                        className='flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-transparent hover:border-primary/40 hover:bg-primary/20 transition-all duration-300 hover:-translate-y-0.5 group'
+                        className='flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-transparent hover:border-primary/40 hover:bg-primary/20'
                       >
                         <span className='text-lg'>{suggestion.emoji}</span>
                         <span className='text-muted-foreground group-hover:text-primary transition-colors'>
@@ -539,7 +539,7 @@ const ReaderPage = () => {
               <CardContent className='p-6'>
                 <div className='flex flex-col gap-4'>
                   <Button
-                    className='w-full font-semibold'
+                    className='w-full font-semibold cursor-pointer'
                     onClick={handleRemixStory}
                     disabled={licenseLoading || !shouldShowRemixFeatures()}
                   >
