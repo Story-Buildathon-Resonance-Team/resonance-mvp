@@ -121,6 +121,19 @@ export const users: UserEntry[] = [
           "He hears only silence where others touch the stars. In a world awakening to ancient power, one man must find meaning in what was left behind.",
       },
       {
+        ipId: "0x52bC44D1c469eED0aB68E2A8E53eF8502DF61eA3",
+        ipMetadataCID:
+          "bafkreigtxcbzdcqmfxsqkdxoqbs57b5lx3urxndckrjy4zzgwavhzfxjwy",
+        nftMetadataCID:
+          "bafkreidsfcxqx7i6zbad5sd65y7z2xxbjfdmcnuiqbpqo3dx2hgjhg5nda",
+        contentCID:
+          "bafkreibv4peqpku27h6vc6gydfquc6hx7pwvreyj2t6m6lb5yvtaznp2yy",
+        imageCID: "bafybeiaysgmmqmjj4z4uxgi7culd46ilgquuhocrqo4o4ajthppespvcra",
+        title: "Seeds of Tomorrow",
+        synopsis:
+          "Born as weapons, they were scattered like seeds across the stars. Now, one woman’s voice will awaken the future humanity never dared to imagine.",
+      },
+      {
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",
@@ -138,31 +151,6 @@ export const users: UserEntry[] = [
         title: "",
         synopsis: "",
       },
-    ],
-  },
-  {
-    userName: "", // Placeholder for user cloning this repo
-    walletAddress: "",
-    stories: [
-      {
-        ipId: "", // The IP ID returned by Story Protocol
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
-      {
-        ipId: "",
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
-      // …up to 10 entries
     ],
   },
 ];
