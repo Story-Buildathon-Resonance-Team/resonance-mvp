@@ -44,7 +44,6 @@ export default function Sidebar() {
   const handleLogout = () => {
     disconnect?.();
     router.push("/");
-    console.log("User logged out");
   };
 
   const handleNavigation = (href: string) => {
