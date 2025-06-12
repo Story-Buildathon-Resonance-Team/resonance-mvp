@@ -1,11 +1,6 @@
-/**
- * Story Service - Handles story registration with Story Protocol
- * This service acts as a bridge between the UI and the Story Protocol API
- */
-
 import { Address } from "viem";
-import { useStoryStore } from "../stores/storyStore";
 import { PublishedStory } from "../stores/types";
+import { validateDerivativeLicenseSelection, LicenseType } from "./licenseService";
 
 export interface StoryRegistrationData {
   title: string;
@@ -20,7 +15,6 @@ export interface StoryRegistrationData {
   };
   licenseTypes?: ("non-commercial" | "commercial-use" | "commercial-remix")[];
   licenseType?: "non-commercial" | "commercial-use" | "commercial-remix";
-  // Remix-specific fields
   originalStoryId?: string;
   originalTitle?: string;
   originalAuthor?: string;
@@ -73,7 +67,6 @@ export async function registerStoryAsIP(
 async function registerOriginalStory(
   data: StoryRegistrationData
 ): Promise<StoryRegistrationResult> {
-  // Handle both single license type and multiple license types for original stories
   let licenseTypes: ("non-commercial" | "commercial-use" | "commercial-remix")[];
   
   if (data.licenseType) {
@@ -157,6 +150,21 @@ async function registerDerivativeStory(
 
   if (!data.licenseType) {
     throw new Error("License type is required for derivative registration");
+  }
+
+  // TODO: In a real implementation, we would fetch the parent's actual license types
+  // For now, we'll assume the parent has the same license type as the derivative
+  // This validation would be more robust with actual parent license data
+  const parentLicenseTypes = [data.licenseType as LicenseType];
+  
+  // Validate license selection
+  const validation = validateDerivativeLicenseSelection(
+    parentLicenseTypes,
+    data.licenseType as LicenseType
+  );
+  
+  if (!validation.isValid) {
+    throw new Error(`License validation failed: ${validation.error}`);
   }
 
   // Get the parent's license terms ID based on the license type
@@ -249,31 +257,24 @@ export async function registerStoryAsIPWithStore(
  * Get story details by IP ID (placeholder for future implementation)
  */
 export async function getStoryByIpId(ipId: string): Promise<any> {
-  // TODO: Implement story retrieval from Story Protocol
   console.log("Getting story by IP ID:", ipId);
   return null;
 }
 
-/**
- * List user's published stories (placeholder for future implementation)
- */
 export async function getUserStories(userAddress: Address): Promise<any[]> {
   // TODO: Implement user story listing
   console.log("Getting stories for user:", userAddress);
   return [];
 }
 
-/**
- * Get license terms ID from license type
- */
 function getLicenseTermsIdFromType(licenseType: "non-commercial" | "commercial-use" | "commercial-remix"): string {
   switch (licenseType) {
     case "non-commercial":
-      return "1"; // NonCommercialSocialRemixingTermsId
+      return "1"; 
     case "commercial-use":
-      return "2"; // CommercialUseOnlyTermsId
+      return "2"; 
     case "commercial-remix":
-      return "3"; // CommercialRemixTermsId
+      return "3"; 
     default:
       throw new Error(`Unknown license type: ${licenseType}`);
   }

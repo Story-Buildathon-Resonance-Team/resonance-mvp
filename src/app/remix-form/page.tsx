@@ -51,6 +51,14 @@ import { usePublishStore, useStoryStore } from "@/stores";
 import { users } from "../../data/user";
 import SuccessModal from "../../components/SuccessModal";
 import StoryUploadFormStep1 from "../../components/StoryUploadFormStep1";
+import {
+  getParentAssetLicenseInfo,
+  determineLicenseInheritance,
+  validateDerivativeLicenseSelection,
+  formatLicenseForDisplay,
+  LicenseType,
+  ParentAssetLicenseInfo,
+} from "../../services/licenseService";
 
 // Base schema without refinement
 const baseSchema = z.object({
@@ -177,6 +185,11 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
   // State for original story data
   const [originalStory, setOriginalStory] = useState<unknown>(null);
   const [loadingOriginalStory, setLoadingOriginalStory] = useState(true);
+  
+  // State for license inheritance
+  const [parentLicenseInfo, setParentLicenseInfo] = useState<ParentAssetLicenseInfo | null>(null);
+  const [licenseInheritance, setLicenseInheritance] = useState<ReturnType<typeof determineLicenseInheritance> | null>(null);
+  const [selectedLicense, setSelectedLicense] = useState<LicenseType | null>(null);
 
   // Replace useState with Zustand store
   const {
@@ -196,50 +209,84 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
 
   const { address, isConnected, userName } = useUser();
 
-  // Fetch original story data
+  // Fetch original story data and license information
   useEffect(() => {
-    if (originalStoryId) {
-      const findStory = () => {
-        // First check the store for published stories (custom stories)
-        const storeStory = publishedStories.find(
-          (s) => s.ipId === originalStoryId
-        );
-        if (storeStory) {
-          return {
-            ipId: storeStory.ipId,
-            title: storeStory.title,
-            description: storeStory.description,
-            author:
-              storeStory.author.name ||
-              storeStory.author.address.slice(0, 8) + "...",
-            licenseType: storeStory.licenseTypes?.[0] || "non-commercial", // Use first license type
-            contentCID: storeStory.contentCID,
-            imageCID: storeStory.imageCID,
-          };
-        }
-
-        // Fallback to static user data (preloaded stories)
-        for (const user of users) {
-          const foundStory = user.stories.find(
+    const fetchStoryAndLicenseInfo = async () => {
+      if (originalStoryId) {
+        const findStory = () => {
+          // First check the store for published stories (custom stories)
+          const storeStory = publishedStories.find(
             (s) => s.ipId === originalStoryId
           );
-          if (foundStory) {
+          if (storeStory) {
             return {
-              ...foundStory,
-              author: user.userName || user.walletAddress.slice(0, 8) + "...",
-              licenseType: "non-commercial", // Default for static stories
+              ipId: storeStory.ipId,
+              title: storeStory.title,
+              description: storeStory.description,
+              author:
+                storeStory.author.name ||
+                storeStory.author.address.slice(0, 8) + "...",
+              licenseType: storeStory.licenseTypes?.[0] || "non-commercial", // Use first license type
+              licenseTypes: storeStory.licenseTypes || ["non-commercial"], // All license types
+              contentCID: storeStory.contentCID,
+              imageCID: storeStory.imageCID,
             };
           }
-        }
-        return null;
-      };
 
-      const foundStory = findStory();
-      setOriginalStory(foundStory);
-      setLoadingOriginalStory(false);
-    } else {
-      setLoadingOriginalStory(false);
-    }
+          // Fallback to static user data (preloaded stories)
+          for (const user of users) {
+            const foundStory = user.stories.find(
+              (s) => s.ipId === originalStoryId
+            );
+            if (foundStory) {
+              return {
+                ...foundStory,
+                author: user.userName || user.walletAddress.slice(0, 8) + "...",
+                licenseType: "non-commercial", // Default for static stories
+                licenseTypes: ["non-commercial"], // Default for static stories
+              };
+            }
+          }
+          return null;
+        };
+
+        const foundStory = findStory();
+        setOriginalStory(foundStory);
+
+        // Get detailed license information
+        if (foundStory) {
+          try {
+            const licenseInfo = await getParentAssetLicenseInfo(
+              originalStoryId,
+              publishedStories,
+              users
+            );
+            
+            if (licenseInfo) {
+              setParentLicenseInfo(licenseInfo);
+              
+              // Determine inheritance requirements
+              const parentLicenseTypes = licenseInfo.licenses.map(l => l.type);
+              const inheritance = determineLicenseInheritance(parentLicenseTypes);
+              setLicenseInheritance(inheritance);
+              
+              // If automatic inheritance, set the license
+              if (!inheritance.requiresSelection && inheritance.inheritedLicense) {
+                setSelectedLicense(inheritance.inheritedLicense.type);
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching license information:", error);
+          }
+        }
+        
+        setLoadingOriginalStory(false);
+      } else {
+        setLoadingOriginalStory(false);
+      }
+    };
+
+    fetchStoryAndLicenseInfo();
   }, [originalStoryId, publishedStories]);
 
   // Get author name from user data or fallback to wallet address
@@ -283,37 +330,30 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
     mode: "onChange",
   });
 
-  // Update form when original story loads
+  // Update form when original story and license information loads
   useEffect(() => {
     if (originalStory && !form.watch("title")) {
-      const inheritedLicense =
-        (originalStory as { licenseType?: string })?.licenseType ||
-        "non-commercial";
       form.setValue(
         "title",
         `Remix of ${(originalStory as { title: string }).title}`
       );
-      form.setValue(
-        "licenseType",
-        inheritedLicense as
-          | "non-commercial"
-          | "commercial-use"
-          | "commercial-remix"
-      );
       updateFormData({
         title: `Remix of ${(originalStory as { title: string }).title}`,
-        licenseType: inheritedLicense as
-          | "non-commercial"
-          | "commercial-use"
-          | "commercial-remix",
       });
     }
+    
     if (suggestionText && !form.watch("description")) {
       const decodedSuggestion = decodeURIComponent(suggestionText);
       form.setValue("description", decodedSuggestion);
       updateFormData({ description: decodedSuggestion });
     }
-  }, [originalStory, suggestionText, form, updateFormData]);
+
+    // Set license based on inheritance logic
+    if (licenseInheritance && selectedLicense && !form.watch("licenseType")) {
+      form.setValue("licenseType", selectedLicense);
+      updateFormData({ licenseType: selectedLicense });
+    }
+  }, [originalStory, suggestionText, licenseInheritance, selectedLicense, form, updateFormData]);
 
   // Auto-save form data to store whenever form changes
   useEffect(() => {
@@ -333,6 +373,33 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
   const validateCurrentStep = async () => {
     const currentSchema = getCurrentStepSchema();
     const formData = form.getValues();
+
+    // Additional validation for license selection step
+    if (currentStep === 1 && licenseInheritance?.requiresSelection) {
+      if (!selectedLicense || !formData.licenseType) {
+        form.setError("licenseType", {
+          type: "manual",
+          message: "Please select a license for your remix",
+        });
+        return false;
+      }
+      
+      // Validate that the selected license is valid
+      if (parentLicenseInfo) {
+        const validation = validateDerivativeLicenseSelection(
+          parentLicenseInfo.licenses.map(l => l.type),
+          selectedLicense
+        );
+        
+        if (!validation.isValid) {
+          form.setError("licenseType", {
+            type: "manual",
+            message: validation.error || "Invalid license selection",
+          });
+          return false;
+        }
+      }
+    }
 
     try {
       await currentSchema.parseAsync(formData);
@@ -661,120 +728,212 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                 </div>
               )}
 
-              {/* Step 1: License Inheritance (View-Only) */}
+              {/* Step 1: License Inheritance */}
               {currentStep === 1 && (
                 <div className='space-y-6'>
-                  {originalStory && (
+                  {parentLicenseInfo && licenseInheritance && (
                     <div className='space-y-4'>
-                      <div className='p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg'>
+                      {/* Parent Story Information */}
+                      <div className='p-6 bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/30 rounded-lg backdrop-blur-sm'>
                         <div className='flex items-start gap-4'>
-                          <div className='p-2 bg-blue-100 rounded-lg'>
-                            <LinkIcon className='h-6 w-6 text-blue-600' />
+                          <div className='p-2 bg-primary/20 rounded-lg'>
+                            <LinkIcon className='h-6 w-6 text-primary' />
                           </div>
                           <div className='space-y-3 flex-1'>
-                            <div className='text-lg font-semibold text-blue-900'>
-                              License Automatically Inherited
+                            <div className='text-lg font-semibold text-foreground'>
+                              Remixing: "{parentLicenseInfo.title}"
                             </div>
-                            <div className='text-sm text-blue-800 leading-relaxed'>
-                              As per Story Protocol, your remix will
-                              automatically inherit all license terms, royalty
-                              rules, and dispute statuses from the parent IP
-                              asset. These terms cannot be modified.
+                            <div className='text-sm text-muted-foreground'>
+                              by {parentLicenseInfo.author}
                             </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className='p-6 border border-gray-200 rounded-lg bg-gray-50'>
-                        <h3 className='text-lg font-semibold mb-4 text-gray-900'>
-                          Inherited License Terms
-                        </h3>
-
-                        <div className='space-y-4'>
-                          <div className='flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg'>
-                            <div className='space-y-1'>
-                              <div className='font-medium text-gray-900'>
-                                Parent Story
-                              </div>
-                              <div className='text-sm text-gray-600'>
-                                "{(originalStory as { title: string }).title}"
-                                by{" "}
-                                {(originalStory as { author: string }).author}
-                              </div>
-                            </div>
-                            <Badge
-                              variant='outline'
-                              className='bg-blue-50 text-blue-700 border-blue-200'
-                            >
-                              Original
-                            </Badge>
-                          </div>
-
-                          <div className='flex items-center justify-center'>
-                            <div className='w-px h-8 bg-gray-300'></div>
-                          </div>
-
-                          <div className='flex items-center justify-between p-4 bg-white border-2 border-blue-200 rounded-lg'>
-                            <div className='space-y-1'>
-                              <div className='font-medium text-gray-900'>
-                                Your Remix
-                              </div>
-                              <div className='text-sm text-gray-600'>
-                                Will inherit all terms from parent
-                              </div>
-                            </div>
-                            <Badge className='bg-blue-100 text-blue-800 border-blue-300'>
-                              {(
-                                (originalStory as { licenseType?: string })
-                                  ?.licenseType || "non-commercial"
-                              )
-                                .split("-")
-                                .map(
-                                  (word) =>
-                                    word.charAt(0).toUpperCase() + word.slice(1)
-                                )
-                                .join(" ")}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <div className='mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg'>
-                          <div className='flex items-start gap-3'>
-                            <div className='p-1 bg-amber-100 rounded'>
-                              <AlertCircle className='h-4 w-4 text-amber-600' />
-                            </div>
-                            <div className='text-sm text-amber-800'>
-                              <strong>Important:</strong> License terms are
-                              automatically inherited and cannot be changed.
-                              This ensures compliance with Story Protocol and
-                              maintains the integrity of the IP lineage chain.
+                            <div className='text-sm text-foreground/80 leading-relaxed'>
+                              {parentLicenseInfo.hasMultipleLicenses
+                                ? "This parent asset has multiple licenses. You must select one for your remix."
+                                : "Your remix will automatically inherit the license from the parent asset."}
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Hidden form field to store the inherited license */}
-                      <FormField
-                        control={form.control}
-                        name='licenseType'
-                        render={({ field }) => (
-                          <input
-                            type='hidden'
-                            value={field.value}
-                            onChange={field.onChange}
+                      {/* License Inheritance Logic */}
+                      {!licenseInheritance.requiresSelection ? (
+                        // Automatic inheritance - single license
+                        <div className='p-6 border border-primary/30 rounded-lg bg-card/50 backdrop-blur-sm'>
+                          <h3 className='text-lg font-semibold mb-4 text-foreground'>
+                            License Automatically Inherited
+                          </h3>
+
+                          <div className='space-y-4'>
+                            <div className='flex items-center justify-between p-4 bg-card/30 border border-primary/20 rounded-lg backdrop-blur-sm'>
+                              <div className='space-y-1'>
+                                <div className='font-medium text-foreground'>
+                                  Parent Story
+                                </div>
+                                <div className='text-sm text-muted-foreground'>
+                                  "{parentLicenseInfo.title}" by {parentLicenseInfo.author}
+                                </div>
+                              </div>
+                              <Badge variant='outline' className='bg-primary/10 text-primary border-primary/30'>
+                                Original
+                              </Badge>
+                            </div>
+
+                            <div className='flex items-center justify-center'>
+                              <div className='w-px h-8 bg-primary/30'></div>
+                            </div>
+
+                            <div className='flex items-center justify-between p-4 bg-primary/10 border-2 border-primary/40 rounded-lg backdrop-blur-sm'>
+                              <div className='space-y-1'>
+                                <div className='font-medium text-foreground'>Your Remix</div>
+                                <div className='text-sm text-muted-foreground'>
+                                  Will inherit: {licenseInheritance.inheritedLicense?.name}
+                                </div>
+                              </div>
+                              <Badge className='bg-primary/20 text-primary border-primary/40'>
+                                {formatLicenseForDisplay(licenseInheritance.inheritedLicense!).badge}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <div className='mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg backdrop-blur-sm'>
+                            <div className='flex items-start gap-3'>
+                              <div className='p-1 bg-green-500/20 rounded'>
+                                <CheckCircle className='h-4 w-4 text-green-400' />
+                              </div>
+                              <div className='text-sm text-green-300'>
+                                <strong>Automatic Inheritance:</strong> Since the parent asset has a single license, 
+                                your remix will automatically inherit all terms, ensuring compliance with Story Protocol.
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Hidden form field to store the inherited license */}
+                          <FormField
+                            control={form.control}
+                            name='licenseType'
+                            render={({ field }) => (
+                              <input
+                                type='hidden'
+                                value={licenseInheritance.inheritedLicense?.type || 'non-commercial'}
+                                onChange={field.onChange}
+                              />
+                            )}
                           />
-                        )}
-                      />
+                        </div>
+                      ) : (
+                        // Multiple licenses - requires selection
+                        <div className='p-6 border border-primary/30 rounded-lg bg-card/50 backdrop-blur-sm'>
+                          <h3 className='text-lg font-semibold mb-4 text-foreground'>
+                            Select License for Your Remix
+                          </h3>
+                          
+                          <div className='mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg backdrop-blur-sm'>
+                            <div className='flex items-start gap-3'>
+                              <div className='p-1 bg-amber-500/20 rounded'>
+                                <AlertCircle className='h-4 w-4 text-amber-400' />
+                              </div>
+                              <div className='text-sm text-amber-300'>
+                                <strong>Multiple Licenses Available:</strong> The parent asset is published under 
+                                multiple licenses. You must choose one for your remix.
+                              </div>
+                            </div>
+                          </div>
+
+                          <FormField
+                            control={form.control}
+                            name='licenseType'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Available Licenses</FormLabel>
+                                <FormControl>
+                                  <div className='space-y-3'>
+                                    {licenseInheritance.availableLicenses.map((license) => {
+                                      const displayInfo = formatLicenseForDisplay(license);
+                                      return (
+                                        <div
+                                          key={license.id}
+                                          className={`p-4 border rounded-lg cursor-pointer transition-all backdrop-blur-sm ${
+                                            field.value === license.type
+                                              ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
+                                              : 'border-primary/20 bg-card/30 hover:border-primary/40 hover:bg-card/50'
+                                          }`}
+                                          onClick={() => {
+                                            field.onChange(license.type);
+                                            setSelectedLicense(license.type);
+                                          }}
+                                        >
+                                          <div className='flex items-start justify-between'>
+                                            <div className='space-y-2 flex-1'>
+                                              <div className='flex items-center gap-2'>
+                                                <div className='font-medium text-foreground'>{displayInfo.title}</div>
+                                                <Badge variant='outline' className='border-primary/30 text-primary'>{displayInfo.badge}</Badge>
+                                              </div>
+                                              <div className='text-sm text-muted-foreground'>
+                                                {displayInfo.description}
+                                              </div>
+                                              <div className='flex flex-wrap gap-1'>
+                                                {displayInfo.features.map((feature, index) => (
+                                                  <Badge key={index} variant='secondary' className='text-xs bg-secondary/50 text-secondary-foreground border-secondary/30'>
+                                                    {feature}
+                                                  </Badge>
+                                                ))}
+                                              </div>
+                                            </div>
+                                            <div className={`w-4 h-4 rounded-full border-2 ${
+                                              field.value === license.type
+                                                ? 'border-primary bg-primary'
+                                                : 'border-muted-foreground/30'
+                                            }`}>
+                                              {field.value === license.type && (
+                                                <div className='w-full h-full rounded-full bg-card scale-50'></div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          {selectedLicense && (
+                            <div className='mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg backdrop-blur-sm'>
+                              <div className='flex items-start gap-3'>
+                                <div className='p-1 bg-green-500/20 rounded'>
+                                  <CheckCircle className='h-4 w-4 text-green-400' />
+                                </div>
+                                <div className='text-sm text-green-300'>
+                                  <strong>License Selected:</strong> Your remix will inherit the selected license terms 
+                                  and comply with all associated requirements.
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {licenseInheritance.error && (
+                        <div className='p-6 border border-red-500/30 bg-red-500/10 rounded-lg backdrop-blur-sm'>
+                          <div className='flex items-center gap-3'>
+                            <AlertCircle className='h-5 w-5 text-red-400' />
+                            <div className='text-sm text-red-300'>
+                              <strong>License Error:</strong> {licenseInheritance.error}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {!originalStory && (
-                    <div className='p-6 border border-red-200 bg-red-50 rounded-lg'>
+                  {!parentLicenseInfo && (
+                    <div className='p-6 border border-red-500/30 bg-red-500/10 rounded-lg backdrop-blur-sm'>
                       <div className='flex items-center gap-3'>
-                        <AlertCircle className='h-5 w-5 text-red-600' />
-                        <div className='text-sm text-red-800'>
-                          Unable to load parent story information. Please try
-                          again or contact support.
+                        <AlertCircle className='h-5 w-5 text-red-400' />
+                        <div className='text-sm text-red-300'>
+                          Unable to load parent story license information. Please try again or contact support.
                         </div>
                       </div>
                     </div>
@@ -919,7 +1078,7 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                       className={
                         submitStatus.type === "error"
                           ? "border-destructive bg-destructive/10"
-                          : "border-green-500 bg-green-50"
+                          : "border-green-500/30 bg-green-500/10"
                       }
                     >
                       {submitStatus.type === "error" ? (
@@ -937,7 +1096,7 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                           </div>
                         </div>
                       ) : (
-                        <AlertDescription className='text-green-700'>
+                        <AlertDescription className='text-green-300'>
                           {submitStatus.message}
                         </AlertDescription>
                       )}
