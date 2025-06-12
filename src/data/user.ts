@@ -107,11 +107,14 @@ export const users: UserEntry[] = [
           "Ji-Won and Lee-Hyun, members of an advanced ancient civilization, must separate as she joins a secret colonization mission while he stays behind to guide humanity's development through hidden genetic codes.",
       },
       {
-        ipId: "",
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
+        ipId: "0xca5f2e51677519C47C465D5500Bd392efE576bF2",
+        ipMetadataCID:
+          "bafkreiaamoxi5loefxmvif3fam2y4gk23mohrx4arawbmhpb2krakuzwze",
+        nftMetadataCID:
+          "bafkreidgatpbpeaehclxhdbclo57nk4jksg66sdlmf3b2k3247jubmogha",
+        contentCID:
+          "bafkreibwk6c72lsqf4bwedw7ho7jpg4tw2xudfjipuxld6k5fqgv6r24zy",
+        imageCID: "bafybeid57w42yhoagkkuesyc36nk5h4pln2pq7v363ipsn7zkce5jvlvpe",
         title: "The Architect's Burden",
         synopsis:
           "In a last-ditch effort to restore Earth's dying ecosystems, Dr. Elena Vasquez builds a machine that demands a human sacrifice to seed new life. But as the device awakens with a mind of its own, she realizes they may have engineered something far more dangerous than salvation.",

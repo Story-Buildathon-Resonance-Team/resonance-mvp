@@ -5,20 +5,13 @@ import { useStoryStore } from '@/stores'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { DraftsList } from '@/components/DraftsList'
 import { PublishedStoriesList } from '@/components/PublishedStoriesList'
 import DashboardDataSeeder from '@/components/DashboardDataSeeder'
 import { 
   PlusIcon,
   FileTextIcon,
-  BookOpenIcon,
-  EyeIcon,
-  TrendingUpIcon,
-  ClockIcon,
-  BookmarkIcon,
-  GitFork
-} from 'lucide-react'
+  BookOpenIcon} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 
@@ -158,92 +151,6 @@ export default function DashboardPage() {
         {/* Stories Content */}
         <div className="min-h-[400px]">
           {activeView === 'drafts' ? <DraftsList /> : <PublishedStoriesList />}
-        </div>
-
-        {/* Secondary Actions
-        {(stats.totalBookmarked > 0 || stats.totalRemixes > 0) && (
-          <>
-            <Separator />
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Reading & Inspiration</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {stats.totalBookmarked > 0 && (
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <BookmarkIcon className="h-5 w-5 text-blue-600" />
-                          <div>
-                            <div className="font-medium">Bookmarked Stories</div>
-                            <div className="text-sm text-muted-foreground">
-                              {stats.totalBookmarked} stories saved
-                            </div>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">View All</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-                
-                {stats.totalRemixes > 0 && (
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <GitFork className="h-5 w-5 text-purple-600" />
-                          <div>
-                            <div className="font-medium">Your Remixes</div>
-                            <div className="text-sm text-muted-foreground">
-                              {stats.totalRemixes} remixes created
-                            </div>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">View All</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
-          </>
-        )} */}
-
-        {/* Quick Actions */}
-        <Separator />
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Explore</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" asChild className="h-auto p-4 justify-start">
-              <Link href="/library" className="flex items-center gap-3">
-                <BookOpenIcon className="h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Browse Stories</div>
-                  <div className="text-sm text-muted-foreground">Discover new stories</div>
-                </div>
-              </Link>
-            </Button>
-            
-            <Button variant="outline" asChild className="h-auto p-4 justify-start">
-              <Link href="/library" className="flex items-center gap-3">
-                <GitFork className="h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Find Stories to Remix</div>
-                  <div className="text-sm text-muted-foreground">Build on others' work</div>
-                </div>
-              </Link>
-            </Button>
-            
-            <Button variant="outline" asChild className="h-auto p-4 justify-start">
-              <Link href="/" className="flex items-center gap-3">
-                <TrendingUpIcon className="h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Trending Stories</div>
-                  <div className="text-sm text-muted-foreground">See what's popular</div>
-                </div>
-              </Link>
-            </Button>
-          </div>
         </div>
       </div>
     </div>

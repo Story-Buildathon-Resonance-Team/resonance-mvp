@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, User, FileText, Globe, AlertCircle, GitBranch, Sparkles } from "lucide-react";
@@ -123,35 +123,6 @@ export default function StoriesPage() {
               </CardHeader>
 
               <CardContent className='space-y-4'>
-                {/* Author Info */}
-                <div className='flex items-center gap-2 text-sm'>
-                  <User className='h-4 w-4' />
-                  <span>{story.author}</span>
-                </div>
-
-                {/* License Badge */}
-                <Badge variant='secondary' className='w-fit'>
-                  {story.licenseType === 'non-commercial' 
-                    ? 'Non-Commercial Social Remixing'
-                    : story.licenseType === 'commercial-use'
-                    ? 'Commercial Use Only'
-                    : story.licenseType === 'commercial-remix'
-                    ? 'Commercial Remix'
-                    : 'Non-Commercial Social Remixing'
-                  }
-                </Badge>
-
-                {/* IP Asset Info */}
-                {story.ipId && (
-                  <div className='space-y-2'>
-                    <div className='text-xs text-muted-foreground'>
-                      <strong>IP Asset ID:</strong>
-                      <br />
-                      <code className='text-xs'>{story.ipId}</code>
-                    </div>
-                  </div>
-                )}
-
                 {/* Action Buttons */}
                 <div className='flex gap-2 pt-2'>
                   {story.ipId && story.contentCID ? (
@@ -173,23 +144,6 @@ export default function StoriesPage() {
                       object (check user.ts file in the data folder)
                     </div>
                   ) : null}
-                </div>
-
-                {/* IPFS Links */}
-                <div className='text-xs text-muted-foreground space-y-1'>
-                  {story.ipMetadataCID && (
-                    <div className='flex items-center gap-1'>
-                      <Globe className='h-3 w-3' />
-                      <a
-                        href={getIPFSUrl(story.ipMetadataCID)}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='hover:underline'
-                      >
-                        IP Metadata
-                      </a>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
