@@ -42,6 +42,7 @@ import {
   ImageIcon,
   Save,
   LinkIcon,
+  AlertCircle,
 } from "lucide-react";
 import { registerStoryAsIP } from "../../services/storyService";
 import { uploadStoryToPinata } from "../../utils/pinata";
@@ -117,8 +118,8 @@ interface Step {
 const remixSteps: Step[] = [
   {
     id: 1,
-    title: "Choose License",
-    description: "Select how you want to license your remix",
+    title: "License Inheritance",
+    description: "Review inherited license terms from parent IP",
     icon: Scale,
     schema: licenseSchema,
   },
@@ -180,7 +181,7 @@ export default function RemixStoryForm({
     resetForm,
   } = usePublishStore();
 
-  const { addPublishedStory } = useStoryStore();
+  const { addPublishedStory, publishedStories } = useStoryStore();
   const [successResult, setSuccessResult] = useState<unknown>(null);
 
   const { address, isConnected, userName } = useUser();
@@ -189,12 +190,28 @@ export default function RemixStoryForm({
   useEffect(() => {
     if (originalStoryId) {
       const findStory = () => {
+        // First check the store for published stories (custom stories)
+        const storeStory = publishedStories.find((s) => s.ipId === originalStoryId);
+        if (storeStory) {
+          return {
+            ipId: storeStory.ipId,
+            title: storeStory.title,
+            description: storeStory.description,
+            author: storeStory.author.name || storeStory.author.address.slice(0, 8) + "...",
+            licenseType: storeStory.licenseTypes?.[0] || 'non-commercial', // Use first license type
+            contentCID: storeStory.contentCID,
+            imageCID: storeStory.imageCID,
+          };
+        }
+
+        // Fallback to static user data (preloaded stories)
         for (const user of users) {
           const foundStory = user.stories.find((s) => s.ipId === originalStoryId);
           if (foundStory) {
             return {
               ...foundStory,
               author: user.userName || user.walletAddress.slice(0, 8) + "...",
+              licenseType: 'non-commercial', // Default for static stories
             };
           }
         }
@@ -207,7 +224,7 @@ export default function RemixStoryForm({
     } else {
       setLoadingOriginalStory(false);
     }
-  }, [originalStoryId]);
+  }, [originalStoryId, publishedStories]);
 
   // Get author name from user data or fallback to wallet address
   const getAuthorName = (): string => {
@@ -228,13 +245,14 @@ export default function RemixStoryForm({
 
   const authorName = getAuthorName();
 
-  // Pre-populate form with remix-specific defaults
+  // Pre-populate form with remix-specific defaults and license inheritance
   const defaultValues = {
     title: originalStory ? `Remix of ${(originalStory as { title: string }).title}` : "",
     description: suggestionText ? decodeURIComponent(suggestionText) : "",
     contentType: "text" as const,
     content: "",
-    licenseType: "non-commercial" as const,
+    // Inherit license from parent story, with fallback to non-commercial
+    licenseType: (originalStory as { licenseType?: string })?.licenseType as "non-commercial" | "commercial-use" | "commercial-remix" || "non-commercial" as const,
   };
 
   const form = useForm<FormData>({
@@ -246,8 +264,13 @@ export default function RemixStoryForm({
   // Update form when original story loads
   useEffect(() => {
     if (originalStory && !form.watch("title")) {
+      const inheritedLicense = (originalStory as { licenseType?: string })?.licenseType || 'non-commercial';
       form.setValue("title", `Remix of ${(originalStory as { title: string }).title}`);
-      updateFormData({ title: `Remix of ${(originalStory as { title: string }).title}` });
+      form.setValue("licenseType", inheritedLicense as "non-commercial" | "commercial-use" | "commercial-remix");
+      updateFormData({ 
+        title: `Remix of ${(originalStory as { title: string }).title}`,
+        licenseType: inheritedLicense as "non-commercial" | "commercial-use" | "commercial-remix"
+      });
     }
     if (suggestionText && !form.watch("description")) {
       const decodedSuggestion = decodeURIComponent(suggestionText);
@@ -406,9 +429,11 @@ export default function RemixStoryForm({
           },
           contentCID: pinataResult.contentCID,
           imageCID: pinataResult.imageCID,
+          nftMetadataCID: pinataResult.contentCID, // Using contentCID as fallback
+          ipMetadataCID: pinataResult.contentCID, // Using contentCID as fallback
           txHash: registrationResult.txHash || '',
           tokenId: registrationResult.tokenId || '',
-          licenseType: data.licenseType,
+          licenseTypes: [data.licenseType], // Convert single license to array
           publishedAt: Date.now(),
           explorerUrl: registrationResult.explorerUrl || '',
           originalStoryId, // Track as remix
@@ -584,109 +609,96 @@ export default function RemixStoryForm({
                 </div>
               )}
 
-              {/* Step 1: License Selection */}
+              {/* Step 1: License Inheritance (View-Only) */}
               {currentStep === 1 && (
                 <div className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="licenseType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>License Type for Your Remix</FormLabel>
-                        <FormControl>
-                          <div className="space-y-4">
-                            <div className="grid gap-4">
-                              <label
-                                className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
-                                  field.value === "non-commercial"
-                                    ? "border-primary bg-primary/5"
-                                    : ""
-                                }`}
-                              >
-                                <input
-                                  type="radio"
-                                  value="non-commercial"
-                                  checked={field.value === "non-commercial"}
-                                  onChange={field.onChange}
-                                  className="mt-1 flex-shrink-0"
-                                />
-                                <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
-                                  <div className="font-medium">
-                                    Non-Commercial Remix License
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
-                                  </div>
-                                  <Badge variant="secondary" className="text-xs">
-                                    Ideal for: Creative experimentation and community building
-                                  </Badge>
-                                </div>
-                              </label>
-
-                              <label
-                                className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
-                                  field.value === "commercial-use"
-                                    ? "border-primary bg-primary/5"
-                                    : ""
-                                }`}
-                              >
-                                <input
-                                  type="radio"
-                                  value="commercial-use"
-                                  checked={field.value === "commercial-use"}
-                                  onChange={field.onChange}
-                                  className="mt-1 flex-shrink-0"
-                                />
-                                <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
-                                  <div className="font-medium">
-                                    Commercial Use License
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                  </div>
-                                  <Badge variant="secondary" className="text-xs">
-                                    Ideal for: Professional remixes with commercial potential
-                                  </Badge>
-                                </div>
-                              </label>
-
-                              <label
-                                className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 w-full overflow-hidden ${
-                                  field.value === "commercial-remix"
-                                    ? "border-primary bg-primary/5"
-                                    : ""
-                                }`}
-                              >
-                                <input
-                                  type="radio"
-                                  value="commercial-remix"
-                                  checked={field.value === "commercial-remix"}
-                                  onChange={field.onChange}
-                                  className="mt-1 flex-shrink-0"
-                                />
-                                <div className="space-y-2 min-w-0 flex-1 overflow-hidden">
-                                  <div className="font-medium">
-                                    Commercial Remix License
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.
-                                  </div>
-                                  <Badge variant="secondary" className="text-xs">
-                                    Ideal for: Remixes intended for broad commercial distribution
-                                  </Badge>
-                                </div>
-                              </label>
+                  {originalStory && (
+                    <div className="space-y-4">
+                      <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-4">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <LinkIcon className="h-6 w-6 text-blue-600" />
+                          </div>
+                          <div className="space-y-3 flex-1">
+                            <div className="text-lg font-semibold text-blue-900">
+                              License Automatically Inherited
+                            </div>
+                            <div className="text-sm text-blue-800 leading-relaxed">
+                              As per Story Protocol, your remix will automatically inherit all license terms, royalty rules, and dispute statuses from the parent IP asset. These terms cannot be modified.
                             </div>
                           </div>
-                        </FormControl>
-                        <FormDescription>
-                          Choose how others can use your remix. This will be
-                          enforced on-chain through Story Protocol.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        </div>
+                      </div>
+
+                      <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
+                        <h3 className="text-lg font-semibold mb-4 text-gray-900">Inherited License Terms</h3>
+                        
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
+                            <div className="space-y-1">
+                              <div className="font-medium text-gray-900">Parent Story</div>
+                              <div className="text-sm text-gray-600">"{(originalStory as { title: string }).title}" by {(originalStory as { author: string }).author}</div>
+                            </div>
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                              Original
+                            </Badge>
+                          </div>
+
+                          <div className="flex items-center justify-center">
+                            <div className="w-px h-8 bg-gray-300"></div>
+                          </div>
+
+                          <div className="flex items-center justify-between p-4 bg-white border-2 border-blue-200 rounded-lg">
+                            <div className="space-y-1">
+                              <div className="font-medium text-gray-900">Your Remix</div>
+                              <div className="text-sm text-gray-600">Will inherit all terms from parent</div>
+                            </div>
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                              {((originalStory as { licenseType?: string })?.licenseType || 'non-commercial')
+                                .split('-')
+                                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                .join(' ')}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <div className="p-1 bg-amber-100 rounded">
+                              <AlertCircle className="h-4 w-4 text-amber-600" />
+                            </div>
+                            <div className="text-sm text-amber-800">
+                              <strong>Important:</strong> License terms are automatically inherited and cannot be changed. This ensures compliance with Story Protocol and maintains the integrity of the IP lineage chain.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Hidden form field to store the inherited license */}
+                      <FormField
+                        control={form.control}
+                        name="licenseType"
+                        render={({ field }) => (
+                          <input
+                            type="hidden"
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </div>
+                  )}
+
+                  {!originalStory && (
+                    <div className="p-6 border border-red-200 bg-red-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <AlertCircle className="h-5 w-5 text-red-600" />
+                        <div className="text-sm text-red-800">
+                          Unable to load parent story information. Please try again or contact support.
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

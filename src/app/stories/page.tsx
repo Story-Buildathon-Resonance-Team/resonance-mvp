@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, User, FileText, Globe, AlertCircle } from "lucide-react";
+import { BookOpen, User, FileText, Globe, AlertCircle, GitBranch, Sparkles } from "lucide-react";
 import { users } from "../../data/user";
 import { useStoryStore } from "../../stores/storyStore";
 import Link from "next/link";
@@ -37,7 +37,9 @@ export default function StoriesPage() {
     author: story.author.name || story.author.address.slice(0, 8) + "...",
     authorAddress: story.author.address,
     publishedAt: story.publishedAt,
-    licenseType: story.licenseType,
+    licenseType: story.licenseTypes?.[0] || 'non-commercial',
+    originalStoryId: story.originalStoryId, // Track remix relationship
+    isRemix: !!story.originalStoryId, // Flag to identify remixes
   }));
 
   // Combine and deduplicate stories (store stories take precedence)
@@ -96,19 +98,27 @@ export default function StoriesPage() {
               )}
 
               <CardHeader className='flex-1'>
-                <CardTitle className='line-clamp-2'>
-                  {story.title || "Untitled Story"}
-                </CardTitle>
-                <CardDescription>
-                  <div className='flex items-center gap-2 text-sm'>
-                    <User className='h-4 w-4' />
-                    <span>{story.author}</span>
-                  </div>
-                </CardDescription>
+                <div className="flex items-start justify-between gap-2">
+                  <CardTitle className='line-clamp-2 flex-1'>
+                    {story.title || "Untitled Story"}
+                  </CardTitle>
+                  {(story as any).isRemix && (
+                    <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                      <GitBranch className="h-3 w-3" />
+                      Remix
+                    </Badge>
+                  )}
+                </div>
                 {story.synopsis && (
                   <p className='text-sm text-muted-foreground line-clamp-3'>
                     {story.synopsis}
                   </p>
+                )}
+                {(story as any).isRemix && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Sparkles className="h-3 w-3" />
+                    <span>Remix of original work</span>
+                  </div>
                 )}
               </CardHeader>
 

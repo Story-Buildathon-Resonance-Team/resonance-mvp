@@ -9,6 +9,7 @@ import {
   PILTemplateAddress,
   validateLicenseCompatibility,
   getLicenseTermsById,
+  SPGNFTContractAddress,
 } from "@/utils/utils";
 
 interface DerivativeRegistrationRequest {
@@ -28,12 +29,35 @@ interface DerivativeRegistrationRequest {
     | "commercial-remix";
 }
 
+/**
+ * Get license terms ID from license type
+ */
+function getLicenseTermsIdFromType(licenseType: "non-commercial" | "commercial-use" | "commercial-remix"): string {
+  switch (licenseType) {
+    case "non-commercial":
+      return "1"; // NonCommercialSocialRemixingTermsId
+    case "commercial-use":
+      return "2"; // CommercialUseOnlyTermsId
+    case "commercial-remix":
+      return "3"; // CommercialRemixTermsId
+    default:
+      throw new Error(`Unknown license type: ${licenseType}`);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log("=== Starting Derivative IP Registration API ===");
+    console.log("SPGNFTContractAddress:", SPGNFTContractAddress);
+    console.log("PILTemplateAddress:", PILTemplateAddress);
 
     const data: DerivativeRegistrationRequest = await request.json();
-    console.log("Derivative request data parsed successfully");
+    console.log("Derivative request data:", {
+      title: data.title,
+      parentIpId: data.parentIpId,
+      authorAddress: data.author.address,
+      derivativeLicenseType: data.derivativeLicenseType
+    });
 
     // Initialize server-side config
     const { client } = initializeServerConfig();
@@ -45,10 +69,19 @@ export async function POST(request: NextRequest) {
       // Check if parent IP exists (this would need actual implementation)
       // const parentIP = await client.ipAsset.getIpMetadata(data.parentIpId);
 
+      // Convert derivative license type to license terms ID
+      const derivativeLicenseTermsId = getLicenseTermsIdFromType(data.derivativeLicenseType);
+      
+      console.log("License validation:", {
+        parentLicenseTermsId: data.parentLicenseTermsId,
+        derivativeLicenseType: data.derivativeLicenseType,
+        derivativeLicenseTermsId: derivativeLicenseTermsId
+      });
+      
       // Validate license compatibility
       const compatibility = validateLicenseCompatibility(
         data.parentLicenseTermsId,
-        data.derivativeLicenseType
+        derivativeLicenseTermsId
       );
 
       if (!compatibility.isCompatible) {
@@ -159,10 +192,17 @@ export async function POST(request: NextRequest) {
       console.log("License terms may already be attached:", attachError);
     }
 
+    console.log("Registering derivative with:", {
+      spgNftContract: SPGNFTContractAddress,
+      recipient: data.author.address,
+      parentIpId: data.parentIpId,
+      parentLicenseTermsId: data.parentLicenseTermsId,
+      PILTemplateAddress: PILTemplateAddress
+    });
+
     // Register the derivative
     const response = await client.ipAsset.mintAndRegisterIpAndMakeDerivative({
-      spgNftContract: process.env
-        .NEXT_PUBLIC_SPG_NFT_CONTRACT_ADDRESS as Address,
+      spgNftContract: SPGNFTContractAddress,
       recipient: data.author.address,
       derivData: {
         parentIpIds: [data.parentIpId],
