@@ -108,6 +108,19 @@ export const users: UserEntry[] = [
           "She’s shattered time forty-three times to save him—each attempt a new tragedy etched in broken light. Now, in the one timeline where he truly lives, she must decide if love means letting go.",
       },
       {
+        ipId: "0x40Fa07054BA077DBc0Bd85B9A3A52872DCaB7F5A",
+        ipMetadataCID:
+          "bafkreibu5gafozhq2dwtbjis2pa57domgjisq4auc42twaxxhektvsmnue",
+        nftMetadataCID:
+          "bafkreibzlzfge6ctahqs7c4r5frsh4hrljogbwz2xmadzqftmzcyiyaqlq",
+        contentCID:
+          "bafkreib5q6rric2xvehhm4qew42gmhv2otjynxghd4myzar2rpku42zpou",
+        imageCID: "bafybeiakuuj3acgyfgnjaf42anwsg7fseiua4zxvdaxkiljpnwawjmvc4q",
+        title: "The Gardener",
+        synopsis:
+          "He hears only silence where others touch the stars. In a world awakening to ancient power, one man must find meaning in what was left behind.",
+      },
+      {
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",
@@ -116,12 +129,6 @@ export const users: UserEntry[] = [
         title: "",
         synopsis: "",
       },
-    ],
-  },
-  {
-    userName: "",
-    walletAddress: "",
-    stories: [
       {
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
@@ -131,16 +138,6 @@ export const users: UserEntry[] = [
         title: "",
         synopsis: "",
       },
-      {
-        ipId: "",
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
-      // …up to 10 entries
     ],
   },
   {
@@ -168,5 +165,4 @@ export const users: UserEntry[] = [
       // …up to 10 entries
     ],
   },
-  // Up to 5 user objects here.
 ];

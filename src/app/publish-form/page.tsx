@@ -248,11 +248,19 @@ export default function PaginatedStoryForm({
 
   const fillSampleStory = () => {
     const sampleData = {
-      title: "Your story title here",
+      title: "The Song That Sleeps",
       description:
-        "A brief description of your story. 1-2 sentences is enough.",
+        "He had not spoken in three days. Silence swallowed his call. She was waiting for him.",
       contentType: "text" as const,
-      content: `Paste your story here. Make sure it is between 500 to 1000 words long. This is a test app, so you can use a short story, a scenario, or even a poem. The content should be in plain text format, without any special formatting or HTML tags. Just write your story as you would in a text editor.`,
+      content: `The library breathed with the weight of untold words.
+      Lior pressed his palm against the entrance archway, feeling the marble pulse beneath his touch—each heartbeat a whispered prayer carved by centuries of scholars. The stone was warm, almost alive, and threaded with golden veins where particularly beautiful truths had been spoken aloud. But beneath the beauty lay jagged scars, deep gouges where screams had once torn through the air.
+      He had not spoken in three days.
+      "Aela?" His voice cracked like breaking glass, and immediately the sound took shape—crystalline fragments that scattered across the floor, chiming softly as they shattered against fallen books. The echo carved shallow grooves into the nearest pillar before fading.
+      Silence swallowed his call.
+      Deeper into the ruins he went, past reading alcoves where silence hung like curtains, so thick it could be touched, so sharp it drew blood from unwary fingers. The absence of sound here had weight and texture—velvet darkness that muffled his footsteps, then suddenly thin as razors where a librarian's final gasp had carved emptiness into the very air.
+      He found her in the heart of the archive, surrounded by a perfect sphere of crystallized quiet.
+      Aela sat cross-legged on a cushion of compressed whispers, her fingers dancing across pages that sang beneath her touch. Books floated around her in slow orbits, their covers breathing with stored voices. Her hair, white as unspoken secrets, moved without any wind, stirred by the subtle currents of contained sound.
+      She had been beautiful once, before she chose blindness. The scars across her eyelids were deliberate, precise—surgical marks she had carved herself to escape a world grown too loud. But her other senses had sharpened to impossible acuity. She could hear the color of starlight, taste the weight of whispered confessions.`,
     };
 
     // Update form

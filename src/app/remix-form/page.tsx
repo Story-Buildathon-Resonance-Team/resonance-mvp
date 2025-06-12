@@ -534,7 +534,7 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
           </Alert>
           <Button
             onClick={() => router.back()}
-            className='mt-4'
+            className='mt-4 cursor-pointer'
             variant='outline'
           >
             Go Back
@@ -955,7 +955,7 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                   variant='outline'
                   onClick={handlePrevious}
                   disabled={currentStep === 1 || isSubmitting}
-                  className='flex items-center gap-2'
+                  className='flex items-center gap-2 cursor-pointer'
                 >
                   <ChevronLeft className='h-4 w-4' />
                   Previous
@@ -966,7 +966,7 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                     type='button'
                     onClick={handleNext}
                     disabled={isSubmitting}
-                    className='flex items-center gap-2'
+                    className='flex items-center gap-2 cursor-pointer'
                   >
                     Next
                     <ChevronRight className='h-4 w-4' />
@@ -975,7 +975,7 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                   <Button
                     type='submit'
                     disabled={isSubmitting || !address}
-                    className='flex items-center gap-2'
+                    className='flex items-center gap-2 cursor-pointer'
                   >
                     {isSubmitting ? (
                       <>
