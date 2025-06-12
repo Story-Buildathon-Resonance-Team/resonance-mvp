@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { users, StoryEntry } from "@/data/user";
 import { useStoryStore } from "@/stores/storyStore";
@@ -384,7 +385,7 @@ const ReaderPage = () => {
       isRemix: assetData.parentCount > 0,
       parentCount: assetData.parentCount,
       childrenCount: assetData.childrenCount,
-      totalConnected: assetData.parentCount + assetData.childrenCount
+      totalConnected: assetData.parentCount + assetData.childrenCount,
     };
   };
 
@@ -392,31 +393,36 @@ const ReaderPage = () => {
   const getConnectedWorks = () => {
     const connected = {
       parents: [] as any[],
-      children: [] as any[]
+      children: [] as any[],
     };
 
     // Find children (remixes of this story)
     const allStories = [
       ...publishedStories,
-      ...users.flatMap(user => 
+      ...users.flatMap((user) =>
         user.stories
-          .filter(story => story.ipId && story.title)
-          .map(story => ({
+          .filter((story) => story.ipId && story.title)
+          .map((story) => ({
             ...story,
-            author: { name: user.userName || user.walletAddress.slice(0, 8) + "...", address: user.walletAddress }
+            author: {
+              name: user.userName || user.walletAddress.slice(0, 8) + "...",
+              address: user.walletAddress,
+            },
           }))
-      )
+      ),
     ];
 
     // Find stories that have this story as their original
-    connected.children = allStories.filter(story => 
-      (story as any).originalStoryId === ipId
+    connected.children = allStories.filter(
+      (story) => (story as any).originalStoryId === ipId
     );
 
     // Find parent story if this is a remix
-    const currentStoryInStore = publishedStories.find(s => s.ipId === ipId);
+    const currentStoryInStore = publishedStories.find((s) => s.ipId === ipId);
     if (currentStoryInStore?.originalStoryId) {
-      const parentStory = allStories.find(s => s.ipId === currentStoryInStore.originalStoryId);
+      const parentStory = allStories.find(
+        (s) => s.ipId === currentStoryInStore.originalStoryId
+      );
       if (parentStory) {
         connected.parents.push(parentStory);
       }
@@ -542,10 +548,11 @@ const ReaderPage = () => {
                         >
                           {lineageInfo.isOriginal ? "Original Work" : "Remix"}
                         </div>
-                        
+
                         {lineageInfo.isRemix && (
                           <div className='bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 text-amber-600 text-sm'>
-                            Derived from {lineageInfo.parentCount} parent work{lineageInfo.parentCount !== 1 ? 's' : ''}
+                            Derived from {lineageInfo.parentCount} parent work
+                            {lineageInfo.parentCount !== 1 ? "s" : ""}
                           </div>
                         )}
                       </div>
@@ -556,7 +563,9 @@ const ReaderPage = () => {
                   <div className='bg-primary/10 border border-primary/30 rounded-xl px-4 py-3 text-primary text-sm'>
                     <div className='font-medium mb-1'>Connected Works</div>
                     <div className='text-xs opacity-80'>
-                      {lineageInfo ? `${lineageInfo.totalConnected} total connections` : 'Loading...'}
+                      {lineageInfo
+                        ? `${lineageInfo.totalConnected} total connections`
+                        : "Loading..."}
                     </div>
                   </div>
                 </div>
@@ -567,12 +576,22 @@ const ReaderPage = () => {
             <Card className='bg-card border-primary/30 backdrop-blur-lg'>
               <CardContent className='p-6'>
                 <h4 className='text-xl font-semibold mb-6 text-primary flex items-center gap-2'>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <svg
+                    className='w-5 h-5'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M13 10V3L4 14h7v7l9-11h-7z'
+                    />
                   </svg>
                   Connected Works
                 </h4>
-                
+
                 {lineageInfo && lineageInfo.totalConnected > 0 ? (
                   <div className='space-y-4'>
                     {/* Parent Works */}
@@ -582,13 +601,22 @@ const ReaderPage = () => {
                           Parent Works ({connectedWorks.parents.length})
                         </h5>
                         {connectedWorks.parents.map((parent, index) => (
-                          <div key={index} className='flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
+                          <div
+                            key={index}
+                            className='flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg'
+                          >
                             <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
                             <div className='flex-1'>
-                              <div className='font-medium text-sm'>{parent.title}</div>
-                              <div className='text-xs text-muted-foreground'>by {parent.author?.name || parent.author}</div>
+                              <div className='font-medium text-sm'>
+                                {parent.title}
+                              </div>
+                              <div className='text-xs text-muted-foreground'>
+                                by {parent.author?.name || parent.author}
+                              </div>
                             </div>
-                            <Badge variant="outline" className="text-xs">Original</Badge>
+                            <Badge variant='outline' className='text-xs'>
+                              Original
+                            </Badge>
                           </div>
                         ))}
                       </div>
@@ -602,10 +630,14 @@ const ReaderPage = () => {
                       <div className='flex items-center gap-3 p-3 bg-primary/10 border-2 border-primary/30 rounded-lg'>
                         <div className='w-2 h-2 bg-primary rounded-full'></div>
                         <div className='flex-1'>
-                          <div className='font-medium text-sm'>{story.title}</div>
-                          <div className='text-xs text-muted-foreground'>by {story.author}</div>
+                          <div className='font-medium text-sm'>
+                            {story.title}
+                          </div>
+                          <div className='text-xs text-muted-foreground'>
+                            by {story.author}
+                          </div>
                         </div>
-                        <Badge className="text-xs">
+                        <Badge className='text-xs'>
                           {lineageInfo.isOriginal ? "Original" : "Remix"}
                         </Badge>
                       </div>
@@ -618,13 +650,22 @@ const ReaderPage = () => {
                           Derivative Works ({connectedWorks.children.length})
                         </h5>
                         {connectedWorks.children.map((child, index) => (
-                          <div key={index} className='flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg'>
+                          <div
+                            key={index}
+                            className='flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg'
+                          >
                             <div className='w-2 h-2 bg-green-500 rounded-full'></div>
                             <div className='flex-1'>
-                              <div className='font-medium text-sm'>{child.title}</div>
-                              <div className='text-xs text-muted-foreground'>by {child.author?.name || child.author}</div>
+                              <div className='font-medium text-sm'>
+                                {child.title}
+                              </div>
+                              <div className='text-xs text-muted-foreground'>
+                                by {child.author?.name || child.author}
+                              </div>
                             </div>
-                            <Badge variant="secondary" className="text-xs">Remix</Badge>
+                            <Badge variant='secondary' className='text-xs'>
+                              Remix
+                            </Badge>
                           </div>
                         ))}
                       </div>
@@ -633,12 +674,24 @@ const ReaderPage = () => {
                 ) : (
                   <div className='text-center py-8 text-muted-foreground'>
                     <div className='w-16 h-16 mx-auto mb-4 bg-muted/20 rounded-full flex items-center justify-center'>
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      <svg
+                        className='w-8 h-8'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M13 10V3L4 14h7v7l9-11h-7z'
+                        />
                       </svg>
                     </div>
                     <p className='text-sm'>No connected works found</p>
-                    <p className='text-xs mt-1'>This story has no parent or derivative works yet</p>
+                    <p className='text-xs mt-1'>
+                      This story has no parent or derivative works yet
+                    </p>
                   </div>
                 )}
               </CardContent>

@@ -37,7 +37,7 @@ export default function StoriesPage() {
     author: story.author.name || story.author.address.slice(0, 8) + "...",
     authorAddress: story.author.address,
     publishedAt: story.publishedAt,
-    licenseType: story.licenseType,
+    licenseType: story.licenseTypes,
   }));
 
   // Combine and deduplicate stories (store stories take precedence)
@@ -157,7 +157,6 @@ export default function StoriesPage() {
           </CardContent>
         </Card>
       )}
-
-          </div>
+    </div>
   );
 }
