@@ -68,23 +68,30 @@ const baseSchema = z.object({
   content: z.string().optional(),
   storyFile: z.instanceof(File).optional(),
   coverImage: z.instanceof(File, { message: "Cover image is required" }),
-  licenseType: z.enum(["non-commercial", "commercial-use", "commercial-remix"], {
-    required_error: "Please select a license type",
-  }),
+  licenseType: z.enum(
+    ["non-commercial", "commercial-use", "commercial-remix"],
+    {
+      required_error: "Please select a license type",
+    }
+  ),
 });
 
 // Complete form schema with refinement
-const completeSchema = baseSchema.refine((data) => {
-  if (data.contentType === "text") {
-    return data.content && data.content.length >= 50;
-  } else if (data.contentType === "pdf") {
-    return data.storyFile && data.storyFile.type === "application/pdf";
+const completeSchema = baseSchema.refine(
+  (data) => {
+    if (data.contentType === "text") {
+      return data.content && data.content.length >= 50;
+    } else if (data.contentType === "pdf") {
+      return data.storyFile && data.storyFile.type === "application/pdf";
+    }
+    return false;
+  },
+  {
+    message:
+      "Please provide either text content (min 50 characters) or upload a PDF file",
+    path: ["content"],
   }
-  return false;
-}, {
-  message: "Please provide either text content (min 50 characters) or upload a PDF file",
-  path: ["content"],
-});
+);
 
 // Step-specific schemas for validation
 const storyContentSchema = baseSchema.pick({
@@ -141,29 +148,32 @@ const remixSteps: Step[] = [
 
 // Original Story Context Card Component
 const OriginalStoryCard = ({ originalStory }: { originalStory: unknown }) => (
-  <Card className="mb-6 border-primary/20">
-    <CardContent className="p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <LinkIcon className="h-4 w-4" />
-        <span className="text-sm font-medium">Remixing:</span>
+  <Card className='mb-6 border-primary/20'>
+    <CardContent className='p-4'>
+      <div className='flex items-center gap-2 mb-2'>
+        <LinkIcon className='h-4 w-4' />
+        <span className='text-sm font-medium'>Remixing:</span>
       </div>
-      <h3 className="font-semibold">{(originalStory as { title: string }).title}</h3>
-      <p className="text-sm text-muted-foreground">by {(originalStory as { author: string }).author}</p>
-      <Badge variant="outline" className="mt-2">
-        {(originalStory as { licenseType?: string }).licenseType || 'Non-Commercial'}
+      <h3 className='font-semibold'>
+        {(originalStory as { title: string }).title}
+      </h3>
+      <p className='text-sm text-muted-foreground'>
+        by {(originalStory as { author: string }).author}
+      </p>
+      <Badge variant='outline' className='mt-2'>
+        {(originalStory as { licenseType?: string }).licenseType ||
+          "Non-Commercial"}
       </Badge>
     </CardContent>
   </Card>
 );
 
-export default function RemixStoryForm({
-  onSuccess,
-}: RemixStoryFormProps) {
+export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const originalStoryId = searchParams.get('originalStoryId');
-  const suggestionText = searchParams.get('suggestion');
-  
+  const originalStoryId = searchParams.get("originalStoryId");
+  const suggestionText = searchParams.get("suggestion");
+
   // State for original story data
   const [originalStory, setOriginalStory] = useState<unknown>(null);
   const [loadingOriginalStory, setLoadingOriginalStory] = useState(true);
@@ -191,14 +201,18 @@ export default function RemixStoryForm({
     if (originalStoryId) {
       const findStory = () => {
         // First check the store for published stories (custom stories)
-        const storeStory = publishedStories.find((s) => s.ipId === originalStoryId);
+        const storeStory = publishedStories.find(
+          (s) => s.ipId === originalStoryId
+        );
         if (storeStory) {
           return {
             ipId: storeStory.ipId,
             title: storeStory.title,
             description: storeStory.description,
-            author: storeStory.author.name || storeStory.author.address.slice(0, 8) + "...",
-            licenseType: storeStory.licenseTypes?.[0] || 'non-commercial', // Use first license type
+            author:
+              storeStory.author.name ||
+              storeStory.author.address.slice(0, 8) + "...",
+            licenseType: storeStory.licenseTypes?.[0] || "non-commercial", // Use first license type
             contentCID: storeStory.contentCID,
             imageCID: storeStory.imageCID,
           };
@@ -206,12 +220,14 @@ export default function RemixStoryForm({
 
         // Fallback to static user data (preloaded stories)
         for (const user of users) {
-          const foundStory = user.stories.find((s) => s.ipId === originalStoryId);
+          const foundStory = user.stories.find(
+            (s) => s.ipId === originalStoryId
+          );
           if (foundStory) {
             return {
               ...foundStory,
               author: user.userName || user.walletAddress.slice(0, 8) + "...",
-              licenseType: 'non-commercial', // Default for static stories
+              licenseType: "non-commercial", // Default for static stories
             };
           }
         }
@@ -247,12 +263,18 @@ export default function RemixStoryForm({
 
   // Pre-populate form with remix-specific defaults and license inheritance
   const defaultValues = {
-    title: originalStory ? `Remix of ${(originalStory as { title: string }).title}` : "",
+    title: originalStory
+      ? `Remix of ${(originalStory as { title: string }).title}`
+      : "",
     description: suggestionText ? decodeURIComponent(suggestionText) : "",
     contentType: "text" as const,
     content: "",
     // Inherit license from parent story, with fallback to non-commercial
-    licenseType: (originalStory as { licenseType?: string })?.licenseType as "non-commercial" | "commercial-use" | "commercial-remix" || "non-commercial" as const,
+    licenseType:
+      ((originalStory as { licenseType?: string })?.licenseType as
+        | "non-commercial"
+        | "commercial-use"
+        | "commercial-remix") || ("non-commercial" as const),
   };
 
   const form = useForm<FormData>({
@@ -264,12 +286,26 @@ export default function RemixStoryForm({
   // Update form when original story loads
   useEffect(() => {
     if (originalStory && !form.watch("title")) {
-      const inheritedLicense = (originalStory as { licenseType?: string })?.licenseType || 'non-commercial';
-      form.setValue("title", `Remix of ${(originalStory as { title: string }).title}`);
-      form.setValue("licenseType", inheritedLicense as "non-commercial" | "commercial-use" | "commercial-remix");
-      updateFormData({ 
+      const inheritedLicense =
+        (originalStory as { licenseType?: string })?.licenseType ||
+        "non-commercial";
+      form.setValue(
+        "title",
+        `Remix of ${(originalStory as { title: string }).title}`
+      );
+      form.setValue(
+        "licenseType",
+        inheritedLicense as
+          | "non-commercial"
+          | "commercial-use"
+          | "commercial-remix"
+      );
+      updateFormData({
         title: `Remix of ${(originalStory as { title: string }).title}`,
-        licenseType: inheritedLicense as "non-commercial" | "commercial-use" | "commercial-remix"
+        licenseType: inheritedLicense as
+          | "non-commercial"
+          | "commercial-use"
+          | "commercial-remix",
       });
     }
     if (suggestionText && !form.watch("description")) {
@@ -289,7 +325,8 @@ export default function RemixStoryForm({
 
   const getCurrentStepSchema = () => {
     return (
-      remixSteps.find((step) => step.id === currentStep)?.schema || completeSchema
+      remixSteps.find((step) => step.id === currentStep)?.schema ||
+      completeSchema
     );
   };
 
@@ -328,18 +365,24 @@ export default function RemixStoryForm({
 
   const fillSampleStory = () => {
     const sampleData = {
-      title: originalStory ? `Remix of ${(originalStory as { title: string }).title}` : "Your remix title here",
-      description: suggestionText ? decodeURIComponent(suggestionText) : "A brief description of your remix. 1-2 sentences is enough.",
+      title: originalStory
+        ? `Remix of ${(originalStory as { title: string }).title}`
+        : "Your remix title here",
+      description: suggestionText
+        ? decodeURIComponent(suggestionText)
+        : "A brief description of your remix. 1-2 sentences is enough.",
       contentType: "text" as const,
-      content: `Write your remix here. Make sure it is between 500 to 1000 words long. This remix is based on &quot;${(originalStory as { title: string })?.title || 'the original story'}&quot; and should credit the original author while adding your unique creative vision.`,
+      content: `Write your remix here. Make sure it is between 500 to 1000 words long. This remix is based on &quot;${
+        (originalStory as { title: string })?.title || "the original story"
+      }&quot; and should credit the original author while adding your unique creative vision.`,
     };
-    
+
     // Update form
     form.setValue("title", sampleData.title);
     form.setValue("description", sampleData.description);
     form.setValue("contentType", sampleData.contentType);
     form.setValue("content", sampleData.content);
-    
+
     // Update store
     updateFormData(sampleData);
   };
@@ -357,7 +400,8 @@ export default function RemixStoryForm({
     if (!originalStoryId) {
       setSubmitStatus({
         type: "error",
-        message: "Original story ID not found. Please navigate from a story page.",
+        message:
+          "Original story ID not found. Please navigate from a story page.",
       });
       return;
     }
@@ -417,7 +461,7 @@ export default function RemixStoryForm({
 
         // Show success modal
         setSuccessResult(registrationResult);
-        
+
         // Add to published stories store
         addPublishedStory({
           ipId: registrationResult.ipId,
@@ -431,19 +475,21 @@ export default function RemixStoryForm({
           imageCID: pinataResult.imageCID,
           nftMetadataCID: pinataResult.contentCID, // Using contentCID as fallback
           ipMetadataCID: pinataResult.contentCID, // Using contentCID as fallback
-          txHash: registrationResult.txHash || '',
-          tokenId: registrationResult.tokenId || '',
+          txHash: registrationResult.txHash || "",
+          tokenId: registrationResult.tokenId || "",
           licenseTypes: [data.licenseType], // Convert single license to array
           publishedAt: Date.now(),
-          explorerUrl: registrationResult.explorerUrl || '',
+          explorerUrl: registrationResult.explorerUrl || "",
           originalStoryId, // Track as remix
         });
-        
+
         form.reset();
         resetForm();
         onSuccess?.(registrationResult);
       } else {
-        throw new Error(registrationResult.error || "Registration failed - no IP ID returned");
+        throw new Error(
+          registrationResult.error || "Registration failed - no IP ID returned"
+        );
       }
     } catch (error) {
       console.error("Remix submission error:", error);
@@ -477,18 +523,19 @@ export default function RemixStoryForm({
   // Error state if no original story found
   if (originalStoryId && !originalStory) {
     return (
-      <Card className="w-full max-w-6xl mx-auto">
-        <CardContent className="p-8">
+      <Card className='w-full max-w-6xl mx-auto'>
+        <CardContent className='p-8'>
           <Alert>
-            <Info className="h-4 w-4" />
+            <Info className='h-4 w-4' />
             <AlertDescription>
-              Original story not found. Please navigate from a valid story page to create a remix.
+              Original story not found. Please navigate from a valid story page
+              to create a remix.
             </AlertDescription>
           </Alert>
-          <Button 
-            onClick={() => router.back()} 
-            className="mt-4"
-            variant="outline"
+          <Button
+            onClick={() => router.back()}
+            className='mt-4'
+            variant='outline'
           >
             Go Back
           </Button>
@@ -499,10 +546,10 @@ export default function RemixStoryForm({
 
   if (!isConnected || !address) {
     return (
-      <Card className="w-full max-w-6xl mx-auto">
-        <CardContent className="p-8">
+      <Card className='w-full max-w-6xl mx-auto'>
+        <CardContent className='p-8'>
           <Alert>
-            <Info className="h-4 w-4" />
+            <Info className='h-4 w-4' />
             <AlertDescription>
               Please connect your wallet to create a remix.
             </AlertDescription>
@@ -522,49 +569,54 @@ export default function RemixStoryForm({
       )}
 
       {/* Header */}
-      <br /><br />
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <h1 className="text-3xl font-bold">Remix. Transform. Inspire.</h1>
+      <br />
+      <br />
+      <div className='text-center space-y-4'>
+        <div className='flex items-center justify-center gap-2 mb-4'>
+          <h1 className='text-3xl font-bold'>Remix. Transform. Inspire.</h1>
         </div>
-        <p className="text-xl text-muted-foreground">
+        <p className='text-xl text-muted-foreground'>
           Take inspiration from great stories and make them your own.
         </p>
         {formData.lastSaved && (
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Save className="h-4 w-4" />
+          <div className='flex items-center justify-center gap-2 text-sm text-muted-foreground'>
+            <Save className='h-4 w-4' />
             Auto-saved {new Date(formData.lastSaved).toLocaleTimeString()}
           </div>
         )}
       </div>
-      <br /><br />
+      <br />
+      <br />
 
       {/* Original Story Context
       {originalStory && <OriginalStoryCard originalStory={originalStory} />} */}
 
-      <Card className="w-full max-w-6xl mx-auto">
+      <Card className='w-full max-w-6xl mx-auto'>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
+              <CardTitle className='flex items-center gap-2'>
+                <Sparkles className='h-5 w-5' />
                 Create Your Remix
               </CardTitle>
               <CardDescription>
-                Create a remix of &quot;{(originalStory as { title: string })?.title || 'the original story'}&quot; and register it as intellectual property.
+                Create a remix of &quot;
+                {(originalStory as { title: string })?.title ||
+                  "the original story"}
+                &quot; and register it as intellectual property.
               </CardDescription>
             </div>
-            <Badge variant="outline">
+            <Badge variant='outline'>
               Step {currentStep} of {remixSteps.length}
             </Badge>
           </div>
 
           {/* Progress Bar */}
-          <div className="space-y-2">
-            <Progress value={progress} className="h-2" />
-            <div className="flex justify-between text-sm text-muted-foreground">
+          <div className='space-y-2'>
+            <Progress value={progress} className='h-2' />
+            <div className='flex justify-between text-sm text-muted-foreground'>
               {remixSteps.map((step) => (
-                <div key={step.id} className="flex flex-col items-center gap-1">
+                <div key={step.id} className='flex flex-col items-center gap-1'>
                   <div
                     className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
                       step.id === currentStep
@@ -575,9 +627,9 @@ export default function RemixStoryForm({
                     }`}
                   >
                     {step.id < currentStep ? (
-                      <CheckCircle className="h-4 w-4" />
+                      <CheckCircle className='h-4 w-4' />
                     ) : (
-                      <step.icon className="h-4 w-4" />
+                      <step.icon className='h-4 w-4' />
                     )}
                   </div>
                   <span
@@ -595,14 +647,14 @@ export default function RemixStoryForm({
 
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
               {/* Current Step Header */}
               {currentStepData && (
-                <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-                  <currentStepData.icon className="h-6 w-6 text-primary" />
+                <div className='flex items-center gap-3 p-4 bg-muted/50 rounded-lg'>
+                  <currentStepData.icon className='h-6 w-6 text-primary' />
                   <div>
-                    <h3 className="font-semibold">{currentStepData.title}</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className='font-semibold'>{currentStepData.title}</h3>
+                    <p className='text-sm text-muted-foreground'>
                       {currentStepData.description}
                     </p>
                   </div>
@@ -611,64 +663,91 @@ export default function RemixStoryForm({
 
               {/* Step 1: License Inheritance (View-Only) */}
               {currentStep === 1 && (
-                <div className="space-y-6">
+                <div className='space-y-6'>
                   {originalStory && (
-                    <div className="space-y-4">
-                      <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-                        <div className="flex items-start gap-4">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <LinkIcon className="h-6 w-6 text-blue-600" />
+                    <div className='space-y-4'>
+                      <div className='p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg'>
+                        <div className='flex items-start gap-4'>
+                          <div className='p-2 bg-blue-100 rounded-lg'>
+                            <LinkIcon className='h-6 w-6 text-blue-600' />
                           </div>
-                          <div className="space-y-3 flex-1">
-                            <div className="text-lg font-semibold text-blue-900">
+                          <div className='space-y-3 flex-1'>
+                            <div className='text-lg font-semibold text-blue-900'>
                               License Automatically Inherited
                             </div>
-                            <div className="text-sm text-blue-800 leading-relaxed">
-                              As per Story Protocol, your remix will automatically inherit all license terms, royalty rules, and dispute statuses from the parent IP asset. These terms cannot be modified.
+                            <div className='text-sm text-blue-800 leading-relaxed'>
+                              As per Story Protocol, your remix will
+                              automatically inherit all license terms, royalty
+                              rules, and dispute statuses from the parent IP
+                              asset. These terms cannot be modified.
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-                        <h3 className="text-lg font-semibold mb-4 text-gray-900">Inherited License Terms</h3>
-                        
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
-                            <div className="space-y-1">
-                              <div className="font-medium text-gray-900">Parent Story</div>
-                              <div className="text-sm text-gray-600">"{(originalStory as { title: string }).title}" by {(originalStory as { author: string }).author}</div>
+                      <div className='p-6 border border-gray-200 rounded-lg bg-gray-50'>
+                        <h3 className='text-lg font-semibold mb-4 text-gray-900'>
+                          Inherited License Terms
+                        </h3>
+
+                        <div className='space-y-4'>
+                          <div className='flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg'>
+                            <div className='space-y-1'>
+                              <div className='font-medium text-gray-900'>
+                                Parent Story
+                              </div>
+                              <div className='text-sm text-gray-600'>
+                                "{(originalStory as { title: string }).title}"
+                                by{" "}
+                                {(originalStory as { author: string }).author}
+                              </div>
                             </div>
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            <Badge
+                              variant='outline'
+                              className='bg-blue-50 text-blue-700 border-blue-200'
+                            >
                               Original
                             </Badge>
                           </div>
 
-                          <div className="flex items-center justify-center">
-                            <div className="w-px h-8 bg-gray-300"></div>
+                          <div className='flex items-center justify-center'>
+                            <div className='w-px h-8 bg-gray-300'></div>
                           </div>
 
-                          <div className="flex items-center justify-between p-4 bg-white border-2 border-blue-200 rounded-lg">
-                            <div className="space-y-1">
-                              <div className="font-medium text-gray-900">Your Remix</div>
-                              <div className="text-sm text-gray-600">Will inherit all terms from parent</div>
+                          <div className='flex items-center justify-between p-4 bg-white border-2 border-blue-200 rounded-lg'>
+                            <div className='space-y-1'>
+                              <div className='font-medium text-gray-900'>
+                                Your Remix
+                              </div>
+                              <div className='text-sm text-gray-600'>
+                                Will inherit all terms from parent
+                              </div>
                             </div>
-                            <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-                              {((originalStory as { licenseType?: string })?.licenseType || 'non-commercial')
-                                .split('-')
-                                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                                .join(' ')}
+                            <Badge className='bg-blue-100 text-blue-800 border-blue-300'>
+                              {(
+                                (originalStory as { licenseType?: string })
+                                  ?.licenseType || "non-commercial"
+                              )
+                                .split("-")
+                                .map(
+                                  (word) =>
+                                    word.charAt(0).toUpperCase() + word.slice(1)
+                                )
+                                .join(" ")}
                             </Badge>
                           </div>
                         </div>
 
-                        <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                          <div className="flex items-start gap-3">
-                            <div className="p-1 bg-amber-100 rounded">
-                              <AlertCircle className="h-4 w-4 text-amber-600" />
+                        <div className='mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg'>
+                          <div className='flex items-start gap-3'>
+                            <div className='p-1 bg-amber-100 rounded'>
+                              <AlertCircle className='h-4 w-4 text-amber-600' />
                             </div>
-                            <div className="text-sm text-amber-800">
-                              <strong>Important:</strong> License terms are automatically inherited and cannot be changed. This ensures compliance with Story Protocol and maintains the integrity of the IP lineage chain.
+                            <div className='text-sm text-amber-800'>
+                              <strong>Important:</strong> License terms are
+                              automatically inherited and cannot be changed.
+                              This ensures compliance with Story Protocol and
+                              maintains the integrity of the IP lineage chain.
                             </div>
                           </div>
                         </div>
@@ -677,10 +756,10 @@ export default function RemixStoryForm({
                       {/* Hidden form field to store the inherited license */}
                       <FormField
                         control={form.control}
-                        name="licenseType"
+                        name='licenseType'
                         render={({ field }) => (
                           <input
-                            type="hidden"
+                            type='hidden'
                             value={field.value}
                             onChange={field.onChange}
                           />
@@ -690,11 +769,12 @@ export default function RemixStoryForm({
                   )}
 
                   {!originalStory && (
-                    <div className="p-6 border border-red-200 bg-red-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <AlertCircle className="h-5 w-5 text-red-600" />
-                        <div className="text-sm text-red-800">
-                          Unable to load parent story information. Please try again or contact support.
+                    <div className='p-6 border border-red-200 bg-red-50 rounded-lg'>
+                      <div className='flex items-center gap-3'>
+                        <AlertCircle className='h-5 w-5 text-red-600' />
+                        <div className='text-sm text-red-800'>
+                          Unable to load parent story information. Please try
+                          again or contact support.
                         </div>
                       </div>
                     </div>
@@ -704,7 +784,7 @@ export default function RemixStoryForm({
 
               {/* Step 2: Create Remix Content */}
               {currentStep === 2 && (
-                <StoryUploadFormStep1 
+                <StoryUploadFormStep1
                   form={form}
                   authorName={authorName}
                   fillSampleStory={fillSampleStory}
@@ -713,45 +793,53 @@ export default function RemixStoryForm({
 
               {/* Step 3: Review & Publish */}
               {currentStep === 3 && (
-                <div className="space-y-6">
+                <div className='space-y-6'>
                   <Alert>
-                    <CheckCircle className="h-4 w-4" />
+                    <CheckCircle className='h-4 w-4' />
                     <AlertDescription>
                       Please review your remix details before registering as
                       intellectual property.
                     </AlertDescription>
                   </Alert>
 
-                  <div className="space-y-4">
+                  <div className='space-y-4'>
                     {/* Original Story Attribution */}
                     {originalStory && (
-                      <div className="grid gap-4 p-4 border rounded-lg bg-muted/20">
-                        <h3 className="font-semibold text-primary">Original Story Attribution</h3>
-                        <div className="grid gap-2 text-sm">
+                      <div className='grid gap-4 p-4 border rounded-lg bg-muted/20'>
+                        <h3 className='font-semibold text-primary'>
+                          Original Story Attribution
+                        </h3>
+                        <div className='grid gap-2 text-sm'>
                           <div>
-                            <strong>Original Title:</strong> {(originalStory as { title: string }).title}
+                            <strong>Original Title:</strong>{" "}
+                            {(originalStory as { title: string }).title}
                           </div>
                           <div>
-                            <strong>Original Author:</strong> {(originalStory as { author: string }).author}
+                            <strong>Original Author:</strong>{" "}
+                            {(originalStory as { author: string }).author}
                           </div>
                           <div>
-                            <strong>Original License:</strong> {(originalStory as { licenseType?: string }).licenseType || 'Non-Commercial'}
+                            <strong>Original License:</strong>{" "}
+                            {(originalStory as { licenseType?: string })
+                              .licenseType || "Non-Commercial"}
                           </div>
-                          <div className="text-xs text-muted-foreground mt-2">
-                            This remix will automatically include proper attribution to the original work.
+                          <div className='text-xs text-muted-foreground mt-2'>
+                            This remix will automatically include proper
+                            attribution to the original work.
                           </div>
                         </div>
                       </div>
                     )}
 
-                    <div className="grid gap-4 p-4 border rounded-lg">
-                      <h3 className="font-semibold">Your Remix Details</h3>
-                      <div className="grid gap-2 text-sm">
+                    <div className='grid gap-4 p-4 border rounded-lg'>
+                      <h3 className='font-semibold'>Your Remix Details</h3>
+                      <div className='grid gap-2 text-sm'>
                         <div>
                           <strong>Title:</strong> {form.watch("title")}
                         </div>
                         <div>
-                          <strong>Description:</strong> {form.watch("description")}
+                          <strong>Description:</strong>{" "}
+                          {form.watch("description")}
                         </div>
                         <div>
                           <strong>Author:</strong> {authorName}
@@ -766,7 +854,9 @@ export default function RemixStoryForm({
                         </div>
                         <div>
                           <strong>Content Type:</strong>{" "}
-                          {form.watch("contentType") === "text" ? "Text Content" : "PDF File"}
+                          {form.watch("contentType") === "text"
+                            ? "Text Content"
+                            : "PDF File"}
                         </div>
                         {form.watch("contentType") === "text" && (
                           <div>
@@ -774,12 +864,19 @@ export default function RemixStoryForm({
                             {form.watch("content")?.length || 0} characters
                           </div>
                         )}
-                        {form.watch("contentType") === "pdf" && form.watch("storyFile") && (
-                          <div>
-                            <strong>PDF File:</strong>{" "}
-                            {form.watch("storyFile")?.name} ({((form.watch("storyFile")?.size || 0) / 1024 / 1024).toFixed(2)} MB)
-                          </div>
-                        )}
+                        {form.watch("contentType") === "pdf" &&
+                          form.watch("storyFile") && (
+                            <div>
+                              <strong>PDF File:</strong>{" "}
+                              {form.watch("storyFile")?.name} (
+                              {(
+                                (form.watch("storyFile")?.size || 0) /
+                                1024 /
+                                1024
+                              ).toFixed(2)}{" "}
+                              MB)
+                            </div>
+                          )}
                         <div>
                           <strong>Cover Image:</strong>{" "}
                           {form.watch("coverImage")
@@ -789,15 +886,30 @@ export default function RemixStoryForm({
                       </div>
                     </div>
 
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <h4 className="font-medium mb-2">What happens next?</h4>
-                      <ol className="text-sm space-y-1 list-decimal list-inside text-muted-foreground">
+                    <div className='p-4 bg-muted/50 rounded-lg'>
+                      <h4 className='font-medium mb-2'>What happens next?</h4>
+                      <ol className='text-sm space-y-1 list-decimal list-inside text-muted-foreground'>
                         <li>Your remix and images will be uploaded to IPFS</li>
-                        <li>Original story attribution will be included in metadata</li>
-                        <li>Your remix will be registered as an IP Asset on Story Protocol</li>
-                        <li>Licensing relationships will be established with the original work</li>
-                        <li>You&apos;ll receive an NFT representing ownership of your remix IP</li>
-                        <li>Others can discover your remix based on your chosen license</li>
+                        <li>
+                          Original story attribution will be included in
+                          metadata
+                        </li>
+                        <li>
+                          Your remix will be registered as an IP Asset on Story
+                          Protocol
+                        </li>
+                        <li>
+                          Licensing relationships will be established with the
+                          original work
+                        </li>
+                        <li>
+                          You&apos;ll receive an NFT representing ownership of
+                          your remix IP
+                        </li>
+                        <li>
+                          Others can discover your remix based on your chosen
+                          license
+                        </li>
                       </ol>
                     </div>
                   </div>
@@ -811,17 +923,21 @@ export default function RemixStoryForm({
                       }
                     >
                       {submitStatus.type === "error" ? (
-                        <div className="space-y-2">
-                          <div className="font-medium text-destructive">Registration Failed</div>
-                          <AlertDescription className="text-sm">
+                        <div className='space-y-2'>
+                          <div className='font-medium text-destructive'>
+                            Registration Failed
+                          </div>
+                          <AlertDescription className='text-sm'>
                             {submitStatus.message}
                           </AlertDescription>
-                          <div className="text-xs text-muted-foreground">
-                            This is usually due to license compatibility issues. Please try again or contact support if the problem persists.
+                          <div className='text-xs text-muted-foreground'>
+                            This is usually due to license compatibility issues.
+                            Please try again or contact support if the problem
+                            persists.
                           </div>
                         </div>
                       ) : (
-                        <AlertDescription className="text-green-700">
+                        <AlertDescription className='text-green-700'>
                           {submitStatus.message}
                         </AlertDescription>
                       )}
@@ -833,42 +949,42 @@ export default function RemixStoryForm({
               <Separator />
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between">
+              <div className='flex justify-between'>
                 <Button
-                  type="button"
-                  variant="outline"
+                  type='button'
+                  variant='outline'
                   onClick={handlePrevious}
                   disabled={currentStep === 1 || isSubmitting}
-                  className="flex items-center gap-2"
+                  className='flex items-center gap-2'
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className='h-4 w-4' />
                   Previous
                 </Button>
 
                 {currentStep < remixSteps.length ? (
                   <Button
-                    type="button"
+                    type='button'
                     onClick={handleNext}
                     disabled={isSubmitting}
-                    className="flex items-center gap-2"
+                    className='flex items-center gap-2'
                   >
                     Next
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className='h-4 w-4' />
                   </Button>
                 ) : (
                   <Button
-                    type="submit"
+                    type='submit'
                     disabled={isSubmitting || !address}
-                    className="flex items-center gap-2"
+                    className='flex items-center gap-2'
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                         {submitStatus.message || "Publishing Remix..."}
                       </>
                     ) : (
                       <>
-                        <Upload className="mr-2 h-4 w-4" />
+                        <Upload className='mr-2 h-4 w-4' />
                         Publish Remix as IP
                       </>
                     )}
@@ -881,4 +997,4 @@ export default function RemixStoryForm({
       </Card>
     </>
   );
-} 
+}
