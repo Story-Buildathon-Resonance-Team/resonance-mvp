@@ -25,11 +25,13 @@ import {
 import Link from "next/link";
 import { useUser } from "./Web3Providers";
 import { useStoryStore } from "../stores/storyStore";
+import { useConnect } from "@/hooks/useConnect";
 
 export default function HomePage() {
   const { isConnected } = useUser();
   const { publishedStories } = useStoryStore();
   const router = useRouter();
+  const { handleConnect } = useConnect();
 
   // Automatically redirect logged-in users to dashboard
   useEffect(() => {
@@ -92,16 +94,15 @@ export default function HomePage() {
 
             {/* CTA Buttons */}
             <div className='flex flex-col sm:flex-row items-center justify-center gap-6 pt-8'>
-              <Link href='/publish-form'>
-                <Button
-                  size='lg'
-                  className='group px-10 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 cursor-pointer'
-                >
-                  <BookOpen className='h-6 w-6 mr-3 group-hover:rotate-12 transition-transform duration-300' />
-                  Start Creating
-                  <ArrowRight className='h-6 w-6 ml-3 group-hover:translate-x-1 transition-transform duration-300' />
-                </Button>
-              </Link>
+              <Button
+                size='lg'
+                className='group px-10 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 cursor-pointer'
+                onClick={isConnected ? undefined : handleConnect}
+              >
+                <BookOpen className='h-6 w-6 mr-3 group-hover:rotate-12 transition-transform duration-300' />
+                Start Creating
+                <ArrowRight className='h-6 w-6 ml-3 group-hover:translate-x-1 transition-transform duration-300' />
+              </Button>
               <Link href='#stories'>
                 <Button
                   variant='outline'
@@ -548,16 +549,15 @@ export default function HomePage() {
               </div>
 
               <div className='flex flex-col sm:flex-row items-center justify-center gap-6 pt-8'>
-                <Link href='/publish-form'>
-                  <Button
-                    size='lg'
-                    className='group px-10 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 cursor-pointer'
-                  >
-                    <BookOpen className='h-6 w-6 mr-3 group-hover:rotate-12 transition-transform duration-300' />
-                    Start Creating
-                    <ArrowRight className='h-6 w-6 ml-3 group-hover:translate-x-1 transition-transform duration-300' />
-                  </Button>
-                </Link>
+                <Button
+                  size='lg'
+                  className='group px-10 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 cursor-pointer'
+                  onClick={isConnected ? undefined : handleConnect}
+                >
+                  <BookOpen className='h-6 w-6 mr-3 group-hover:rotate-12 transition-transform duration-300' />
+                  Start Creating
+                  <ArrowRight className='h-6 w-6 ml-3 group-hover:translate-x-1 transition-transform duration-300' />
+                </Button>
                 <Link href='#stories'>
                   <Button
                     variant='outline'

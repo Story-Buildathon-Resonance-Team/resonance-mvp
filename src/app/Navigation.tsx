@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useConnectModal } from "@tomo-inc/tomo-evm-kit";
+import { useConnect } from "@/hooks/useConnect";
 import { useDisconnect } from "wagmi";
 import { useUser } from "./Web3Providers";
 import { useAppStore } from "@/stores";
@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 
 export default function Navigation() {
-  const { openConnectModal } = useConnectModal();
+  const { handleConnect } = useConnect();
   const { disconnect } = useDisconnect();
   const { address, isConnected, userName } = useUser();
   const { mobileMenuOpen, setMobileMenuOpen, navigate } = useAppStore();
@@ -95,18 +95,6 @@ export default function Navigation() {
     disconnect?.();
   };
 
-  const handleLogin = () => {
-    if (openConnectModal) {
-      try {
-        openConnectModal();
-      } catch (error) {
-        console.error("Error calling openConnectModal:", error);
-      }
-    } else {
-      console.error("openConnectModal is not available");
-    }
-  };
-
   // User dropdown component
   const UserDropdown = ({ size = "default" }: { size?: "default" | "sm" }) => {
     if (!isConnected) {
@@ -115,7 +103,7 @@ export default function Navigation() {
           variant='default'
           size={size}
           className='cursor-pointer gradient-purple-cyan text-white font-semibold hover:shadow-glow transition-all duration-300'
-          onClick={handleLogin}
+          onClick={handleConnect}
         >
           Login
         </Button>
@@ -145,8 +133,11 @@ export default function Navigation() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
-            <LogOut className="mr-2 h-4 w-4" />
+          <DropdownMenuItem
+            onClick={handleLogout}
+            className='cursor-pointer text-red-600'
+          >
+            <LogOut className='mr-2 h-4 w-4' />
             <span>Logout</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
