@@ -21,7 +21,10 @@ export default function SuccessModal({ result, onClose }: SuccessModalProps) {
 
   const handleViewExplorer = () => {
     if (result.explorerUrl && result.ipId) {
-      window.open(`${result.explorerUrl}/${result.ipId}`, "_blank");
+      const sanitizedUrl = result.explorerUrl.endsWith(result.ipId)
+        ? result.explorerUrl
+        : `${result.explorerUrl}/${result.ipId}`;
+      window.open(sanitizedUrl, "_blank");
     }
   };
 
@@ -67,7 +70,7 @@ export default function SuccessModal({ result, onClose }: SuccessModalProps) {
             {result.explorerUrl && result.ipId && (
               <Button
                 variant='outline'
-                className='flex-1'
+                className='flex-1 cursor-pointer'
                 onClick={handleViewExplorer}
               >
                 <ExternalLink className='h-4 w-4 mr-2' />
@@ -76,7 +79,7 @@ export default function SuccessModal({ result, onClose }: SuccessModalProps) {
             )}
             <Button
               onClick={result.ipId ? handleReadStory : onClose}
-              className='flex-1'
+              className='flex-1 cursor-pointer'
             >
               {result.ipId ? "Read My Story" : "Continue"}
             </Button>

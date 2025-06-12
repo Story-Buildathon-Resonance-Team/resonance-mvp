@@ -26,31 +26,6 @@ export interface UserEntry {
 
 export const users: UserEntry[] = [
   {
-    userName: "",
-    walletAddress: "",
-    stories: [
-      {
-        ipId: "", // The IP ID returned by Story Protocol
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
-      {
-        ipId: "",
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
-      // …up to 10 entries
-    ],
-  },
-  {
     userName: "Nat",
     walletAddress: "0x1BB1EB6b6676A6b0850547a70019112c41495BA2",
     stories: [
@@ -119,14 +94,21 @@ export const users: UserEntry[] = [
         synopsis:
           "In a last-ditch effort to restore Earth's dying ecosystems, Dr. Elena Vasquez builds a machine that demands a human sacrifice to seed new life. But as the device awakens with a mind of its own, she realizes they may have engineered something far more dangerous than salvation.",
       },
-    ],
-  },
-  {
-    userName: "",
-    walletAddress: "",
-    stories: [
       {
-        ipId: "",
+        ipId: "0x45A325F92e49061714D1e8426C6E6cF82980b4b3",
+        ipMetadataCID:
+          "bafkreidp4hwrnvimtqux6dlew4m2az6dreusnhifsve2gopuu4ptqoaho4",
+        nftMetadataCID:
+          "bafkreiehl2mytm52tuem6vt35mnejfcp7xphdi2oryn75vl44avrpqgpze",
+        contentCID:
+          "bafkreigmj4iitdyfqkceawmivmi4shjrx7smskefm3bwox6nvx3b3jllya",
+        imageCID: "bafybeidwhlfvcyuttnfxrjf5olxa6qi6v6hfjhz6vy7arazvbssuhspefu",
+        title: "The Observatory of Broken Hours",
+        synopsis:
+          "She’s shattered time forty-three times to save him—each attempt a new tragedy etched in broken light. Now, in the one timeline where he truly lives, she must decide if love means letting go.",
+      },
+      {
+        ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",
         contentCID: "",
@@ -134,7 +116,6 @@ export const users: UserEntry[] = [
         title: "",
         synopsis: "",
       },
-      // …up to 10 entries
     ],
   },
   {

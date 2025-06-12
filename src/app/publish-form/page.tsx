@@ -852,7 +852,7 @@ export default function PaginatedStoryForm({
                   variant='outline'
                   onClick={handlePrevious}
                   disabled={currentStep === 1 || isSubmitting}
-                  className='flex items-center gap-2'
+                  className='flex items-center gap-2 cursor-pointer'
                 >
                   <ChevronLeft className='h-4 w-4' />
                   Previous
@@ -863,7 +863,7 @@ export default function PaginatedStoryForm({
                     type='button'
                     onClick={handleNext}
                     disabled={isSubmitting}
-                    className='flex items-center gap-2'
+                    className='flex items-center gap-2 cursor-pointer'
                   >
                     Next
                     <ChevronRight className='h-4 w-4' />
@@ -872,7 +872,7 @@ export default function PaginatedStoryForm({
                   <Button
                     type='submit'
                     disabled={isSubmitting || !address}
-                    className='flex items-center gap-2'
+                    className='flex items-center gap-2 cursor-pointer'
                   >
                     {isSubmitting ? (
                       <>
