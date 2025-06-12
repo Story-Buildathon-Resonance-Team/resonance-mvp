@@ -77,12 +77,7 @@ export default function HomePage() {
             {/* Main Headline */}
             <div className='space-y-8'>
               <h1 className='text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent leading-[0.9] animate-fade-in-up tracking-tight'>
-                Stories That Spark
-                <br />
-                <span className='relative inline-block'>
-                  Stories
-                  <div className='absolute -bottom-3 left-0 right-0 h-2 bg-gradient-to-r from-primary to-accent rounded-full animate-scale-x'></div>
-                </span>
+                Stories That Spark Stories
               </h1>
 
               <p className='text-xl md:text-2xl lg:text-3xl text-muted-foreground max-w-5xl mx-auto leading-relaxed animate-fade-in-up delay-200 font-light'>
@@ -188,11 +183,6 @@ export default function HomePage() {
               Characters with endless potential sit unused. Worlds rich enough
               for dozens of stories never get explored. Meanwhile, readers crave
               more from the universes they love.
-            </p>
-            <p className='text-xl text-foreground max-w-3xl mx-auto'>
-              Your best fictional creations—the characters you spent months
-              developing, the worlds you built from nothing—deserve to inspire
-              other creators.
             </p>
           </div>
 
@@ -322,11 +312,11 @@ export default function HomePage() {
                     <CardTitle className='text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors'>
                       {story.title}
                     </CardTitle>
-                  </CardHeader>
-                  <CardContent className='space-y-4'>
                     <span className='text-primary font-semibold'>
                       by {story.author.name}
                     </span>
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
                     <p className='text-muted-foreground line-clamp-3 leading-relaxed'>
                       {story.description}
                     </p>
@@ -459,6 +449,79 @@ export default function HomePage() {
                 </Card>
               </>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className='relative z-10 py-32 px-6'>
+        <div className='container mx-auto max-w-7xl'>
+          <div className='text-center mb-20'>
+            <h2 className='text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-accent bg-clip-text text-transparent mb-6'>
+              Community Impact
+            </h2>
+            <p className='text-xl text-foreground max-w-3xl mx-auto'>
+              Be part of a platform where creative collaboration leads to better
+              discovery. The more remixes and derivative works, the greater the
+              resonance.
+            </p>
+            <p className='text-xl text-foreground max-w-3xl mx-auto'>
+              Your best fictional creations—the characters you spent months
+              developing, the worlds you built from nothing—deserve to inspire
+              other creators.
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-8 animate-fade-in-up delay-600'>
+            <Card className='group text-center border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-500 hover:scale-105 hover:shadow-2xl'>
+              <CardHeader className='pb-4'>
+                <div className='w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform duration-300'>
+                  <Shield className='h-8 w-8 text-white' />
+                </div>
+                <CardTitle className='text-xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent'>
+                  See your characters live new lives
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className='text-muted-foreground leading-relaxed'>
+                  Discover origin stories, spin-offs, and adventures you never
+                  imagined.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className='group text-center border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-500 hover:scale-105 hover:shadow-2xl'>
+              <CardHeader className='pb-4'>
+                <div className='w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-accent to-primary rounded-2xl flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform duration-300'>
+                  <Sparkles className='h-8 w-8 text-white' />
+                </div>
+                <CardTitle className='text-xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent'>
+                  Connect with your creative community
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className='text-muted-foreground leading-relaxed'>
+                  Collaborate with writers who understand and expand your
+                  vision.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className='group text-center border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-500 hover:scale-105 hover:shadow-2xl'>
+              <CardHeader className='pb-4'>
+                <div className='w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary via-accent to-primary rounded-2xl flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform duration-300'>
+                  <TrendingUp className='h-8 w-8 text-white' />
+                </div>
+                <CardTitle className='text-xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent'>
+                  Create sustainable income
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className='text-muted-foreground leading-relaxed'>
+                  Build revenue streams that grow as your universe expands .
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
