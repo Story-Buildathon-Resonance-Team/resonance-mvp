@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering to avoid useSearchParams prerendering issues
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

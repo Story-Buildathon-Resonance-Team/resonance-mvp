@@ -18,16 +18,10 @@ import {
   BookOpen,
   LayoutDashboard,
   User,
-  Settings,
   LogOut,
   ChevronDown,
   Sparkles,
-  Menu,
   X,
-  FileText,
-  Library,
-  GitBranch,
-  Home,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -92,12 +86,10 @@ export default function Sidebar() {
 
     let startX = 0;
     let startY = 0;
-    let isSwipeGesture = false;
 
     const handleTouchStart = (e: TouchEvent) => {
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
-      isSwipeGesture = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -110,8 +102,6 @@ export default function Sidebar() {
 
       // Check if it's a horizontal swipe (more horizontal than vertical)
       if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-        isSwipeGesture = true;
-
         // Swipe right from left edge to open sidebar
         if (diffX > 0 && startX < 50 && !isOpen) {
           e.preventDefault();
@@ -128,7 +118,6 @@ export default function Sidebar() {
     const handleTouchEnd = () => {
       startX = 0;
       startY = 0;
-      isSwipeGesture = false;
     };
 
     document.addEventListener("touchstart", handleTouchStart, {
@@ -364,11 +353,6 @@ export default function Sidebar() {
                     </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className='cursor-pointer'>
-                  <Settings className='mr-2 h-4 w-4' />
-                  <span>Settings</span>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}

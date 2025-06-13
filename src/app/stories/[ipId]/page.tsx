@@ -224,7 +224,6 @@ const ReaderPage = () => {
         throw new Error("Failed to fetch story content");
       }
 
-      const contentType = response.headers.get("content-type");
       const rawContent = await response.text();
 
       // Try to parse as JSON first
@@ -363,20 +362,6 @@ const ReaderPage = () => {
     return null;
   };
 
-  // Get origin status text
-  const getOriginStatus = () => {
-    if (assetError || !assetData) return "Loading...";
-    return assetData.parentCount === 0
-      ? "This is an original"
-      : "This is a remix";
-  };
-
-  // Get connected works count
-  const getConnectedWorksCount = () => {
-    if (assetError || !assetData) return "Loading...";
-    return assetData.childrenCount;
-  };
-
   // Get lineage information
   const getLineageInfo = () => {
     if (assetError || !assetData) return null;
@@ -392,8 +377,8 @@ const ReaderPage = () => {
   // Find connected works from store and user data
   const getConnectedWorks = () => {
     const connected = {
-      parents: [] as any[],
-      children: [] as any[],
+      parents: [] as StoryWithAuthor[],
+      children: [] as StoryWithAuthor[],
     };
 
     // Find children (remixes of this story)
@@ -414,7 +399,7 @@ const ReaderPage = () => {
 
     // Find stories that have this story as their original
     connected.children = allStories.filter(
-      (story) => (story as any).originalStoryId === ipId
+      (story) => (story as StoryWithAuthor).originalStoryId === ipId
     );
 
     // Find parent story if this is a remix

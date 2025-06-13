@@ -22,7 +22,6 @@ import {
   X,
   LayoutDashboard,
   User,
-  Settings,
   LogOut,
   ChevronDown,
   Sparkles,
@@ -80,15 +79,6 @@ export default function Navigation() {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
-
-  const handleNavigation = (href: string) => {
-    navigate(href);
-    closeMobileMenu();
   };
 
   const handleLogout = () => {

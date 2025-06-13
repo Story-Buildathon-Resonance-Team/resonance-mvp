@@ -4,8 +4,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { PropsWithChildren } from "react";
 import Web3Providers from "./Web3Providers";
-import Navigation from "./Navigation";
-import Sidebar from "./Sidebar";
 import { StoreProvider } from "@/stores/StoreProvider";
 import LayoutWrapper from "./LayoutWrapper";
 

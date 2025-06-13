@@ -4,10 +4,10 @@ import { getIPLicensesFromStory } from "@/lib/licenses";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { ipId: string } }
+  { params }: { params: Promise<{ ipId: string }> }
 ) {
   try {
-    const { ipId } = params;
+    const { ipId } = await params;
 
     if (!ipId) {
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function GET(
         // Try to find story details from local data for title/author
         let storyDetails = null;
         for (const user of users) {
-          const story = user.stories?.find((s: any) => s.ipId === ipId);
+          const story = user.stories?.find((s: { ipId: string; title: string }) => s.ipId === ipId);
           if (story) {
             storyDetails = {
               title: story.title,
@@ -76,7 +76,7 @@ export async function GET(
     console.log(`API: Falling back to static data for IP ID: ${ipId}`);
 
     for (const user of users) {
-      const story = user.stories?.find((s: any) => s.ipId === ipId);
+      const story = user.stories?.find((s: { ipId: string; title: string }) => s.ipId === ipId);
       if (story) {
         // For static user data, we default to non-commercial license
         const licenseTypes = ["non-commercial"];
