@@ -147,6 +147,16 @@ export const users: UserEntry[] = [
           "Cuando el amor trasciende el tiempo, el sacrificio se convierte en semilla del despertar. En un mundo al borde del olvido, una promesa silenciosa conecta generaciones aún por nacer.",
       },
       {
+        ipId: "",
+        ipMetadataCID: "",
+        nftMetadataCID: "",
+        contentCID: "",
+        imageCID: "",
+        title: "The Architect's Awakening",
+        synopsis:
+          "When Lee-Hyun awakens to a quantum symphony only he can hear, he discovers the power to weave consciousness into the fabric of reality itself. But building bridges between minds and worlds may cost him everything—even his own existence.",
+      },
+      {
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",

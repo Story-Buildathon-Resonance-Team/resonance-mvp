@@ -614,7 +614,10 @@ const ReaderPage = () => {
                                 by {parent.author?.name || parent.author}
                               </div>
                             </div>
-                            <Badge variant='outline' className='text-xs border-primary/30 text-primary'>
+                            <Badge
+                              variant='outline'
+                              className='text-xs border-primary/30 text-primary'
+                            >
                               Original
                             </Badge>
                           </div>
@@ -652,9 +655,9 @@ const ReaderPage = () => {
                         {connectedWorks.children.map((child, index) => (
                           <div
                             key={index}
-                            className='flex items-center gap-3 p-3 bg-accent/10 border border-accent/30 rounded-lg backdrop-blur-sm'
+                            className='flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg backdrop-blur-sm'
                           >
-                            <div className='w-2 h-2 bg-accent rounded-full'></div>
+                            <div className='w-2 h-2 bg-amber-600 rounded-full'></div>
                             <div className='flex-1'>
                               <div className='font-medium text-sm text-foreground'>
                                 {child.title}
@@ -663,7 +666,10 @@ const ReaderPage = () => {
                                 by {child.author?.name || child.author}
                               </div>
                             </div>
-                            <Badge variant='secondary' className='text-xs bg-accent/20 text-accent border-accent/30'>
+                            <Badge
+                              variant='secondary'
+                              className='text-xs bg-accent/20 text-amber-600 border-amber-600/30'
+                            >
                               Remix
                             </Badge>
                           </div>
