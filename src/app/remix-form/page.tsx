@@ -185,11 +185,16 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
   // State for original story data
   const [originalStory, setOriginalStory] = useState<unknown>(null);
   const [loadingOriginalStory, setLoadingOriginalStory] = useState(true);
-  
+
   // State for license inheritance
-  const [parentLicenseInfo, setParentLicenseInfo] = useState<ParentAssetLicenseInfo | null>(null);
-  const [licenseInheritance, setLicenseInheritance] = useState<ReturnType<typeof determineLicenseInheritance> | null>(null);
-  const [selectedLicense, setSelectedLicense] = useState<LicenseType | null>(null);
+  const [parentLicenseInfo, setParentLicenseInfo] =
+    useState<ParentAssetLicenseInfo | null>(null);
+  const [licenseInheritance, setLicenseInheritance] = useState<ReturnType<
+    typeof determineLicenseInheritance
+  > | null>(null);
+  const [selectedLicense, setSelectedLicense] = useState<LicenseType | null>(
+    null
+  );
 
   // Replace useState with Zustand store
   const {
@@ -261,17 +266,23 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
               publishedStories,
               users
             );
-            
+
             if (licenseInfo) {
               setParentLicenseInfo(licenseInfo);
-              
+
               // Determine inheritance requirements
-              const parentLicenseTypes = licenseInfo.licenses.map(l => l.type);
-              const inheritance = determineLicenseInheritance(parentLicenseTypes);
+              const parentLicenseTypes = licenseInfo.licenses.map(
+                (l) => l.type
+              );
+              const inheritance =
+                determineLicenseInheritance(parentLicenseTypes);
               setLicenseInheritance(inheritance);
-              
+
               // If automatic inheritance, set the license
-              if (!inheritance.requiresSelection && inheritance.inheritedLicense) {
+              if (
+                !inheritance.requiresSelection &&
+                inheritance.inheritedLicense
+              ) {
                 setSelectedLicense(inheritance.inheritedLicense.type);
               }
             }
@@ -279,7 +290,7 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
             console.error("Error fetching license information:", error);
           }
         }
-        
+
         setLoadingOriginalStory(false);
       } else {
         setLoadingOriginalStory(false);
@@ -341,7 +352,7 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
         title: `Remix of ${(originalStory as { title: string }).title}`,
       });
     }
-    
+
     if (suggestionText && !form.watch("description")) {
       const decodedSuggestion = decodeURIComponent(suggestionText);
       form.setValue("description", decodedSuggestion);
@@ -353,7 +364,14 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
       form.setValue("licenseType", selectedLicense);
       updateFormData({ licenseType: selectedLicense });
     }
-  }, [originalStory, suggestionText, licenseInheritance, selectedLicense, form, updateFormData]);
+  }, [
+    originalStory,
+    suggestionText,
+    licenseInheritance,
+    selectedLicense,
+    form,
+    updateFormData,
+  ]);
 
   // Auto-save form data to store whenever form changes
   useEffect(() => {
@@ -383,14 +401,14 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
         });
         return false;
       }
-      
+
       // Validate that the selected license is valid
       if (parentLicenseInfo) {
         const validation = validateDerivativeLicenseSelection(
-          parentLicenseInfo.licenses.map(l => l.type),
+          parentLicenseInfo.licenses.map((l) => l.type),
           selectedLicense
         );
-        
+
         if (!validation.isValid) {
           form.setError("licenseType", {
             type: "manual",
@@ -439,7 +457,7 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
         ? decodeURIComponent(suggestionText)
         : "A brief description of your remix. 1-2 sentences is enough.",
       contentType: "text" as const,
-      content: `Write your remix here. Make sure it is between 500 to 1000 words long. This remix is based on &quot;${
+      content: `Hey, you liked the story? Come on, get those creative juices flowing and add to this universe. Maybe you came up with a song? A character's origin story? Write it here, share your creative vision with the world. This remix is based on &quot;${
         (originalStory as { title: string })?.title || "the original story"
       }&quot; and should credit the original author while adding your unique creative vision.`,
     };
@@ -770,10 +788,14 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                                   Parent Story
                                 </div>
                                 <div className='text-sm text-muted-foreground'>
-                                  "{parentLicenseInfo.title}" by {parentLicenseInfo.author}
+                                  "{parentLicenseInfo.title}" by{" "}
+                                  {parentLicenseInfo.author}
                                 </div>
                               </div>
-                              <Badge variant='outline' className='bg-primary/10 text-primary border-primary/30'>
+                              <Badge
+                                variant='outline'
+                                className='bg-primary/10 text-primary border-primary/30'
+                              >
                                 Original
                               </Badge>
                             </div>
@@ -784,13 +806,20 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
 
                             <div className='flex items-center justify-between p-4 bg-primary/10 border-2 border-primary/40 rounded-lg backdrop-blur-sm'>
                               <div className='space-y-1'>
-                                <div className='font-medium text-foreground'>Your Remix</div>
+                                <div className='font-medium text-foreground'>
+                                  Your Remix
+                                </div>
                                 <div className='text-sm text-muted-foreground'>
-                                  Will inherit: {licenseInheritance.inheritedLicense?.name}
+                                  Will inherit:{" "}
+                                  {licenseInheritance.inheritedLicense?.name}
                                 </div>
                               </div>
                               <Badge className='bg-primary/20 text-primary border-primary/40'>
-                                {formatLicenseForDisplay(licenseInheritance.inheritedLicense!).badge}
+                                {
+                                  formatLicenseForDisplay(
+                                    licenseInheritance.inheritedLicense!
+                                  ).badge
+                                }
                               </Badge>
                             </div>
                           </div>
@@ -801,8 +830,10 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                                 <CheckCircle className='h-4 w-4 text-green-400' />
                               </div>
                               <div className='text-sm text-green-300'>
-                                <strong>Automatic Inheritance:</strong> Since the parent asset has a single license, 
-                                your remix will automatically inherit all terms, ensuring compliance with Story Protocol.
+                                <strong>Automatic Inheritance:</strong> Since
+                                the parent asset has a single license, your
+                                remix will automatically inherit all terms,
+                                ensuring compliance with Story Protocol.
                               </div>
                             </div>
                           </div>
@@ -814,7 +845,10 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                             render={({ field }) => (
                               <input
                                 type='hidden'
-                                value={licenseInheritance.inheritedLicense?.type || 'non-commercial'}
+                                value={
+                                  licenseInheritance.inheritedLicense?.type ||
+                                  "non-commercial"
+                                }
                                 onChange={field.onChange}
                               />
                             )}
@@ -826,15 +860,16 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                           <h3 className='text-lg font-semibold mb-4 text-foreground'>
                             Select License for Your Remix
                           </h3>
-                          
+
                           <div className='mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg backdrop-blur-sm'>
                             <div className='flex items-start gap-3'>
                               <div className='p-1 bg-amber-500/20 rounded'>
                                 <AlertCircle className='h-4 w-4 text-amber-400' />
                               </div>
                               <div className='text-sm text-amber-300'>
-                                <strong>Multiple Licenses Available:</strong> The parent asset is published under 
-                                multiple licenses. You must choose one for your remix.
+                                <strong>Multiple Licenses Available:</strong>{" "}
+                                The parent asset is published under multiple
+                                licenses. You must choose one for your remix.
                               </div>
                             </div>
                           </div>
@@ -847,51 +882,70 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                                 <FormLabel>Available Licenses</FormLabel>
                                 <FormControl>
                                   <div className='space-y-3'>
-                                    {licenseInheritance.availableLicenses.map((license) => {
-                                      const displayInfo = formatLicenseForDisplay(license);
-                                      return (
-                                        <div
-                                          key={license.id}
-                                          className={`p-4 border rounded-lg cursor-pointer transition-all backdrop-blur-sm ${
-                                            field.value === license.type
-                                              ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
-                                              : 'border-primary/20 bg-card/30 hover:border-primary/40 hover:bg-card/50'
-                                          }`}
-                                          onClick={() => {
-                                            field.onChange(license.type);
-                                            setSelectedLicense(license.type);
-                                          }}
-                                        >
-                                          <div className='flex items-start justify-between'>
-                                            <div className='space-y-2 flex-1'>
-                                              <div className='flex items-center gap-2'>
-                                                <div className='font-medium text-foreground'>{displayInfo.title}</div>
-                                                <Badge variant='outline' className='border-primary/30 text-primary'>{displayInfo.badge}</Badge>
-                                              </div>
-                                              <div className='text-sm text-muted-foreground'>
-                                                {displayInfo.description}
-                                              </div>
-                                              <div className='flex flex-wrap gap-1'>
-                                                {displayInfo.features.map((feature, index) => (
-                                                  <Badge key={index} variant='secondary' className='text-xs bg-secondary/50 text-secondary-foreground border-secondary/30'>
-                                                    {feature}
-                                                  </Badge>
-                                                ))}
-                                              </div>
-                                            </div>
-                                            <div className={`w-4 h-4 rounded-full border-2 ${
+                                    {licenseInheritance.availableLicenses.map(
+                                      (license) => {
+                                        const displayInfo =
+                                          formatLicenseForDisplay(license);
+                                        return (
+                                          <div
+                                            key={license.id}
+                                            className={`p-4 border rounded-lg cursor-pointer transition-all backdrop-blur-sm ${
                                               field.value === license.type
-                                                ? 'border-primary bg-primary'
-                                                : 'border-muted-foreground/30'
-                                            }`}>
-                                              {field.value === license.type && (
-                                                <div className='w-full h-full rounded-full bg-card scale-50'></div>
-                                              )}
+                                                ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                                                : "border-primary/20 bg-card/30 hover:border-primary/40 hover:bg-card/50"
+                                            }`}
+                                            onClick={() => {
+                                              field.onChange(license.type);
+                                              setSelectedLicense(license.type);
+                                            }}
+                                          >
+                                            <div className='flex items-start justify-between'>
+                                              <div className='space-y-2 flex-1'>
+                                                <div className='flex items-center gap-2'>
+                                                  <div className='font-medium text-foreground'>
+                                                    {displayInfo.title}
+                                                  </div>
+                                                  <Badge
+                                                    variant='outline'
+                                                    className='border-primary/30 text-primary'
+                                                  >
+                                                    {displayInfo.badge}
+                                                  </Badge>
+                                                </div>
+                                                <div className='text-sm text-muted-foreground'>
+                                                  {displayInfo.description}
+                                                </div>
+                                                <div className='flex flex-wrap gap-1'>
+                                                  {displayInfo.features.map(
+                                                    (feature, index) => (
+                                                      <Badge
+                                                        key={index}
+                                                        variant='secondary'
+                                                        className='text-xs bg-secondary/50 text-secondary-foreground border-secondary/30'
+                                                      >
+                                                        {feature}
+                                                      </Badge>
+                                                    )
+                                                  )}
+                                                </div>
+                                              </div>
+                                              <div
+                                                className={`w-4 h-4 rounded-full border-2 ${
+                                                  field.value === license.type
+                                                    ? "border-primary bg-primary"
+                                                    : "border-muted-foreground/30"
+                                                }`}
+                                              >
+                                                {field.value ===
+                                                  license.type && (
+                                                  <div className='w-full h-full rounded-full bg-card scale-50'></div>
+                                                )}
+                                              </div>
                                             </div>
                                           </div>
-                                        </div>
-                                      );
-                                    })}
+                                        );
+                                      }
+                                    )}
                                   </div>
                                 </FormControl>
                                 <FormMessage />
@@ -906,8 +960,9 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                                   <CheckCircle className='h-4 w-4 text-green-400' />
                                 </div>
                                 <div className='text-sm text-green-300'>
-                                  <strong>License Selected:</strong> Your remix will inherit the selected license terms 
-                                  and comply with all associated requirements.
+                                  <strong>License Selected:</strong> Your remix
+                                  will inherit the selected license terms and
+                                  comply with all associated requirements.
                                 </div>
                               </div>
                             </div>
@@ -920,7 +975,8 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                           <div className='flex items-center gap-3'>
                             <AlertCircle className='h-5 w-5 text-red-400' />
                             <div className='text-sm text-red-300'>
-                              <strong>License Error:</strong> {licenseInheritance.error}
+                              <strong>License Error:</strong>{" "}
+                              {licenseInheritance.error}
                             </div>
                           </div>
                         </div>
@@ -933,7 +989,8 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
                       <div className='flex items-center gap-3'>
                         <AlertCircle className='h-5 w-5 text-red-400' />
                         <div className='text-sm text-red-300'>
-                          Unable to load parent story license information. Please try again or contact support.
+                          Unable to load parent story license information.
+                          Please try again or contact support.
                         </div>
                       </div>
                     </div>
