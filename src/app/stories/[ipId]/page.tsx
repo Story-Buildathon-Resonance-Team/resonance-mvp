@@ -605,16 +605,16 @@ const ReaderPage = () => {
                             key={index}
                             className='flex items-center gap-3 p-3 bg-blue-500/10 border-blue-500/30 border rounded-lg'
                           >
-                            <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
+                            <div className='w-2 h-2 bg-primary rounded-full'></div>
                             <div className='flex-1'>
-                              <div className='font-medium text-sm'>
+                              <div className='font-medium text-sm text-foreground'>
                                 {parent.title}
                               </div>
                               <div className='text-xs text-muted-foreground'>
                                 by {parent.author?.name || parent.author}
                               </div>
                             </div>
-                            <Badge variant='outline' className='text-xs'>
+                            <Badge variant='outline' className='text-xs border-primary/30 text-primary'>
                               Original
                             </Badge>
                           </div>
@@ -652,18 +652,18 @@ const ReaderPage = () => {
                         {connectedWorks.children.map((child, index) => (
                           <div
                             key={index}
-                            className='flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg'
+                            className='flex items-center gap-3 p-3 bg-accent/10 border border-accent/30 rounded-lg backdrop-blur-sm'
                           >
-                            <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                            <div className='w-2 h-2 bg-accent rounded-full'></div>
                             <div className='flex-1'>
-                              <div className='font-medium text-sm'>
+                              <div className='font-medium text-sm text-foreground'>
                                 {child.title}
                               </div>
                               <div className='text-xs text-muted-foreground'>
                                 by {child.author?.name || child.author}
                               </div>
                             </div>
-                            <Badge variant='secondary' className='text-xs'>
+                            <Badge variant='secondary' className='text-xs bg-accent/20 text-accent border-accent/30'>
                               Remix
                             </Badge>
                           </div>
