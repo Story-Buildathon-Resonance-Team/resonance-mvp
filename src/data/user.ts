@@ -173,6 +173,28 @@ export const users: UserEntry[] = [
           "An epic ballad about Lee-Hyun, a young man whose quantum consciousness awakening transforms him into a living bridge between worlds.",
       },
       {
+        ipId: "0x4668981c1a1A51e9D1f2f9954fA2963bcbF2446B",
+        ipMetadataCID:
+          "bafkreiemxgpbdaekwpvrvi2o2obnqhf4kxz5xzkrpd6ivlruuo5pjf72hq",
+        nftMetadataCID:
+          "bafkreiehyhjtd57sk2xmdzmwx3qdpior5ddpje4fg3dogaci564355jcwq",
+        contentCID:
+          "bafkreicxdbnpeldon6mlnlrdzq6bnvw2x6igswolq7p4oocry2upagw22u",
+        imageCID: "bafybeiau6grjggy7szmoih457jes62lxwrvthnehlbuf5yefzbo64gfr2y",
+        title: "The Watchers' Gambit",
+        synopsis:
+          "When ancient powers hidden in human bloodlines awaken, the fate of two civilizations teeters on a knife’s edge. One Watcher must decide whether to silence evolution—or risk everything on humanity’s potential.",
+      },
+      {
+        ipId: "", // The IP ID returned by Story Protocol
+        ipMetadataCID: "",
+        nftMetadataCID: "",
+        contentCID: "",
+        imageCID: "",
+        title: "",
+        synopsis: "",
+      },
+      {
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",
