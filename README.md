@@ -233,9 +233,9 @@ For technical issues:
 
 ## Contributors
 
-- **[Craig Mutegi]**(https://github.com/cmm25)
-- **[Nat Gómez]**(https://github.com/inatgomez)
-- **[Xavier]**(https://github.com/xmd404v2)
+- **[Craig Mutegi](https://github.com/cmm25)**
+- **[Nat Gómez](https://github.com/inatgomez)**
+- **[Xavier](https://github.com/xmd404v2)**
 
 ---
 
