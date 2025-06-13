@@ -218,9 +218,6 @@ async function registerDerivativeStory(
   };
 }
 
-/**
- * Register a story as an IP asset and prepare it for store addition
- */
 export async function registerStoryAsIPWithStore(
   data: StoryRegistrationData
 ): Promise<StoryRegistrationResult> {
