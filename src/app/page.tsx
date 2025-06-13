@@ -69,7 +69,7 @@ export default function HomePage() {
       </div>
 
       {/* Hero Section - Full Viewport */}
-      <section className='relative z-10 min-h-screen flex flex-col items-center justify-center px-6 pt-20'>
+      <section className='relative z-10 min-h-screen flex flex-col items-center justify-center px-6 pt-10'>
         <div className='container mx-auto max-w-7xl'>
           <div className='text-center space-y-12'>
             {/* Badge */}

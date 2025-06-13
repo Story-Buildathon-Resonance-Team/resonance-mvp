@@ -1,6 +1,7 @@
 import { Address } from "viem";
 import { PublishedStory } from "../stores/types";
-import { validateDerivativeLicenseSelection, LicenseType } from "./licenseService";
+import { validateDerivativeLicenseSelection } from "./licenseService";
+import { LicenseType } from "../utils/utils";
 
 export interface StoryRegistrationData {
   title: string;
@@ -18,7 +19,9 @@ export interface StoryRegistrationData {
   originalStoryId?: string;
   originalTitle?: string;
   originalAuthor?: string;
+  // Add parent license information for derivatives
   parentLicenseTypes?: ("non-commercial" | "commercial-use" | "commercial-remix")[];
+  // Add context data for license validation
   publishedStories?: PublishedStory[];
   staticUserData?: any[];
 }
@@ -47,11 +50,11 @@ export interface StoryRegistrationResult {
  * @param data - Story registration data including optional context for license validation
  * @returns Promise<StoryRegistrationResult>
  */
-export async function registerStoryAsIP(
-  data: StoryRegistrationData
-): Promise<StoryRegistrationResult> {
+export async function registerStoryAsIP(data: StoryRegistrationData): Promise<StoryRegistrationResult> {
   try {
     console.log("Registering story as IP:", data.title);
+
+    // Check if this is a remix (derivative)
     const isRemix = !!data.originalStoryId;
 
     if (isRemix) {
@@ -69,7 +72,13 @@ export async function registerStoryAsIP(
     };
   }
 }
-async function registerOriginalStory(data: StoryRegistrationData): Promise<StoryRegistrationResult> {
+
+/**
+ * Register an original story
+ */
+async function registerOriginalStory(
+  data: StoryRegistrationData
+): Promise<StoryRegistrationResult> {
   let licenseTypes: ("non-commercial" | "commercial-use" | "commercial-remix")[];
   
   if (data.licenseType) {
@@ -144,8 +153,17 @@ async function registerOriginalStory(data: StoryRegistrationData): Promise<Story
 /**
  * Get parent license information from available sources
  */
-async function getParentLicenseTypes( parentIpId: string, publishedStories?: PublishedStory[], staticUserData?: any[]): Promise<LicenseType[]> {
+async function getParentLicenseTypes(
+  parentIpId: string,
+  publishedStories?: PublishedStory[],
+  staticUserData?: any[]
+): Promise<LicenseType[]> {
   console.log(`Fetching parent license types for IP ID: ${parentIpId}`);
+
+  // First, check if parent license types were explicitly provided
+  // This would happen when the UI has already fetched this information
+  
+  // Check published stories from store
   if (publishedStories && publishedStories.length > 0) {
     const parentStory = publishedStories.find(story => story.ipId === parentIpId);
     if (parentStory && parentStory.licenseTypes) {
@@ -190,16 +208,79 @@ async function getParentLicenseTypes( parentIpId: string, publishedStories?: Pub
   return [LicenseType.NON_COMMERCIAL];
 }
 
+function determineDerivativeLicenses(
+  parentLicenseTypes: LicenseType[],
+  selectedLicenseTypes?: ("non-commercial" | "commercial-use" | "commercial-remix")[],
+  selectedLicenseType?: "non-commercial" | "commercial-use" | "commercial-remix"
+): {
+  derivativeLicenses: LicenseType[];
+  isAutoInherited: boolean;
+  inheritanceReason: string;
+} {
+  // Filter out licenses that don't allow derivatives
+  const derivativeCompatibleParentLicenses = parentLicenseTypes.filter(
+    license => license !== LicenseType.COMMERCIAL_USE
+  );
+
+  if (derivativeCompatibleParentLicenses.length === 0) {
+    throw new Error("Parent licenses do not allow derivatives. Only 'Commercial Use' licenses found, which prohibit remixing.");
+  }
+
+  // If parent has only one derivative-compatible license, derivative automatically inherits it
+  if (derivativeCompatibleParentLicenses.length === 1) {
+    const inheritedLicense = derivativeCompatibleParentLicenses[0];
+    
+    return {
+      derivativeLicenses: [inheritedLicense],
+      isAutoInherited: true,
+      inheritanceReason: `Automatically inherited the single derivative-compatible parent license: ${inheritedLicense}`
+    };
+  }
+
+  // Parent has multiple derivative-compatible licenses - user must select
+  let derivativeLicenses: LicenseType[];
+  
+  if (selectedLicenseTypes && selectedLicenseTypes.length > 0) {
+    // User selected multiple licenses
+    derivativeLicenses = selectedLicenseTypes.map(type => type as LicenseType);
+  } else if (selectedLicenseType) {
+    // User selected single license (backward compatibility)
+    derivativeLicenses = [selectedLicenseType as LicenseType];
+  } else {
+    throw new Error(
+      `Parent has multiple derivative-compatible licenses: ${derivativeCompatibleParentLicenses.join(", ")}. ` +
+      `You must select which license(s) to inherit for your derivative.`
+    );
+  }
+
+  // Validate all selected licenses are available from parent
+  const invalidSelections = derivativeLicenses.filter(license => !derivativeCompatibleParentLicenses.includes(license));
+  if (invalidSelections.length > 0) {
+    throw new Error(
+      `Selected license(s) not available from parent: ${invalidSelections.join(", ")}. ` +
+      `Available derivative-compatible licenses: ${derivativeCompatibleParentLicenses.join(", ")}`
+    );
+  }
+
+  // Validate that selected licenses allow derivatives
+  const nonDerivativeLicenses = derivativeLicenses.filter(license => license === LicenseType.COMMERCIAL_USE);
+  if (nonDerivativeLicenses.length > 0) {
+    throw new Error(`Selected license(s) do not allow derivatives: ${nonDerivativeLicenses.join(", ")}`);
+  }
+
+  return {
+    derivativeLicenses,
+    isAutoInherited: false,
+    inheritanceReason: `Selected ${derivativeLicenses.length} license(s) from ${derivativeCompatibleParentLicenses.length} available parent licenses`
+  };
+}
+
 /**
  * Register a derivative story (remix)
  */
 async function registerDerivativeStory(data: StoryRegistrationData): Promise<StoryRegistrationResult> {
   if (!data.originalStoryId) {
     throw new Error("Original story ID is required for derivative registration");
-  }
-
-  if (!data.licenseType) {
-    throw new Error("License type is required for derivative registration");
   }
   let parentLicenseTypes: LicenseType[];
   
@@ -216,37 +297,54 @@ async function registerDerivativeStory(data: StoryRegistrationData): Promise<Sto
     );
   }
 
-  // Validate that the selected license is compatible with the parent's licenses
-  const validation = validateDerivativeLicenseSelection(
+  // Determine derivative licenses based on parent licenses and user selection
+  const licenseInheritance = determineDerivativeLicenses(
     parentLicenseTypes,
-    data.licenseType as LicenseType
+    data.licenseTypes,
+    data.licenseType
   );
-  
-  if (!validation.isValid) {
-    throw new Error(`License validation failed: ${validation.error}`);
+
+  console.log(`License inheritance: ${licenseInheritance.inheritanceReason}`);
+  console.log(`Derivative will have licenses:`, licenseInheritance.derivativeLicenses);
+
+  // Validate each selected license against parent licenses
+  for (const derivativeLicense of licenseInheritance.derivativeLicenses) {
+    const validation = validateDerivativeLicenseSelection(
+      parentLicenseTypes,
+      derivativeLicense
+    );
+    
+    if (!validation.isValid) {
+      throw new Error(`License validation failed for ${derivativeLicense}: ${validation.error}`);
+    }
   }
 
-  // Get the derivative license terms ID
-  const derivativeLicenseTermsId = getLicenseTermsIdFromType(data.licenseType);
+  const primaryLicense = licenseInheritance.derivativeLicenses[0];
+  const primaryLicenseTermsId = getLicenseTermsIdFromType(primaryLicense);
   
-  if (!derivativeLicenseTermsId) {
-    throw new Error(`Invalid license type: ${data.licenseType}`);
+  if (!primaryLicenseTermsId) {
+    throw new Error(`Invalid primary license type: ${primaryLicense}`);
   }
 
-  // For Story Protocol, we need to determine which parent license to inherit from
-  // If parent has multiple licenses, we should use the one that matches our derivative license
-  // If parent only has one license, we use that one
+  // Determine parent license terms ID to inherit from
   let parentLicenseTermsId: string;
   
-  if (parentLicenseTypes.includes(data.licenseType as LicenseType)) {
-    // Parent has the same license type as derivative - perfect match
-    parentLicenseTermsId = derivativeLicenseTermsId;
+  if (parentLicenseTypes.includes(primaryLicense)) {
+    parentLicenseTermsId = primaryLicenseTermsId;
   } else {
     // Use the first compatible parent license
-    parentLicenseTermsId = getLicenseTermsIdFromType(parentLicenseTypes[0]);
+    const compatibleParentLicense = parentLicenseTypes.find(license => license !== LicenseType.COMMERCIAL_USE);
+    if (!compatibleParentLicense) {
+      throw new Error("No compatible parent license found for derivative registration");
+    }
+    parentLicenseTermsId = getLicenseTermsIdFromType(compatibleParentLicense);
   }
 
-  console.log(`Registering derivative with parent license: ${parentLicenseTypes[0]}, derivative license: ${data.licenseType}`);
+  console.log(`Registering derivative with:`);
+  console.log(`- Parent licenses: ${parentLicenseTypes.join(", ")}`);
+  console.log(`- Derivative licenses: ${licenseInheritance.derivativeLicenses.join(", ")}`);
+  console.log(`- Primary license for registration: ${primaryLicense}`);
+  console.log(`- Auto-inherited: ${licenseInheritance.isAutoInherited}`);
 
   const response = await fetch("/api/register-derivative", {
     method: "POST",
@@ -261,8 +359,11 @@ async function registerDerivativeStory(data: StoryRegistrationData): Promise<Sto
       author: data.author,
       parentIpId: data.originalStoryId,
       parentLicenseTermsId: parentLicenseTermsId,
-      derivativeLicenseType: data.licenseType,
-      parentLicenseTypes: parentLicenseTypes, 
+      derivativeLicenseType: primaryLicense, 
+      derivativeLicenseTypes: licenseInheritance.derivativeLicenses, 
+      parentLicenseTypes: parentLicenseTypes,
+      isAutoInherited: licenseInheritance.isAutoInherited,
+      inheritanceReason: licenseInheritance.inheritanceReason,
     }),
   });
 
@@ -313,7 +414,7 @@ export async function registerStoryAsIPWithStore(
       licenseTypes: data.licenseTypes,
       publishedAt: Date.now(),
       explorerUrl: result.explorerUrl!,
-      originalStoryId: data.originalStoryId, // Include for remixes
+      originalStoryId: data.originalStoryId, 
     };
 
     return {
@@ -325,10 +426,6 @@ export async function registerStoryAsIPWithStore(
   return result;
 }
 
-/**
- * Enhanced registration function that automatically includes context data
- * This is the recommended way to register stories in the application
- */
 export async function registerStoryWithContext(
   data: Omit<StoryRegistrationData, 'publishedStories' | 'staticUserData'>,
   publishedStories: PublishedStory[],
@@ -342,6 +439,7 @@ export async function registerStoryWithContext(
 
   return registerStoryAsIPWithStore(enhancedData);
 }
+
 export async function validateDerivativeLicense(
   parentIpId: string,
   selectedLicenseType: "non-commercial" | "commercial-use" | "commercial-remix",
@@ -380,6 +478,63 @@ export async function validateDerivativeLicense(
   }
 }
 
+export async function getDerivativeLicenseOptions(
+  parentIpId: string,
+  publishedStories?: PublishedStory[],
+  staticUserData?: any[],
+  parentLicenseTypes?: ("non-commercial" | "commercial-use" | "commercial-remix")[]
+): Promise<{
+  parentLicenses: LicenseType[];
+  availableForDerivative: LicenseType[];
+  requiresSelection: boolean;
+  autoInheritedLicense?: LicenseType;
+  inheritanceReason: string;
+}> {
+  try {
+    let parentLicenses: LicenseType[];
+    
+    if (parentLicenseTypes && parentLicenseTypes.length > 0) {
+      parentLicenses = parentLicenseTypes.map(type => type as LicenseType);
+    } else {
+      parentLicenses = await getParentLicenseTypes(parentIpId, publishedStories, staticUserData);
+    }
+
+    // Filter out licenses that don't allow derivatives
+    const availableForDerivative = parentLicenses.filter(
+      license => license !== LicenseType.COMMERCIAL_USE
+    );
+
+    if (availableForDerivative.length === 0) {
+      return {
+        parentLicenses,
+        availableForDerivative: [],
+        requiresSelection: false,
+        inheritanceReason: "Parent licenses do not allow derivatives"
+      };
+    }
+
+    if (availableForDerivative.length === 1) {
+      return {
+        parentLicenses,
+        availableForDerivative,
+        requiresSelection: false,
+        autoInheritedLicense: availableForDerivative[0],
+        inheritanceReason: `Automatically inherits the single derivative-compatible license: ${availableForDerivative[0]}`
+      };
+    }
+
+    return {
+      parentLicenses,
+      availableForDerivative,
+      requiresSelection: true,
+      inheritanceReason: `Multiple licenses available - user must select from: ${availableForDerivative.join(", ")}`
+    };
+
+  } catch (error) {
+    throw new Error(`Failed to get derivative license options: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
+}
+
 /**
  * Get story details by IP ID (placeholder for future implementation)
  */
@@ -389,17 +544,22 @@ export async function getStoryByIpId(ipId: string): Promise<any> {
 }
 
 export async function getUserStories(userAddress: Address): Promise<any[]> {
-  // TODO: Implement user story listing
   console.log("Getting stories for user:", userAddress);
   return [];
 }
 
-function getLicenseTermsIdFromType(licenseType: "non-commercial" | "commercial-use" | "commercial-remix"): string {
-  switch (licenseType) {
+function getLicenseTermsIdFromType(licenseType: LicenseType | "non-commercial" | "commercial-use" | "commercial-remix"): string {
+  // Convert string to LicenseType if needed
+  const normalizedType = typeof licenseType === 'string' ? licenseType as LicenseType : licenseType;
+  
+  switch (normalizedType) {
+    case LicenseType.NON_COMMERCIAL:
     case "non-commercial":
       return "1"; 
+    case LicenseType.COMMERCIAL_USE:
     case "commercial-use":
       return "2"; 
+    case LicenseType.COMMERCIAL_REMIX:
     case "commercial-remix":
       return "3"; 
     default:
