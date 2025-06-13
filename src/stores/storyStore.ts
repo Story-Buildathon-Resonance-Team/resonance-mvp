@@ -1,7 +1,24 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
-import type { StoryStore, StoryDraft, ReadingProgress, PublishedStory, RemixedStory } from './types'
+import type { StoryStore, StoryDraft } from './types'
+
+interface Story {
+  ipId: string
+  title: string
+  description: string
+  author: {
+    name: string
+    address: string
+  }
+  contentCID: string
+  imageCID: string
+  txHash: string
+  tokenId: string
+  licenseType: string
+  publishedAt: number
+  explorerUrl: string
+}
 
 export const useStoryStore = create<StoryStore>()(
   devtools(
@@ -137,6 +154,56 @@ export const useStoryStore = create<StoryStore>()(
         // Auto-save (placeholder - implement if needed)
         enableAutoSave: () => {},
         disableAutoSave: () => {},
+        
+        publishStory: async (formData) => {
+          // TODO: Implement actual story publishing logic
+          // For now, just add a mock story
+          const mockStory: Story = {
+            ipId: "mock-ip-id",
+            title: formData.title,
+            description: formData.description,
+            author: {
+              name: "Mock Author",
+              address: "0x123...",
+            },
+            contentCID: "mock-content-cid",
+            imageCID: "mock-image-cid",
+            txHash: "mock-tx-hash",
+            tokenId: "mock-token-id",
+            licenseType: formData.licenseType,
+            publishedAt: Date.now(),
+            explorerUrl: "https://mock-explorer.com",
+          };
+
+          set((state) => ({
+            publishedStories: [...state.publishedStories, mockStory],
+          }));
+        },
+        
+        remixStory: async (formData) => {
+          // TODO: Implement actual remix publishing logic
+          // For now, just add a mock remix story
+          const mockRemixStory: Story = {
+            ipId: "mock-remix-ip-id",
+            title: formData.remixTitle,
+            description: formData.remixDescription,
+            author: {
+              name: "Mock Remix Author",
+              address: "0x456...",
+            },
+            contentCID: "mock-remix-content-cid",
+            imageCID: "mock-remix-image-cid",
+            txHash: "mock-remix-tx-hash",
+            tokenId: "mock-remix-token-id",
+            licenseType: "non-commercial", // Default to non-commercial for remixes
+            publishedAt: Date.now(),
+            explorerUrl: "https://mock-explorer.com/remix",
+          };
+
+          set((state) => ({
+            publishedStories: [...state.publishedStories, mockRemixStory],
+          }));
+        },
       }),
       {
         name: 'story-storage',

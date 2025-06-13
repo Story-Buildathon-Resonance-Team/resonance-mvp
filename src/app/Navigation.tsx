@@ -13,7 +13,7 @@ import {
 import { useConnect } from "@/hooks/useConnect";
 import { useDisconnect } from "wagmi";
 import { useUser } from "./Web3Providers";
-import { useAppStore } from "@/stores";
+import { useAppStore } from "@/stores/appStore";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -22,11 +22,35 @@ import {
   X,
   LayoutDashboard,
   User,
-  Settings,
   LogOut,
   ChevronDown,
-  Sparkles,
+  Globe,
+  Upload,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const navigation = [
+  {
+    name: "Home",
+    href: "/",
+    icon: BookOpen,
+  },
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: BookOpen,
+  },
+  {
+    name: "Explore",
+    href: "/explore",
+    icon: Globe,
+  },
+  {
+    name: "Publish",
+    href: "/publish-form",
+    icon: Upload,
+  },
+];
 
 export default function Navigation() {
   const { handleConnect } = useConnect();
@@ -80,15 +104,6 @@ export default function Navigation() {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
-
-  const handleNavigation = (href: string) => {
-    navigate(href);
-    closeMobileMenu();
   };
 
   const handleLogout = () => {
@@ -187,59 +202,21 @@ export default function Navigation() {
             isScrolled ? "gap-3" : "gap-6"
           }`}
         >
-          {isConnected && (
-            <div
-              className={`flex items-center transition-all duration-300 ${
-                isScrolled ? "gap-2" : "gap-4"
-              }`}
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
+                pathname === item.href
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              )}
             >
-              <Link href='/stories' onClick={() => navigate("/stories")}>
-                <Button
-                  variant='ghost'
-                  size={isScrolled ? "sm" : "sm"}
-                  className={`flex items-center cursor-pointer gap-2 text-white hover:text-cyan-300 hover:bg-white/10 transition-all duration-300 ${
-                    isScrolled ? "px-3 py-2" : ""
-                  }`}
-                >
-                  <BookOpen className='h-4 w-4' />
-                  <span className={isScrolled ? "hidden lg:block" : ""}>
-                    Stories
-                  </span>
-                </Button>
-              </Link>
-              <Link href='/dashboard' onClick={() => navigate("/dashboard")}>
-                <Button
-                  variant='ghost'
-                  size={isScrolled ? "sm" : "sm"}
-                  className={`flex items-center cursor-pointer gap-2 text-white hover:text-cyan-300 hover:bg-white/10 transition-all duration-300 ${
-                    isScrolled ? "px-3 py-2" : ""
-                  }`}
-                >
-                  <LayoutDashboard className='h-4 w-4' />
-                  <span className={isScrolled ? "hidden lg:block" : ""}>
-                    Dashboard
-                  </span>
-                </Button>
-              </Link>
-              <Link
-                href='/publish-form'
-                onClick={() => navigate("/publish-form")}
-              >
-                <Button
-                  variant='default'
-                  size={isScrolled ? "sm" : "sm"}
-                  className={`gradient-purple-cyan cursor-pointer hover:shadow-glow text-white font-semibold transition-all duration-300 ${
-                    isScrolled ? "px-3 py-2" : ""
-                  }`}
-                >
-                  <Sparkles className='h-4 w-4 mr-2' />
-                  <span className={isScrolled ? "hidden xl:block" : ""}>
-                    Publish Story
-                  </span>
-                </Button>
-              </Link>
-            </div>
-          )}
+              <item.icon className='h-4 w-4' />
+              {item.name}
+            </Link>
+          ))}
 
           {/* Action Buttons */}
           <div className='flex items-center gap-3'>
@@ -278,6 +255,21 @@ export default function Navigation() {
       {isConnected && mobileMenuOpen && (
         <div className='md:hidden mt-4 bg-card border border-border rounded-lg shadow-lg'>
           <div className='flex flex-col p-2'>
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
+                  pathname === item.href
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                <item.icon className='h-4 w-4' />
+                {item.name}
+              </Link>
+            ))}
             <Link
               href='/publish-form'
               onClick={() => navigate("/publish-form")}

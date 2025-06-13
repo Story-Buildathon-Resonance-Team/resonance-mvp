@@ -254,7 +254,7 @@ function determineDerivativeLicenses(
   }
 
   // Validate all selected licenses are available from parent
-  const invalidSelections = derivativeLicenses.filter(license => !derivativeCompatibleParentLicenses.includes(license));
+  const invalidSelections = derivativeLicenses.filter(license => !(derivativeCompatibleParentLicenses as LicenseType[]).includes(license));
   if (invalidSelections.length > 0) {
     throw new Error(
       `Selected license(s) not available from parent: ${invalidSelections.join(", ")}. ` +
@@ -407,11 +407,11 @@ export async function registerStoryAsIPWithStore(
       author: data.author,
       contentCID: data.contentCID,
       imageCID: data.imageCID,
-      nftMetadataCID: data.nftMetadataCID,
-      ipMetadataCID: data.ipMetadataCID,
+      nftMetadataCID: data.nftMetadataCID || "",
+      ipMetadataCID: data.ipMetadataCID || "",
       txHash: result.txHash!,
       tokenId: result.tokenId!,
-      licenseTypes: data.licenseTypes,
+      licenseTypes: data.licenseTypes || [],
       publishedAt: Date.now(),
       explorerUrl: result.explorerUrl!,
       originalStoryId: data.originalStoryId, 

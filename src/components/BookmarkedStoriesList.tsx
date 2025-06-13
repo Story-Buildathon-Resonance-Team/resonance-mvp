@@ -45,9 +45,11 @@ export default function BookmarkedStoriesList() {
         contentCID:
           "bafkreid34mk4ojned6wlylkcvploxqxfcrolmc6dago4zg3gzpaafxzelq",
         imageCID: "bafybeigmqq35e2wly6qy6enenumudd5bbp67h3koascgyuagixrxq5njly",
+        nftMetadataCID: "bafkreic46pmhqoni66axnbmb4ogkx46kfz6us6xfmohdjj5w53penj7aiq",
+        ipMetadataCID: "bafkreihfngnzxlhvzjnp7qyqjvefjxmypg3ke5p4o4lrptlvzqq2rjcdzq",
         txHash: "0xabcd...efgh",
         tokenId: "1",
-        licenseType: "non-commercial",
+        licenseTypes: ["non-commercial"],
         publishedAt: Date.now() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
         explorerUrl:
           "https://aeneid.explorer.story.foundation/ipa/0xf85014aa8ECa28A5c8ceEfcC5dCeFB4416F51f08",
@@ -56,7 +58,7 @@ export default function BookmarkedStoriesList() {
         ipId: "0x2139d4C281A07fd0311c118b02D396A764894E34",
         title: "The Missing Piece",
         description:
-          "On the run from her sister's ruthless regime, Tamara discovers a bloody message in a remote cabin that hints at a deeper truth behind her bloodline and a soul-binding treaty.",
+          "On the run from her sister&apos;s ruthless regime, Tamara discovers a bloody message in a remote cabin that hints at a deeper truth behind her bloodline and a soul-binding treaty.",
         author: {
           name: "Nat",
           address: "0x1BB1EB6b6676A6b0850547a70019112c41495BA2",
@@ -64,9 +66,11 @@ export default function BookmarkedStoriesList() {
         contentCID:
           "bafkreiaond2f2xj5bhtgjptgnphwn45wqizbhy5ju7z4px7ncfhugp4shu",
         imageCID: "bafybeiammagvjzcc7qln4ni6bjryrxtea5voz326vufkgfspcremp2avbm",
+        nftMetadataCID: "bafkreiafjforjo4cy4ye4tgl7xyjlhfaxz5ntp4n3qgcdid573vfwtl5ku",
+        ipMetadataCID: "bafkreihxoorp34rjyk3c654ephbjwmgbt3dxaetyoazqzdbu4mmyltigzq",
         txHash: "0xijkl...mnop",
         tokenId: "2",
-        licenseType: "non-commercial",
+        licenseTypes: ["non-commercial"],
         publishedAt: Date.now() - 14 * 24 * 60 * 60 * 1000, // 14 days ago
         explorerUrl:
           "https://aeneid.explorer.story.foundation/ipa/0x2139d4C281A07fd0311c118b02D396A764894E34",
@@ -119,7 +123,7 @@ export default function BookmarkedStoriesList() {
             <BookmarkIcon className='h-5 w-5' />
             Bookmarked Stories
           </CardTitle>
-          <CardDescription>Stories you've saved to read later</CardDescription>
+          <CardDescription>Stories you&apos;ve saved to read later</CardDescription>
         </CardHeader>
         <CardContent>
           <div className='text-center py-8 text-muted-foreground'>
@@ -142,7 +146,7 @@ export default function BookmarkedStoriesList() {
           Bookmarked Stories
           <Badge variant='secondary'>{bookmarkedStoriesData.length}</Badge>
         </CardTitle>
-        <CardDescription>Stories you've saved to read later</CardDescription>
+        <CardDescription>Stories you&apos;ve saved to read later</CardDescription>
       </CardHeader>
       <CardContent>
         <div className='space-y-4'>
@@ -163,8 +167,8 @@ export default function BookmarkedStoriesList() {
                       <span>{formatTimeAgo(story.publishedAt)}</span>
                     </div>
                   </div>
-                  <Badge className={getLicenseColor(story.licenseType)}>
-                    {story.licenseType.replace("-", " ")}
+                  <Badge className={getLicenseColor(story.licenseTypes[0])}>
+                    {story.licenseTypes[0].replace("-", " ")}
                   </Badge>
                 </div>
 
@@ -175,9 +179,9 @@ export default function BookmarkedStoriesList() {
                         <ClockIcon className='h-4 w-4' />
                         Reading Progress
                       </span>
-                      <span>{Math.round(progress.progress)}% complete</span>
+                      <span>{Math.round(progress.progress || 0)}% complete</span>
                     </div>
-                    <Progress value={progress.progress} className='h-2' />
+                    <Progress value={progress.progress || 0} className='h-2' />
                     <p className='text-xs text-muted-foreground'>
                       Last read {formatTimeAgo(progress.lastRead)}
                     </p>
@@ -187,7 +191,7 @@ export default function BookmarkedStoriesList() {
                 <div className='flex gap-2 pt-2'>
                   <Button size='sm' className='flex-1' asChild>
                     <Link href={`/stories/${story.ipId}`}>
-                      {progress?.progress > 0
+                      {(progress?.progress || 0) > 0
                         ? "Continue Reading"
                         : "Start Reading"}
                     </Link>

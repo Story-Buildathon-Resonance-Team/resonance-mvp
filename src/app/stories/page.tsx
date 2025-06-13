@@ -3,7 +3,6 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -11,9 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
-  User,
   FileText,
-  Globe,
   AlertCircle,
   GitBranch,
   Sparkles,
@@ -34,7 +31,7 @@ export default function StoriesPage() {
         ...story,
         author: user.userName || user.walletAddress.slice(0, 8) + "...",
         authorAddress: user.walletAddress,
-        publishedAt: story.publishedAt || new Date(0).toISOString(), // Use existing date or default
+        publishedAt: new Date(0).toISOString(), // Default date since not available in interface
         licenseType: "non-commercial", // Default license type
       }))
   );
@@ -74,7 +71,7 @@ export default function StoriesPage() {
 
   // Convert back to array and sort by publication date (newest first)
   const allStories = Array.from(allStoriesMap.values()).sort(
-    (a, b) => (b.publishedAt || 0) - (a.publishedAt || 0)
+    (a, b) => new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime()
   );
 
   const getIPFSUrl = (cid: string) =>

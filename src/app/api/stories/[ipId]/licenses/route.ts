@@ -4,10 +4,10 @@ import { getIPLicensesFromStory } from "@/lib/licenses";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { ipId: string } }
+  { params }: { params: Promise<{ ipId: string }> }
 ) {
   try {
-    const { ipId } = params;
+    const { ipId } = await params;
 
     if (!ipId) {
       return NextResponse.json(

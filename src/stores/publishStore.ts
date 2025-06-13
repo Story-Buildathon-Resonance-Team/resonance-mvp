@@ -96,6 +96,10 @@ export const usePublishStore = create<PublishStore>()(
             set({ currentStep: currentStep - 1 })
           }
         },
+        
+        setFormData: (data: Partial<StoryDraft>) => set((state) => ({
+          formData: { ...state.formData, ...data },
+        })),
       }),
       {
         name: 'publish-form-storage',

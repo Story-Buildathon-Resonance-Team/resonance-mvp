@@ -3,16 +3,15 @@
 import { useStoryStore } from '@/stores'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import type { RemixedStory, ReadingProgress } from '@/stores/types'
+import type { RemixedStory } from '@/stores/types'
 
 export default function DashboardDataSeeder() {
   const { 
     remixedStories, 
     addRemixedStory, 
-    readingProgress, 
-    updateReadingProgress,
     bookmarkedStories,
-    toggleBookmark
+    toggleBookmark,
+    updateReadingProgress
   } = useStoryStore()
   const [hasSeeded, setHasSeeded] = useState(false)
 
@@ -98,7 +97,6 @@ export default function DashboardDataSeeder() {
     hasSeeded, 
     remixedStories.length, 
     addRemixedStory, 
-    updateReadingProgress, 
     bookmarkedStories, 
     toggleBookmark
   ])

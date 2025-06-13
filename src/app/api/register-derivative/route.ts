@@ -8,7 +8,6 @@ import { Address, Hash } from "viem";
 import {
   PILTemplateAddress,
   validateLicenseCompatibility,
-  getLicenseTermsById,
   SPGNFTContractAddress,
 } from "@/utils/utils";
 

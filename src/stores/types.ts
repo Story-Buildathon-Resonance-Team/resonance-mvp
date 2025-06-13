@@ -157,9 +157,11 @@ export interface StoryStore {
 
   // Actions - Published Stories
   addPublishedStory: (story: PublishedStory) => void;
+  publishStory: (formData: Partial<StoryDraft>) => Promise<void>;
 
   // Actions - Remixed Stories
   addRemixedStory: (story: RemixedStory) => void;
+  remixStory: (formData: any) => Promise<void>;
   updateRemixedStory: (id: string, updates: Partial<RemixedStory>) => void;
   deleteRemixedStory: (id: string) => void;
 

@@ -224,7 +224,6 @@ const ReaderPage = () => {
         throw new Error("Failed to fetch story content");
       }
 
-      const contentType = response.headers.get("content-type");
       const rawContent = await response.text();
 
       // Try to parse as JSON first
@@ -361,20 +360,6 @@ const ReaderPage = () => {
       return "This story's license does not allow remixes.";
     }
     return null;
-  };
-
-  // Get origin status text
-  const getOriginStatus = () => {
-    if (assetError || !assetData) return "Loading...";
-    return assetData.parentCount === 0
-      ? "This is an original"
-      : "This is a remix";
-  };
-
-  // Get connected works count
-  const getConnectedWorksCount = () => {
-    if (assetError || !assetData) return "Loading...";
-    return assetData.childrenCount;
   };
 
   // Get lineage information

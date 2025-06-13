@@ -53,14 +53,14 @@ export default function SuccessModal({ result, onClose }: SuccessModalProps) {
               permissions)
             </p>
             <p>
-              ✅ You'll earn royalties when others build successful stories in
+              ✅ You&apos;ll earn royalties when others build successful stories in
               your world
             </p>
             <p>✅ Your story is preserved and discoverable</p>
           </div>
 
           <div className='text-xs text-muted-foreground italic'>
-            For the tech-curious among you: your story's data signature now
+            For the tech-curious among you: your story&apos;s data signature now
             lives immortally in the Aeneid testnet archives. <em>Very</em>{" "}
             futuristic stuff.
           </div>

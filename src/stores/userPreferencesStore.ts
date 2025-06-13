@@ -16,7 +16,7 @@ const defaultPreferences: UserPreferences = {
 export const useUserPreferencesStore = create<UserPreferencesStore>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set) => ({
         preferences: defaultPreferences,
         
         // Actions

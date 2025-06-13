@@ -8,24 +8,23 @@ import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   Shield,
-  Globe,
   Sparkles,
   Users,
-  ArrowRight,
   Star,
-  Zap,
   Heart,
-  TrendingUp,
   Award,
   Infinity,
   DollarSign,
   Network,
   Eye,
+  TrendingUp,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "./Web3Providers";
 import { useStoryStore } from "../stores/storyStore";
 import { useConnect } from "@/hooks/useConnect";
+import Image from "next/image";
 
 export default function HomePage() {
   const { isConnected } = useUser();
@@ -155,7 +154,7 @@ export default function HomePage() {
               <span>Why Resonance?</span>
             </div>
             <h2 className='text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-accent bg-clip-text text-foreground/90 mb-6'>
-              There's a Better Way to Create
+              There&apos;s a Better Way to Create
             </h2>
             <p className='text-xl text-foreground max-w-3xl mx-auto'>
               Amazing fictional worlds die with their original stories.
@@ -250,9 +249,11 @@ export default function HomePage() {
                 >
                   <div className='h-56 relative overflow-hidden'>
                     {story.imageCID ? (
-                      <img
+                      <Image
                         src={`https://gateway.pinata.cloud/ipfs/${story.imageCID}`}
                         alt={story.title}
+                        width={800}
+                        height={400}
                         className='w-full h-full object-cover object-[50%_25%] group-hover:scale-110 transition-transform duration-500'
                       />
                     ) : (
@@ -306,9 +307,9 @@ export default function HomePage() {
                       <div className='flex items-center gap-2'>
                         <Badge variant='outline' className='text-xs'>
                           <BookOpen className='h-3 w-3 mr-1' />
-                          {story.licenseType === "non-commercial"
+                          {story.licenseTypes?.includes("non-commercial")
                             ? "Non-Commercial"
-                            : story.licenseType === "commercial-use"
+                            : story.licenseTypes?.includes("commercial-use")
                             ? "Commercial Use"
                             : "Commercial Remix"}
                         </Badge>
@@ -336,9 +337,11 @@ export default function HomePage() {
                 {/* Top Story Card - First Humans */}
                 <Card className='overflow-hidden group hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] border-0 bg-card/80 backdrop-blur-sm'>
                   <div className='h-56 relative overflow-hidden'>
-                    <img
+                    <Image
                       src='https://gateway.pinata.cloud/ipfs/bafybeigrawa3glvh6rephb2xfzt5lwed2eghjmfbpafgyyvzdpqf3x7gku'
                       alt='First Humans: Temple of Origins'
+                      width={800}
+                      height={400}
                       className='w-full h-full object-cover object-[50%_25%] group-hover:scale-110 transition-transform duration-500'
                     />
                     <div className='absolute top-4 right-4'>
@@ -360,7 +363,7 @@ export default function HomePage() {
                       Ji-Won and Lee-Hyun, members of an advanced ancient
                       civilization, must separate as she joins a secret
                       colonization mission while he stays behind to guide
-                      humanity's development through hidden genetic codes.
+                      humanity&apos;s development through hidden genetic codes.
                     </p>
                     <div className='flex items-center justify-between text-sm'>
                       <div className='flex items-center gap-3'>
@@ -393,9 +396,11 @@ export default function HomePage() {
                 {/* Top Remix Card - The Architect's Burden */}
                 <Card className='overflow-hidden group hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] border-0 bg-card/80 backdrop-blur-sm'>
                   <div className='h-56 relative overflow-hidden'>
-                    <img
+                    <Image
                       src='https://gateway.pinata.cloud/ipfs/bafybeid57w42yhoagkkuesyc36nk5h4pln2pq7v363ipsn7zkce5jvlvpe'
                       alt="The Architect's Burden"
+                      width={800}
+                      height={400}
                       className='w-full h-full object-cover object-[50%_30%] group-hover:scale-110 transition-transform duration-500'
                     />
                     <div className='absolute top-4 right-4'>
@@ -408,13 +413,13 @@ export default function HomePage() {
                   </div>
                   <CardHeader className='pb-3'>
                     <CardTitle className='text-xl font-bold group-hover:text-primary transition-colors'>
-                      The Architect's Burden
+                      The Architect&apos;s Burden
                     </CardTitle>
                     <span className='text-primary font-semibold'>by Nat</span>
                   </CardHeader>
                   <CardContent className='space-y-4'>
                     <p className='text-foreground leading-relaxed'>
-                      In a last-ditch effort to restore Earth's dying
+                      In a last-ditch effort to restore Earth&apos;s dying
                       ecosystems, Dr. Elena Vasquez builds a machine that
                       demands a human sacrifice to seed new life. But as the
                       device awakens with a mind of its own, she realizes...

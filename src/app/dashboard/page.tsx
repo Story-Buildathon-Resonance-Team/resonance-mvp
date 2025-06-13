@@ -1,172 +1,163 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useUser } from "../Web3Providers";
-import { useStoryStore } from "@/stores";
+import { useRouter } from "next/navigation";
+import { useStoryStore } from "@/stores/storyStore";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+  BookOpen,
+  Sparkles,
+  Heart,
+} from "lucide-react";
 import { DraftsList } from "@/components/DraftsList";
 import { PublishedStoriesList } from "@/components/PublishedStoriesList";
+import RemixedStoriesList from "@/components/RemixedStoriesList";
+import BookmarkedStoriesList from "@/components/BookmarkedStoriesList";
 import DashboardDataSeeder from "@/components/DashboardDataSeeder";
-import { PlusIcon, FileTextIcon, BookOpenIcon } from "lucide-react";
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DashboardPage() {
-  const user = useUser();
-  const {
-    drafts,
-    publishedStories,
-    bookmarkedStories,
-    remixedStories,
-    readingProgress,
-  } = useStoryStore();
+  const { isConnected } = useUser();
+  const router = useRouter();
+  const { publishedStories, remixedStories, bookmarkedStories } = useStoryStore();
+  const [activeTab, setActiveTab] = useState("drafts");
 
-  const [activeView, setActiveView] = useState<"drafts" | "published">(
-    "drafts"
-  );
+  // Automatically redirect non-logged-in users to home
+  useEffect(() => {
+    if (!isConnected) {
+      router.push("/");
+    }
+  }, [isConnected, router]);
 
-  // Calculate dashboard stats
-  const stats = useMemo(() => {
-    const totalDrafts = drafts.length;
-    const totalPublished = publishedStories.length;
-    const totalBookmarked = bookmarkedStories.length;
-    const totalRemixes = remixedStories.length;
-
-    // Calculate recent activity (last 7 days)
-    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const recentActivity =
-      drafts.filter((d) => d.lastSaved > weekAgo).length +
-      publishedStories.filter((s) => s.publishedAt > weekAgo).length;
-
-    return {
-      totalDrafts,
-      totalPublished,
-      totalBookmarked,
-      totalRemixes,
-      recentActivity,
-    };
-  }, [drafts, publishedStories, bookmarkedStories, remixedStories]);
-
-  if (!user?.isConnected) {
-    return (
-      <div className='container mx-auto px-4 py-8'>
-        <Card className='max-w-md mx-auto'>
-          <CardHeader className='text-center'>
-            <CardTitle>Connect Your Wallet</CardTitle>
-            <CardDescription>
-              Please connect your wallet to access your dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='text-center'>
-            <Button asChild>
-              <Link href='/'>Go to Home</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  // Don't render the dashboard if user is not connected (they'll be redirected)
+  if (!isConnected) {
+    return null;
   }
 
   return (
-    <div className='max-w-6xl mx-auto px-6 py-8'>
+    <div className='w-full'>
+      {/* Animated Background Elements */}
+      <div className='fixed inset-0 overflow-hidden pointer-events-none z-0'>
+        <div className='absolute top-1/4 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl animate-pulse'></div>
+        <div className='absolute top-3/4 right-1/4 w-[32rem] h-[32rem] bg-accent/6 rounded-full blur-3xl animate-pulse delay-1000'></div>
+        <div className='absolute top-1/2 left-1/2 w-64 h-64 bg-primary/12 rounded-full blur-2xl animate-bounce delay-500'></div>
+        <div className='absolute top-10 right-10 w-48 h-48 bg-accent/8 rounded-full blur-2xl animate-pulse delay-700'></div>
+        <div className='absolute bottom-20 left-10 w-80 h-80 bg-primary/6 rounded-full blur-3xl animate-pulse delay-300'></div>
+      </div>
+
+      {/* Dashboard Content */}
+      <div className='relative z-10 min-h-screen px-6 py-10'>
+        <div className='container mx-auto max-w-7xl'>
+          {/* Header Section */}
+          <div className='text-center space-y-12 mb-16'>
+            <div className='space-y-8'>
+              <h1 className='text-5xl md:text-7xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-foreground leading-[0.9] animate-fade-in-up tracking-tight'>
+                Your Creative Universe
+              </h1>
+
+              <p className='text-xl md:text-2xl text-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in-up delay-200 font-light'>
+                Manage your stories, track remixes, and discover new
+                collaborations. Your creative journey starts here.
+              </p>
+            </div>
+
+            {/* Stats Section */}
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-8 animate-fade-in-up delay-600'>
+              <Card className='group text-center border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-500 hover:scale-105 hover:shadow-2xl'>
+                <CardHeader className='pb-4'>
+                  <div className='w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform duration-300'>
+                    <BookOpen className='h-8 w-8 text-white' />
+                  </div>
+                  <CardTitle className='text-xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-foreground/90'>
+                    Your Stories
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-4xl font-bold text-primary mb-2'>
+                    {publishedStories.length}
+                  </p>
+                  <p className='text-foreground leading-relaxed'>
+                    Original stories published
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className='group text-center border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-500 hover:scale-105 hover:shadow-2xl'>
+                <CardHeader className='pb-4'>
+                  <div className='w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-accent to-primary rounded-2xl flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform duration-300'>
+                    <Sparkles className='h-8 w-8 text-white' />
+                  </div>
+                  <CardTitle className='text-xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-foreground/90'>
+                    Remixes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-4xl font-bold text-primary mb-2'>
+                    {remixedStories.length}
+                  </p>
+                  <p className='text-foreground leading-relaxed'>
+                    Stories remixed from yours
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className='group text-center border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-500 hover:scale-105 hover:shadow-2xl'>
+                <CardHeader className='pb-4'>
+                  <div className='w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary via-accent to-primary rounded-2xl flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform duration-300'>
+                    <Heart className='h-8 w-8 text-white' />
+                  </div>
+                  <CardTitle className='text-xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-foreground/90'>
+                    Bookmarks
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-4xl font-bold text-primary mb-2'>
+                    {bookmarkedStories.length}
+                  </p>
+                  <p className='text-foreground leading-relaxed'>
+                    Stories you&apos;ve saved
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Tabs Section */}
+          <Tabs
+            defaultValue='drafts'
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className='space-y-8'
+          >
+            <TabsList className='grid w-full grid-cols-4'>
+              <TabsTrigger value='drafts'>Drafts</TabsTrigger>
+              <TabsTrigger value='published'>Published</TabsTrigger>
+              <TabsTrigger value='remixed'>Remixed</TabsTrigger>
+              <TabsTrigger value='bookmarked'>Bookmarked</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value='drafts' className='space-y-8'>
+              <DraftsList />
+            </TabsContent>
+
+            <TabsContent value='published' className='space-y-8'>
+              <PublishedStoriesList />
+            </TabsContent>
+
+            <TabsContent value='remixed' className='space-y-8'>
+              <RemixedStoriesList />
+            </TabsContent>
+
+            <TabsContent value='bookmarked' className='space-y-8'>
+              <BookmarkedStoriesList />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+
+      {/* Development Only: Data Seeder */}
       <DashboardDataSeeder />
-
-      {/* Header Section */}
-      <div className='mb-8'>
-        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
-          <div>
-            <h1 className='text-3xl font-bold mb-2'>Your Stories</h1>
-            <p className='text-muted-foreground'>
-              Write, publish, and manage your stories.
-            </p>
-          </div>
-
-          {/* Primary CTA */}
-          <Button asChild size='lg' className='w-fit cursor-pointer'>
-            <Link href='/publish-form' className='flex items-center gap-2'>
-              <PlusIcon className='h-5 w-5' />
-              Write a Story
-            </Link>
-          </Button>
-        </div>
-
-        {/* Quick Stats Row */}
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
-          <div className='text-center p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg'>
-            <div className='text-2xl font-bold text-primary'>
-              {stats.totalDrafts}
-            </div>
-            <div className='text-sm text-muted-foreground'>Drafts</div>
-          </div>
-          <div className='text-center p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg'>
-            <div className='text-2xl font-bold text-primary'>
-              {stats.totalPublished}
-            </div>
-            <div className='text-sm text-muted-foreground'>Published</div>
-          </div>
-          <div className='text-center p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg'>
-            <div className='text-2xl font-bold text-primary'>
-              {stats.totalBookmarked}
-            </div>
-            <div className='text-sm text-muted-foreground'>Bookmarked</div>
-          </div>
-          <div className='text-center p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg'>
-            <div className='text-2xl font-bold text-primary'>
-              {stats.recentActivity}
-            </div>
-            <div className='text-sm text-muted-foreground'>This Week</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className='space-y-6'>
-        {/* Stories Toggle */}
-        <div className='flex items-center gap-4'>
-          <div className='flex items-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-1'>
-            <Button
-              variant={activeView === "drafts" ? "default" : "ghost"}
-              size='sm'
-              onClick={() => setActiveView("drafts")}
-              className='relative cursor-pointer'
-            >
-              <FileTextIcon className='h-4 w-4 mr-2' />
-              Drafts
-              {stats.totalDrafts > 0 && (
-                <Badge variant='secondary' className='ml-2'>
-                  {stats.totalDrafts}
-                </Badge>
-              )}
-            </Button>
-            <Button
-              variant={activeView === "published" ? "default" : "ghost"}
-              size='sm'
-              onClick={() => setActiveView("published")}
-              className='relative cursor-pointer'
-            >
-              <BookOpenIcon className='h-4 w-4 mr-2' />
-              Published
-              {stats.totalPublished > 0 && (
-                <Badge variant='secondary' className='ml-2'>
-                  {stats.totalPublished}
-                </Badge>
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {/* Stories Content */}
-        <div className='min-h-[400px]'>
-          {activeView === "drafts" ? <DraftsList /> : <PublishedStoriesList />}
-        </div>
-      </div>
     </div>
   );
 }

@@ -73,7 +73,7 @@ export default function RemixedStoriesList() {
             Remixed Stories
           </CardTitle>
           <CardDescription>
-            Stories you've remixed from others
+            Stories you&apos;ve remixed from others
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -98,7 +98,7 @@ export default function RemixedStoriesList() {
           <Badge variant="secondary">{remixedStories.length}</Badge>
         </CardTitle>
         <CardDescription>
-          Stories you've remixed from others
+          Stories you&apos;ve remixed from others
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -200,7 +200,7 @@ export default function RemixedStoriesList() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Remix</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to delete "{remix.remixTitle}"? 
+                        Are you sure you want to delete &ldquo;{remix.remixTitle}&rdquo;?
                         {remix.status === 'published' && ' This will only remove it from your dashboard - the published version will remain on the blockchain.'}
                         {remix.status === 'draft' && ' This action cannot be undone.'}
                       </AlertDialogDescription>
