@@ -18,6 +18,9 @@ export interface StoryRegistrationData {
   originalStoryId?: string;
   originalTitle?: string;
   originalAuthor?: string;
+  parentLicenseTypes?: ("non-commercial" | "commercial-use" | "commercial-remix")[];
+  publishedStories?: PublishedStory[];
+  staticUserData?: any[];
 }
 
 export interface StoryRegistrationResult {
@@ -35,14 +38,20 @@ export interface StoryRegistrationResult {
 /**
  * Register a story as an IP asset using the Story Protocol API
  * Handles both original stories and remixes (derivatives)
+ * 
+ * For derivatives, this function will:
+ * 1. Fetch parent license information from multiple sources
+ * 2. Validate license compatibility 
+ * 3. Register the derivative with proper license inheritance
+ * 
+ * @param data - Story registration data including optional context for license validation
+ * @returns Promise<StoryRegistrationResult>
  */
 export async function registerStoryAsIP(
   data: StoryRegistrationData
 ): Promise<StoryRegistrationResult> {
   try {
     console.log("Registering story as IP:", data.title);
-
-    // Check if this is a remix (derivative)
     const isRemix = !!data.originalStoryId;
 
     if (isRemix) {
@@ -60,13 +69,7 @@ export async function registerStoryAsIP(
     };
   }
 }
-
-/**
- * Register an original story
- */
-async function registerOriginalStory(
-  data: StoryRegistrationData
-): Promise<StoryRegistrationResult> {
+async function registerOriginalStory(data: StoryRegistrationData): Promise<StoryRegistrationResult> {
   let licenseTypes: ("non-commercial" | "commercial-use" | "commercial-remix")[];
   
   if (data.licenseType) {
@@ -139,11 +142,58 @@ async function registerOriginalStory(
 }
 
 /**
+ * Get parent license information from available sources
+ */
+async function getParentLicenseTypes( parentIpId: string, publishedStories?: PublishedStory[], staticUserData?: any[]): Promise<LicenseType[]> {
+  console.log(`Fetching parent license types for IP ID: ${parentIpId}`);
+  if (publishedStories && publishedStories.length > 0) {
+    const parentStory = publishedStories.find(story => story.ipId === parentIpId);
+    if (parentStory && parentStory.licenseTypes) {
+      const licenseTypes = parentStory.licenseTypes.map(type => type as LicenseType);
+      console.log(`Found parent licenses in published stories:`, licenseTypes);
+      return licenseTypes;
+    }
+  }
+
+  // Check static user data
+  if (staticUserData && staticUserData.length > 0) {
+    for (const user of staticUserData) {
+      if (user.stories) {
+        const parentStory = user.stories.find((story: any) => story.ipId === parentIpId);
+        if (parentStory) {
+          // Static stories typically default to non-commercial
+          const licenseTypes = [LicenseType.NON_COMMERCIAL];
+          console.log(`Found parent story in static data, defaulting to non-commercial`);
+          return licenseTypes;
+        }
+      }
+    }
+  }
+
+  // Try to fetch from API as fallback
+  try {
+    console.log(`Attempting to fetch parent license info from API for ${parentIpId}`);
+    const response = await fetch(`/api/stories/${parentIpId}/licenses`);
+    if (response.ok) {
+      const licenseData = await response.json();
+      if (licenseData.licenseTypes && licenseData.licenseTypes.length > 0) {
+        console.log(`Found parent licenses from API:`, licenseData.licenseTypes);
+        return licenseData.licenseTypes.map((type: string) => type as LicenseType);
+      }
+    }
+  } catch (error) {
+    console.warn(`Failed to fetch parent license info from API:`, error);
+  }
+
+  // Ultimate fallback - assume non-commercial (most permissive for derivatives)
+  console.warn(`Could not determine parent license types for ${parentIpId}, defaulting to non-commercial`);
+  return [LicenseType.NON_COMMERCIAL];
+}
+
+/**
  * Register a derivative story (remix)
  */
-async function registerDerivativeStory(
-  data: StoryRegistrationData
-): Promise<StoryRegistrationResult> {
+async function registerDerivativeStory(data: StoryRegistrationData): Promise<StoryRegistrationResult> {
   if (!data.originalStoryId) {
     throw new Error("Original story ID is required for derivative registration");
   }
@@ -151,13 +201,22 @@ async function registerDerivativeStory(
   if (!data.licenseType) {
     throw new Error("License type is required for derivative registration");
   }
-
-  // TODO: In a real implementation, we would fetch the parent's actual license types
-  // For now, we'll assume the parent has the same license type as the derivative
-  // This validation would be more robust with actual parent license data
-  const parentLicenseTypes = [data.licenseType as LicenseType];
+  let parentLicenseTypes: LicenseType[];
   
-  // Validate license selection
+  if (data.parentLicenseTypes && data.parentLicenseTypes.length > 0) {
+    // Use explicitly provided parent license types
+    parentLicenseTypes = data.parentLicenseTypes.map(type => type as LicenseType);
+    console.log(`Using provided parent license types:`, parentLicenseTypes);
+  } else {
+    // Fetch parent license types from available sources
+    parentLicenseTypes = await getParentLicenseTypes(
+      data.originalStoryId,
+      data.publishedStories,
+      data.staticUserData
+    );
+  }
+
+  // Validate that the selected license is compatible with the parent's licenses
   const validation = validateDerivativeLicenseSelection(
     parentLicenseTypes,
     data.licenseType as LicenseType
@@ -167,14 +226,28 @@ async function registerDerivativeStory(
     throw new Error(`License validation failed: ${validation.error}`);
   }
 
-  // Get the parent's license terms ID based on the license type
-  const parentLicenseTermsId = getLicenseTermsIdFromType(data.licenseType);
+  // Get the derivative license terms ID
+  const derivativeLicenseTermsId = getLicenseTermsIdFromType(data.licenseType);
   
-  if (!parentLicenseTermsId) {
+  if (!derivativeLicenseTermsId) {
     throw new Error(`Invalid license type: ${data.licenseType}`);
   }
 
-  // For derivatives, both parent and derivative should have the same license terms
+  // For Story Protocol, we need to determine which parent license to inherit from
+  // If parent has multiple licenses, we should use the one that matches our derivative license
+  // If parent only has one license, we use that one
+  let parentLicenseTermsId: string;
+  
+  if (parentLicenseTypes.includes(data.licenseType as LicenseType)) {
+    // Parent has the same license type as derivative - perfect match
+    parentLicenseTermsId = derivativeLicenseTermsId;
+  } else {
+    // Use the first compatible parent license
+    parentLicenseTermsId = getLicenseTermsIdFromType(parentLicenseTypes[0]);
+  }
+
+  console.log(`Registering derivative with parent license: ${parentLicenseTypes[0]}, derivative license: ${data.licenseType}`);
+
   const response = await fetch("/api/register-derivative", {
     method: "POST",
     headers: {
@@ -189,10 +262,11 @@ async function registerDerivativeStory(
       parentIpId: data.originalStoryId,
       parentLicenseTermsId: parentLicenseTermsId,
       derivativeLicenseType: data.licenseType,
+      parentLicenseTypes: parentLicenseTypes, 
     }),
   });
 
-    if (!response.ok) {
+  if (!response.ok) {
     const errorData = await response.json();
     throw new Error(
       errorData.error || `HTTP error! status: ${response.status}`
@@ -239,6 +313,7 @@ export async function registerStoryAsIPWithStore(
       licenseTypes: data.licenseTypes,
       publishedAt: Date.now(),
       explorerUrl: result.explorerUrl!,
+      originalStoryId: data.originalStoryId, // Include for remixes
     };
 
     return {
@@ -248,6 +323,61 @@ export async function registerStoryAsIPWithStore(
   }
 
   return result;
+}
+
+/**
+ * Enhanced registration function that automatically includes context data
+ * This is the recommended way to register stories in the application
+ */
+export async function registerStoryWithContext(
+  data: Omit<StoryRegistrationData, 'publishedStories' | 'staticUserData'>,
+  publishedStories: PublishedStory[],
+  staticUserData?: any[]
+): Promise<StoryRegistrationResult> {
+  const enhancedData: StoryRegistrationData = {
+    ...data,
+    publishedStories,
+    staticUserData,
+  };
+
+  return registerStoryAsIPWithStore(enhancedData);
+}
+export async function validateDerivativeLicense(
+  parentIpId: string,
+  selectedLicenseType: "non-commercial" | "commercial-use" | "commercial-remix",
+  publishedStories?: PublishedStory[],
+  staticUserData?: any[],
+  parentLicenseTypes?: ("non-commercial" | "commercial-use" | "commercial-remix")[]
+): Promise<{
+  isValid: boolean;
+  error?: string;
+  parentLicenses?: LicenseType[];
+}> {
+  try {
+    let parentLicenses: LicenseType[];
+    
+    if (parentLicenseTypes && parentLicenseTypes.length > 0) {
+      parentLicenses = parentLicenseTypes.map(type => type as LicenseType);
+    } else {
+      parentLicenses = await getParentLicenseTypes(parentIpId, publishedStories, staticUserData);
+    }
+
+    const validation = validateDerivativeLicenseSelection(
+      parentLicenses,
+      selectedLicenseType as LicenseType
+    );
+
+    return {
+      isValid: validation.isValid,
+      error: validation.error,
+      parentLicenses,
+    };
+  } catch (error) {
+    return {
+      isValid: false,
+      error: error instanceof Error ? error.message : "Unknown validation error",
+    };
+  }
 }
 
 /**
