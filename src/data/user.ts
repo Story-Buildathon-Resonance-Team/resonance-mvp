@@ -137,7 +137,8 @@ export const users: UserEntry[] = [
         ipId: "0x4D7f400E116F2Fe83905CFC90008e12af23A9Df8",
         ipMetadataCID:
           "bafkreiayzugcq6xlkmv6xed2wbnluxibfftayt5kxb2coslpbdln6wvw54",
-        nftMetadataCID: "",
+        nftMetadataCID:
+          "bafkreigfqrat3wcksfkcilsqoq3d73lqbregctfxedt2nz3f52dflom42i",
         contentCID:
           "bafkreic23tdaf5ae2mfcx37755zzhfgcjxjuiwq6cvoia5qxploznxqmli",
         imageCID: "bafybeiezjgkynmipg5tfshv3twzzlrwt7srpurbve3tqvuj2svmizh3ekm",
