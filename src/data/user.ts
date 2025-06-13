@@ -160,13 +160,17 @@ export const users: UserEntry[] = [
           "When Lee-Hyun awakens to a quantum symphony only he can hear, he discovers the power to weave consciousness into the fabric of reality itself. But building bridges between minds and worlds may cost him everything—even his own existence.",
       },
       {
-        ipId: "", // The IP ID returned by Story Protocol
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
+        ipId: "0x3542e9903B5619E791DE552adCC06180532Bd05A",
+        ipMetadataCID:
+          "bafkreib3fapfc554s2uuvw4ib3vjvgd33w6v72awqfe2fqya4hpx5odgeq",
+        nftMetadataCID:
+          "bafkreid6fr7hskmg5xw4j63d7vs5hccswsqunvwt7hxbmmh36q5zi4rh2a",
+        contentCID:
+          "bafkreihjgjebkh74yangpqbbmzl2uycg2edkcdu56neb7sgqdl6jpdaxmm",
+        imageCID: "bafybeih73r656pcmsqupzb6pumnxiw25647u5c5aq2fuibzvyj6g4spqxm",
+        title: "Bridge Between Stars",
+        synopsis:
+          "An epic ballad about Lee-Hyun, a young man whose quantum consciousness awakening transforms him into a living bridge between worlds.",
       },
       {
         ipId: "", // The IP ID returned by Story Protocol
