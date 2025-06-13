@@ -1,9 +1,23 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, User, FileText, Globe, AlertCircle, GitBranch, Sparkles } from "lucide-react";
+import {
+  BookOpen,
+  User,
+  FileText,
+  Globe,
+  AlertCircle,
+  GitBranch,
+  Sparkles,
+} from "lucide-react";
 import { users } from "../../data/user";
 import { useStoryStore } from "../../stores/storyStore";
 import Link from "next/link";
@@ -11,7 +25,7 @@ import Link from "next/link";
 export default function StoriesPage() {
   // Get published stories from both user data and store
   const { publishedStories } = useStoryStore();
-  
+
   // Get all published stories from user data
   const userStories = users.flatMap((user) =>
     user.stories
@@ -21,7 +35,7 @@ export default function StoriesPage() {
         author: user.userName || user.walletAddress.slice(0, 8) + "...",
         authorAddress: user.walletAddress,
         publishedAt: story.publishedAt || new Date(0).toISOString(), // Use existing date or default
-        licenseType: 'non-commercial', // Default license type
+        licenseType: "non-commercial", // Default license type
       }))
   );
 
@@ -37,30 +51,30 @@ export default function StoriesPage() {
     author: story.author.name || story.author.address.slice(0, 8) + "...",
     authorAddress: story.author.address,
     publishedAt: story.publishedAt,
-    licenseType: story.licenseTypes?.[0] || 'non-commercial',
+    licenseType: story.licenseTypes?.[0] || "non-commercial",
     originalStoryId: story.originalStoryId, // Track remix relationship
     isRemix: !!story.originalStoryId, // Flag to identify remixes
   }));
 
   const allStoriesMap = new Map();
-  
+
   // Add user stories first
-  userStories.forEach(story => {
+  userStories.forEach((story) => {
     if (story.ipId) {
       allStoriesMap.set(story.ipId, story);
     }
   });
-  
+
   // Add store stories (will override user stories with same ipId)
-  storeStories.forEach(story => {
+  storeStories.forEach((story) => {
     if (story.ipId) {
       allStoriesMap.set(story.ipId, story);
     }
   });
 
   // Convert back to array and sort by publication date (newest first)
-  const allStories = Array.from(allStoriesMap.values()).sort((a, b) => 
-    (b.publishedAt || 0) - (a.publishedAt || 0)
+  const allStories = Array.from(allStoriesMap.values()).sort(
+    (a, b) => (b.publishedAt || 0) - (a.publishedAt || 0)
   );
 
   const getIPFSUrl = (cid: string) =>
@@ -71,10 +85,11 @@ export default function StoriesPage() {
       {/* Header */}
       <div className='text-center space-y-4'>
         <div className='flex items-center justify-center gap-2 mb-4'>
-          <h1 className='text-3xl font-bold'>Published Stories</h1>
+          <h1 className='text-3xl font-bold'>Explore</h1>
         </div>
-        <p className='text-xl text-muted-foreground'>
-          Discover stories registered as IP assets on Story Protocol.
+        <p className='text-xl text-foreground/80'>
+          Find your favorite stories, discover new authors, and discover a world
+          of endless possibilities
         </p>
       </div>
 
@@ -85,7 +100,7 @@ export default function StoriesPage() {
             <Card key={story.ipId || index} className='flex flex-col h-full'>
               {/* Cover Image */}
               {story.imageCID && (
-                <div className='aspect-video w-full overflow-hidden rounded-t-lg'>
+                <div className='aspect-video object-cover object-[50%_25%] w-full overflow-hidden rounded-t-lg'>
                   <img
                     src={getIPFSUrl(story.imageCID)}
                     alt={story.title || "Story cover"}
@@ -95,25 +110,31 @@ export default function StoriesPage() {
               )}
 
               <CardHeader className='flex-1'>
-                <div className="flex items-start justify-between gap-2">
+                <div className='flex items-start justify-between gap-2'>
                   <CardTitle className='line-clamp-2 flex-1'>
                     {story.title || "Untitled Story"}
                   </CardTitle>
                   {(story as any).isRemix && (
-                    <Badge variant="secondary" className="flex items-center gap-1 text-xs">
-                      <GitBranch className="h-3 w-3" />
+                    <Badge
+                      variant='secondary'
+                      className='flex items-center gap-1 text-xs'
+                    >
+                      <GitBranch className='h-3 w-3' />
                       Remix
                     </Badge>
                   )}
                 </div>
+                <span className='text-foreground mb-1'>
+                  Author: {story.author}
+                </span>
                 {story.synopsis && (
                   <p className='text-sm text-muted-foreground line-clamp-3'>
                     {story.synopsis}
                   </p>
                 )}
                 {(story as any).isRemix && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Sparkles className="h-3 w-3" />
+                  <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                    <Sparkles className='h-3 w-3' />
                     <span>Remix of original work</span>
                   </div>
                 )}
@@ -165,25 +186,6 @@ export default function StoriesPage() {
           </CardContent>
         </Card>
       )}
-
-      {/* Call to Action */}
-      <Card className='text-center p-6 bg-primary/5 border-primary/20'>
-        <CardContent>
-          <h3 className='text-lg font-semibold mb-2'>
-            Ready to Share Your Story?
-          </h3>
-          <p className='text-muted-foreground mb-4'>
-            Register your fiction as intellectual property and join the
-            decentralized storytelling revolution.
-          </p>
-          <Link href='/publish-form'>
-            <Button>
-              <BookOpen className='h-4 w-4 mr-2' />
-              Publish Your Story
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
     </div>
   );
 }
