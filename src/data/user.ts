@@ -147,11 +147,14 @@ export const users: UserEntry[] = [
           "Cuando el amor trasciende el tiempo, el sacrificio se convierte en semilla del despertar. En un mundo al borde del olvido, una promesa silenciosa conecta generaciones aún por nacer.",
       },
       {
-        ipId: "",
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
+        ipId: "0x416B7b95755970ADb54e4A34130d772E04a7e66d",
+        ipMetadataCID:
+          "bafkreidxzqllnsgxjdbmyle4qbln3rjcgdhgaub6w7lhek4fiu73otfh54",
+        nftMetadataCID:
+          "bafkreicyibgydlo6au6zfvkykjtn6tfa2qbpvpn6pszman3e27kq66coam",
+        contentCID:
+          "bafkreibabmfb6gvvl4hkthmymofijb3otc4i5hwcprvhwodtvvnfa3kfne",
+        imageCID: "bafybeidlucgmkmholggafxugo5qvqeo76biliqadgwrklk5fyoevgggeua",
         title: "The Architect's Awakening",
         synopsis:
           "When Lee-Hyun awakens to a quantum symphony only he can hear, he discovers the power to weave consciousness into the fabric of reality itself. But building bridges between minds and worlds may cost him everything—even his own existence.",
