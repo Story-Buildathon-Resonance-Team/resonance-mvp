@@ -476,11 +476,11 @@ const ReaderPage = () => {
               <CardContent className='p-6 md:p-12'>
                 {/* Story Header */}
                 <div className='text-center mb-12 pb-8 border-b-2 border-primary/30'>
-                  <h1 className='text-3xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent leading-tight'>
+                  <h1 className='text-3xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-foreground/70 leading-tight'>
                     {story.title}
                   </h1>
                   {story.synopsis && (
-                    <p className='text-lg md:text-xl text-muted-foreground italic'>
+                    <p className='text-lg md:text-xl text-foreground/80 italic'>
                       {story.synopsis}
                     </p>
                   )}
@@ -603,7 +603,7 @@ const ReaderPage = () => {
                         {connectedWorks.parents.map((parent, index) => (
                           <div
                             key={index}
-                            className='flex items-center gap-3 p-3 bg-primary/10 border border-primary/30 rounded-lg backdrop-blur-sm'
+                            className='flex items-center gap-3 p-3 bg-blue-500/10 border-blue-500/30 border rounded-lg'
                           >
                             <div className='w-2 h-2 bg-primary rounded-full'></div>
                             <div className='flex-1'>

@@ -26,31 +26,6 @@ export interface UserEntry {
 
 export const users: UserEntry[] = [
   {
-    userName: "",
-    walletAddress: "",
-    stories: [
-      {
-        ipId: "", // The IP ID returned by Story Protocol
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
-      {
-        ipId: "",
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
-      // …up to 10 entries
-    ],
-  },
-  {
     userName: "Nat",
     walletAddress: "0x1BB1EB6b6676A6b0850547a70019112c41495BA2",
     stories: [
@@ -119,28 +94,45 @@ export const users: UserEntry[] = [
         synopsis:
           "In a last-ditch effort to restore Earth's dying ecosystems, Dr. Elena Vasquez builds a machine that demands a human sacrifice to seed new life. But as the device awakens with a mind of its own, she realizes they may have engineered something far more dangerous than salvation.",
       },
-    ],
-  },
-  {
-    userName: "",
-    walletAddress: "",
-    stories: [
       {
-        ipId: "",
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
+        ipId: "0x45A325F92e49061714D1e8426C6E6cF82980b4b3",
+        ipMetadataCID:
+          "bafkreidp4hwrnvimtqux6dlew4m2az6dreusnhifsve2gopuu4ptqoaho4",
+        nftMetadataCID:
+          "bafkreiehl2mytm52tuem6vt35mnejfcp7xphdi2oryn75vl44avrpqgpze",
+        contentCID:
+          "bafkreigmj4iitdyfqkceawmivmi4shjrx7smskefm3bwox6nvx3b3jllya",
+        imageCID: "bafybeidwhlfvcyuttnfxrjf5olxa6qi6v6hfjhz6vy7arazvbssuhspefu",
+        title: "The Observatory of Broken Hours",
+        synopsis:
+          "She’s shattered time forty-three times to save him—each attempt a new tragedy etched in broken light. Now, in the one timeline where he truly lives, she must decide if love means letting go.",
       },
-      // …up to 10 entries
-    ],
-  },
-  {
-    userName: "",
-    walletAddress: "",
-    stories: [
+      {
+        ipId: "0x40Fa07054BA077DBc0Bd85B9A3A52872DCaB7F5A",
+        ipMetadataCID:
+          "bafkreibu5gafozhq2dwtbjis2pa57domgjisq4auc42twaxxhektvsmnue",
+        nftMetadataCID:
+          "bafkreibzlzfge6ctahqs7c4r5frsh4hrljogbwz2xmadzqftmzcyiyaqlq",
+        contentCID:
+          "bafkreib5q6rric2xvehhm4qew42gmhv2otjynxghd4myzar2rpku42zpou",
+        imageCID: "bafybeiakuuj3acgyfgnjaf42anwsg7fseiua4zxvdaxkiljpnwawjmvc4q",
+        title: "The Gardener",
+        synopsis:
+          "He hears only silence where others touch the stars. In a world awakening to ancient power, one man must find meaning in what was left behind.",
+      },
+      {
+        ipId: "0x52bC44D1c469eED0aB68E2A8E53eF8502DF61eA3",
+        ipMetadataCID:
+          "bafkreigtxcbzdcqmfxsqkdxoqbs57b5lx3urxndckrjy4zzgwavhzfxjwy",
+        nftMetadataCID:
+          "bafkreidsfcxqx7i6zbad5sd65y7z2xxbjfdmcnuiqbpqo3dx2hgjhg5nda",
+        contentCID:
+          "bafkreibv4peqpku27h6vc6gydfquc6hx7pwvreyj2t6m6lb5yvtaznp2yy",
+        imageCID: "bafybeiaysgmmqmjj4z4uxgi7culd46ilgquuhocrqo4o4ajthppespvcra",
+        title: "Seeds of Tomorrow",
+        synopsis:
+          "Born as weapons, they were scattered like seeds across the stars. Now, one woman’s voice will awaken the future humanity never dared to imagine.",
+      },
       {
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
@@ -151,22 +143,6 @@ export const users: UserEntry[] = [
         synopsis: "",
       },
       {
-        ipId: "",
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
-      // …up to 10 entries
-    ],
-  },
-  {
-    userName: "", // Placeholder for user cloning this repo
-    walletAddress: "",
-    stories: [
-      {
         ipId: "", // The IP ID returned by Story Protocol
         ipMetadataCID: "",
         nftMetadataCID: "",
@@ -175,17 +151,6 @@ export const users: UserEntry[] = [
         title: "",
         synopsis: "",
       },
-      {
-        ipId: "",
-        ipMetadataCID: "",
-        nftMetadataCID: "",
-        contentCID: "",
-        imageCID: "",
-        title: "",
-        synopsis: "",
-      },
-      // …up to 10 entries
     ],
   },
-  // Up to 5 user objects here.
 ];
