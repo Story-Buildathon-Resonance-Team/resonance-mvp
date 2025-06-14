@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
-import type { StoryStore, StoryDraft, ReadingProgress, PublishedStory, RemixedStory } from './types'
+import type { StoryStore, StoryDraft } from './types'
 
 export const useStoryStore = create<StoryStore>()(
   devtools(

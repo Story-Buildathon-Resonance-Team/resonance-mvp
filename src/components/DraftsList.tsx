@@ -192,7 +192,7 @@ export function DraftsList() {
                 <div className='bg-muted/50 rounded-md p-2 mb-3'>
                   <p className='text-xs text-muted-foreground'>
                     <GitFork className='h-3 w-3 inline mr-1' />
-                    Remix of "{draft.originalTitle}"
+                    Remix of &quot;{draft.originalTitle}&quot;
                   </p>
                 </div>
               )}
@@ -248,7 +248,7 @@ export function DraftsList() {
                       Delete {getDraftTypeLabel(draft.type)}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to delete "{draft.title}"? This
+                      Are you sure you want to delete &quot;{draft.title}&quot;? This
                       action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>

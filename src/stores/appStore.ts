@@ -4,7 +4,7 @@ import type { AppStore } from './types'
 
 export const useAppStore = create<AppStore>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       // State
       isLoading: false,
       currentPage: '/',

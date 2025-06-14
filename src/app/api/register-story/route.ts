@@ -78,19 +78,6 @@ export async function POST(request: NextRequest) {
     console.log("Generated hashes:", { imageHash, mediaHash });
 
     // 2. Generate IP Metadata
-    const licenseDescriptions = data.licenseTypes.map((type) => {
-      switch (type) {
-        case "non-commercial":
-          return "Non-Commercial Social Remixing";
-        case "commercial-use":
-          return "Commercial Use Only (10% revenue share)";
-        case "commercial-remix":
-          return "Commercial Remix (25% revenue share)";
-        default:
-          return type;
-      }
-    });
-
     const ipMetadata: IpMetadata = client.ipAsset.generateIpMetadata({
       title: data.title,
       description: data.description,

@@ -5,8 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -31,20 +29,19 @@ import {
   Loader2,
   Upload,
   BookOpen,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
   FileText,
   Scale,
   CheckCircle,
   Info,
-  ImageIcon,
   Save,
 } from "lucide-react";
 import { registerStoryAsIP } from "../../services/storyService";
 import { uploadStoryToPinata } from "../../utils/pinata";
 import { useUser } from "../Web3Providers";
 import { usePublishStore, useStoryStore } from "@/stores";
+import type { PublishedStory } from "@/stores/types";
 import { users } from "../../data/user";
 import SuccessModal from "../../components/SuccessModal";
 import StoryUploadFormStep1 from "../../components/StoryUploadFormStep1";
@@ -104,8 +101,8 @@ const licenseSchema = baseSchema.pick({
 
 type FormData = z.infer<typeof completeSchema>;
 
-interface PaginatedStoryFormProps {
-  onSuccess?: (result: any) => void;
+interface StoryFormProps {
+  onSuccess?: (result: PublishedStory) => void;
 }
 
 interface Step {
@@ -113,7 +110,7 @@ interface Step {
   title: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
-  schema: z.ZodSchema<any>;
+  schema: z.ZodSchema<unknown>;
 }
 
 const steps: Step[] = [
@@ -142,7 +139,7 @@ const steps: Step[] = [
 
 export default function PaginatedStoryForm({
   onSuccess,
-}: PaginatedStoryFormProps) {
+}: StoryFormProps) {
   // Replace useState with Zustand store
   const {
     currentStep,
@@ -157,7 +154,7 @@ export default function PaginatedStoryForm({
   } = usePublishStore();
 
   const { addPublishedStory } = useStoryStore();
-  const [successResult, setSuccessResult] = useState<any>(null);
+  const [successResult, setSuccessResult] = useState<unknown>(null);
 
   const { address, isConnected, userName } = useUser();
 
@@ -332,8 +329,8 @@ export default function PaginatedStoryForm({
         // Show success modal
         setSuccessResult(registrationResult);
 
-        // Add to published stories store
-        addPublishedStory({
+        // Create published story object
+        const publishedStory: PublishedStory = {
           ipId: registrationResult.ipId,
           title: data.title,
           description: data.description,
@@ -343,16 +340,21 @@ export default function PaginatedStoryForm({
           },
           contentCID: pinataResult.contentCID,
           imageCID: pinataResult.imageCID,
+          nftMetadataCID: "",
+          ipMetadataCID: "",
           txHash: registrationResult.txHash || "",
           tokenId: registrationResult.tokenId || "",
           licenseTypes: data.licenseTypes,
           publishedAt: Date.now(),
           explorerUrl: registrationResult.explorerUrl || "",
-        });
+        };
+
+        // Add to published stories store
+        addPublishedStory(publishedStory);
 
         form.reset();
         resetForm();
-        onSuccess?.(registrationResult);
+        onSuccess?.(publishedStory);
       } else {
         throw new Error(
           registrationResult.error || "Registration failed - no IP ID returned"

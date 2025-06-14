@@ -4,11 +4,10 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { PropsWithChildren } from "react";
 import Web3Providers from "./Web3Providers";
-import Navigation from "./Navigation";
-import Sidebar from "./Sidebar";
 import { StoreProvider } from "@/stores/StoreProvider";
 import LayoutWrapper from "./LayoutWrapper";
-
+import { Analytics } from "@vercel/analytics/next"
+// Commenting to force redeploy of vercel env variables
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
@@ -31,7 +30,10 @@ export default function RootLayout({ children }: PropsWithChildren) {
       >
         <StoreProvider>
           <Web3Providers>
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <LayoutWrapper>
+              {children}
+              <Analytics />
+            </LayoutWrapper>
           </Web3Providers>
         </StoreProvider>
       </body>

@@ -25,7 +25,6 @@ export default function DashboardPage() {
     publishedStories,
     bookmarkedStories,
     remixedStories,
-    readingProgress,
   } = useStoryStore();
 
   const [activeView, setActiveView] = useState<"drafts" | "published">(

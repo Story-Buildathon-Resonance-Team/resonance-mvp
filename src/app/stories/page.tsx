@@ -3,7 +3,6 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -11,9 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
-  User,
   FileText,
-  Globe,
   AlertCircle,
   GitBranch,
   Sparkles,
@@ -114,7 +111,7 @@ export default function StoriesPage() {
                   <CardTitle className='line-clamp-2 flex-1'>
                     {story.title || "Untitled Story"}
                   </CardTitle>
-                  {(story as any).isRemix && (
+                  {story.isRemix && (
                     <Badge
                       variant='secondary'
                       className='flex items-center gap-1 text-xs'
@@ -132,7 +129,7 @@ export default function StoriesPage() {
                     {story.synopsis}
                   </p>
                 )}
-                {(story as any).isRemix && (
+                {story.isRemix && (
                   <div className='flex items-center gap-1 text-xs text-muted-foreground'>
                     <Sparkles className='h-3 w-3' />
                     <span>Remix of original work</span>

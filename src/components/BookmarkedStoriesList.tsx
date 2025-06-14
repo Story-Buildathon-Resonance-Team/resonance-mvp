@@ -119,7 +119,7 @@ export default function BookmarkedStoriesList() {
             <BookmarkIcon className='h-5 w-5' />
             Bookmarked Stories
           </CardTitle>
-          <CardDescription>Stories you've saved to read later</CardDescription>
+          <CardDescription>Stories you&apos;ve saved to read later</CardDescription>
         </CardHeader>
         <CardContent>
           <div className='text-center py-8 text-muted-foreground'>
@@ -142,7 +142,7 @@ export default function BookmarkedStoriesList() {
           Bookmarked Stories
           <Badge variant='secondary'>{bookmarkedStoriesData.length}</Badge>
         </CardTitle>
-        <CardDescription>Stories you've saved to read later</CardDescription>
+        <CardDescription>Stories you&apos;ve saved to read later</CardDescription>
       </CardHeader>
       <CardContent>
         <div className='space-y-4'>
