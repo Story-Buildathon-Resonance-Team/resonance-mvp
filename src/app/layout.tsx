@@ -6,6 +6,7 @@ import { PropsWithChildren } from "react";
 import Web3Providers from "./Web3Providers";
 import { StoreProvider } from "@/stores/StoreProvider";
 import LayoutWrapper from "./LayoutWrapper";
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,7 +30,10 @@ export default function RootLayout({ children }: PropsWithChildren) {
       >
         <StoreProvider>
           <Web3Providers>
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <LayoutWrapper>
+              {children}
+              <Analytics />
+            </LayoutWrapper>
           </Web3Providers>
         </StoreProvider>
       </body>
