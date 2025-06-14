@@ -3,7 +3,7 @@
 // Force dynamic rendering to avoid useSearchParams prerendering issues
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -179,7 +179,7 @@ const OriginalStoryCard = ({ originalStory }: { originalStory: unknown }) => (
   </Card>
 );
 
-export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
+function RemixStoryFormContent({ onSuccess }: RemixStoryFormProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const originalStoryId = searchParams.get("originalStoryId");
@@ -1215,5 +1215,21 @@ export default function RemixStoryForm({ onSuccess }: RemixStoryFormProps) {
         </CardContent>
       </Card>
     </>
+  );
+}
+
+// Wrap the component with Suspense to fix useSearchParams issue
+export default function RemixStoryForm(props: RemixStoryFormProps) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center gap-3 text-foreground">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="text-lg">Loading remix form...</span>
+        </div>
+      </div>
+    }>
+      <RemixStoryFormContent {...props} />
+    </Suspense>
   );
 }
