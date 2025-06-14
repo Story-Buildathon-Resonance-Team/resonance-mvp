@@ -7,7 +7,7 @@ import Web3Providers from "./Web3Providers";
 import { StoreProvider } from "@/stores/StoreProvider";
 import LayoutWrapper from "./LayoutWrapper";
 import { Analytics } from "@vercel/analytics/next"
-
+// Commenting to force redeploy of vercel env variables
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
